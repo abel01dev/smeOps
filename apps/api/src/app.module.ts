@@ -8,6 +8,7 @@ import { SupabaseAuthGuard } from "./auth/guards/supabase-auth.guard";
 import { CategoriesModule } from "./categories/categories.module";
 import { envValidation } from "./config/env.validation";
 import { CustomersModule } from "./customers/customers.module";
+import { DashboardModule } from "./dashboard/dashboard.module";
 import { HealthController } from "./health/health.controller";
 import { PrismaModule } from "./prisma/prisma.module";
 import { ProductsModule } from "./products/products.module";
@@ -39,6 +40,7 @@ import { SalesModule } from "./sales/sales.module";
     ProductsModule,
     CustomersModule,
     SalesModule,
+    DashboardModule,
   ],
   controllers: [HealthController],
   providers: [
