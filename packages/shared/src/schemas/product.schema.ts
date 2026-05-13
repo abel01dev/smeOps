@@ -57,6 +57,19 @@ export const updateProductSchema = z
 export type CreateProductInput = z.infer<typeof createProductSchema>;
 export type UpdateProductInput = z.infer<typeof updateProductSchema>;
 
+/** Query params for GET /products. Merge with paginationQuerySchema in the DTO. */
+export const productListQuerySchema = z.object({
+  search: z.string().trim().max(120).optional(),
+  categoryId: z.string().cuid().optional(),
+  status: productStatusSchema.optional(),
+  lowStockOnly: z
+    .union([z.literal("true"), z.literal("false"), z.boolean()])
+    .transform((v) => v === true || v === "true")
+    .optional(),
+});
+
+export type ProductListQuery = z.infer<typeof productListQuerySchema>;
+
 export interface Product {
   id: string;
   name: string;
