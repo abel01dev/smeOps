@@ -31,6 +31,15 @@ export const createSaleSchema = z.object({
 export type CreateSaleInput = z.infer<typeof createSaleSchema>;
 export type SaleItemInput = z.infer<typeof saleItemInputSchema>;
 
+/** Query params for GET /sales. Merge with paginationQuerySchema in the DTO. */
+export const saleListQuerySchema = z.object({
+  dateFrom: z.coerce.date().optional(),
+  dateTo: z.coerce.date().optional(),
+  customerId: z.string().cuid().optional(),
+  paymentMethod: paymentMethodSchema.optional(),
+});
+export type SaleListQuery = z.infer<typeof saleListQuerySchema>;
+
 export interface SaleItem {
   id: string;
   productId: string;
