@@ -15,8 +15,14 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   private readonly logger = new Logger(PrismaService.name);
 
   async onModuleInit(): Promise<void> {
-    await this.$connect();
-    this.logger.log("Prisma connected");
+    // Don't block app startup if the first DB handshake is slow (e.g. cold
+    // pooler / distant region). The pool will lazily connect on first query.
+    this.$connect()
+      .then(() => this.logger.log("Prisma connected"))
+      .catch((err: unknown) => {
+        const message = err instanceof Error ? err.message : String(err);
+        this.logger.error(`Prisma initial connect failed: ${message}`);
+      });
   }
 
   async onModuleDestroy(): Promise<void> {
