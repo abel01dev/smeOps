@@ -1,0 +1,33 @@
+"use client";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import * as React from "react";
+import { Toaster } from "sonner";
+
+import { useAuthStore } from "@/stores/auth.store";
+
+function AuthHydrator({ children }: { children: React.ReactNode }) {
+  const hydrate = useAuthStore((s) => s.hydrate);
+  React.useEffect(() => {
+    void hydrate();
+  }, [hydrate]);
+  return <>{children}</>;
+}
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  const [queryClient] = React.useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: false },
+        },
+      }),
+  );
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthHydrator>{children}</AuthHydrator>
+      <Toaster position="top-right" richColors closeButton />
+    </QueryClientProvider>
+  );
+}

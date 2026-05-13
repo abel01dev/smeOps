@@ -61,11 +61,13 @@ enum UserRole {
   CASHIER // reserved for future use
 }
 
+// User.id stores the Supabase `auth.users.id` (UUID). Passwords / email
+// confirmation / resets are handled entirely by Supabase Auth; this row only
+// holds business profile data (name, role) and the tenant link.
 model User {
-  id             String   @id @default(cuid())
+  id             String   @id @db.Uuid
   organizationId String
   email          String   @unique
-  passwordHash   String
   name           String
   role           UserRole @default(OWNER)
   createdAt      DateTime @default(now())
@@ -157,7 +159,7 @@ model Sale {
   id             String        @id @default(cuid())
   organizationId String
   customerId     String?
-  cashierId      String
+  cashierId      String        @db.Uuid
   subtotal       Decimal       @db.Decimal(14, 2)
   discount       Decimal       @default(0) @db.Decimal(14, 2)
   total          Decimal       @db.Decimal(14, 2)

@@ -1,17 +1,25 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { APP_GUARD, APP_PIPE } from "@nestjs/core";
+import { ZodValidationPipe } from "nestjs-zod";
 
+import { AuthModule } from "./auth/auth.module";
+import { SupabaseAuthGuard } from "./auth/guards/supabase-auth.guard";
 import { envValidation } from "./config/env.validation";
-import { PrismaModule } from "./prisma/prisma.module";
 import { HealthController } from "./health/health.controller";
+import { PrismaModule } from "./prisma/prisma.module";
 
 /**
  * Application root.
  *
- * Module wiring rationale:
- *   - ConfigModule is global so any service can inject ConfigService.
- *   - PrismaModule is global so we don't have to re-import in every feature module.
- *   - Feature modules (auth, products, sales, ...) will be added Day 2+.
+ * Global wiring:
+ *   - ConfigModule (env validation, fail-fast)
+ *   - PrismaModule (global Prisma client)
+ *   - AuthModule  (register/login/refresh/me)
+ *   - SupabaseAuthGuard registered as APP_GUARD => every route is protected
+ *     unless explicitly marked @Public(). Safe-by-default tenant isolation.
+ *   - ZodValidationPipe registered as APP_PIPE => DTOs declared with
+ *     createZodDto() are validated automatically.
  */
 @Module({
   imports: [
@@ -22,7 +30,12 @@ import { HealthController } from "./health/health.controller";
       validate: envValidation,
     }),
     PrismaModule,
+    AuthModule,
   ],
   controllers: [HealthController],
+  providers: [
+    { provide: APP_GUARD, useClass: SupabaseAuthGuard },
+    { provide: APP_PIPE, useClass: ZodValidationPipe },
+  ],
 })
 export class AppModule {}

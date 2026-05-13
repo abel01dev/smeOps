@@ -2,20 +2,27 @@ import { z } from "zod";
 
 /**
  * Runtime validation of environment variables at startup.
- * If any required variable is missing or malformed the app fails fast,
- * which is much better than a cryptic runtime error 200 requests in.
+ * Fail-fast: if anything required is missing or malformed, the app will not
+ * boot — much better than discovering a missing key on the 200th request.
  */
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().positive().default(4000),
   CORS_ORIGIN: z.string().min(1).default("http://localhost:3000"),
+
+  // ----- Database -----
   DATABASE_URL: z.string().url(),
   DIRECT_URL: z.string().url().optional(),
-  JWT_ACCESS_SECRET: z.string().min(16, "JWT_ACCESS_SECRET must be at least 16 chars"),
-  JWT_REFRESH_SECRET: z.string().min(16, "JWT_REFRESH_SECRET must be at least 16 chars"),
-  JWT_ACCESS_TTL: z.string().default("15m"),
-  JWT_REFRESH_TTL: z.string().default("7d"),
-  OPENAI_API_KEY: z.string().optional(),
+
+  // ----- Supabase -----
+  // SUPABASE_URL: public REST + Auth endpoint for the project
+  SUPABASE_URL: z.string().url(),
+  // SUPABASE_ANON_KEY: safe to expose to browsers (RLS protects data).
+  // Accepts either the new "sb_publishable_*" format or the legacy JWT-shaped key.
+  SUPABASE_ANON_KEY: z.string().min(20),
+  // SUPABASE_SERVICE_ROLE_KEY: bypasses RLS — backend only, NEVER ship to browser.
+  // Accepts either "sb_secret_*" or the legacy service_role JWT.
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(20),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

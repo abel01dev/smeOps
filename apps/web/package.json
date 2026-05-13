@@ -21,6 +21,7 @@
     "@radix-ui/react-toast": "^1.2.4",
     "@radix-ui/react-tooltip": "^1.1.6",
     "@sme/shared": "workspace:*",
+    "@supabase/supabase-js": "^2.46.1",
     "@tanstack/react-query": "^5.62.7",
     "@tanstack/react-query-devtools": "^5.62.7",
     "axios": "^1.7.9",
