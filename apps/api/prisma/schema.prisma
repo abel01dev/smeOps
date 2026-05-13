@@ -1,0 +1,197 @@
+// =====================================================================
+// SME Ops Platform — Prisma schema
+// ---------------------------------------------------------------------
+// Design principles:
+//  1. Multi-tenant by `organizationId` on every tenant-owned table.
+//     A NestJS TenantGuard + Prisma client extension enforces scoping
+//     at the application layer. (Row-Level Security can be layered on
+//     in Postgres later without schema changes.)
+//
+//  2. All monetary values are PostgreSQL DECIMAL — never floats.
+//     - Product / line-item amounts:  Decimal(12, 2)  -> up to 9,999,999,999.99
+//     - Aggregates (sale total, totalSpent): Decimal(14, 2) for headroom
+//
+//  3. Historical accuracy: SaleItem snapshots productName, buyPriceAtSale,
+//     and sellPriceAtSale at the moment of sale, so editing a product
+//     later cannot rewrite history (revenue/profit reports stay stable).
+//
+//  4. Denormalized Sale.profit avoids a JOIN+SUM on every dashboard load.
+//     The single source of truth is still SaleItem.lineProfit.
+//
+//  5. Deletion strategy:
+//       Organization → cascade everything (delete a tenant -> delete all data)
+//       Product      → onDelete: Restrict from SaleItem  (use ARCHIVED status)
+//       Customer     → onDelete: SetNull from Sale      (preserve sale history)
+//       Category     → onDelete: SetNull from Product   (preserve products)
+// =====================================================================
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------------------- Tenancy & users ----------------------
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  currency  String   @default("ETB")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users      User[]
+  categories Category[]
+  products   Product[]
+  customers  Customer[]
+  sales      Sale[]
+
+  @@map("organizations")
+}
+
+enum UserRole {
+  OWNER
+  MANAGER // reserved for future use
+  CASHIER // reserved for future use
+}
+
+model User {
+  id             String   @id @default(cuid())
+  organizationId String
+  email          String   @unique
+  passwordHash   String
+  name           String
+  role           UserRole @default(OWNER)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  sales        Sale[]       @relation("CashierSales")
+
+  @@index([organizationId])
+  @@map("users")
+}
+
+// ---------------------- Inventory ----------------------
+
+model Category {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  products     Product[]
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+  @@map("categories")
+}
+
+enum ProductStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+model Product {
+  id             String        @id @default(cuid())
+  organizationId String
+  categoryId     String?
+  name           String
+  description    String?
+  buyPrice       Decimal       @db.Decimal(12, 2)
+  sellPrice      Decimal       @db.Decimal(12, 2)
+  stockQuantity  Int           @default(0)
+  minStock       Int           @default(0)
+  status         ProductStatus @default(ACTIVE)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  category     Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  saleItems    SaleItem[]
+
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@index([organizationId, name])
+  @@index([categoryId])
+  @@map("products")
+}
+
+// ---------------------- Customers ----------------------
+
+model Customer {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  phone          String?
+  address        String?
+  totalSpent     Decimal  @default(0) @db.Decimal(14, 2)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  sales        Sale[]
+
+  @@index([organizationId])
+  @@index([organizationId, phone])
+  @@map("customers")
+}
+
+// ---------------------- Sales / POS ----------------------
+
+enum PaymentMethod {
+  CASH
+  MOBILE_MONEY // reserved for future use
+  CARD         // reserved for future use
+}
+
+model Sale {
+  id             String        @id @default(cuid())
+  organizationId String
+  customerId     String?
+  cashierId      String
+  subtotal       Decimal       @db.Decimal(14, 2)
+  discount       Decimal       @default(0) @db.Decimal(14, 2)
+  total          Decimal       @db.Decimal(14, 2)
+  profit         Decimal       @db.Decimal(14, 2)
+  paymentMethod  PaymentMethod @default(CASH)
+  note           String?
+  createdAt      DateTime      @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customer     Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  cashier      User         @relation("CashierSales", fields: [cashierId], references: [id])
+  items        SaleItem[]
+
+  @@index([organizationId])
+  @@index([organizationId, createdAt])
+  @@index([customerId])
+  @@map("sales")
+}
+
+model SaleItem {
+  id              String  @id @default(cuid())
+  saleId          String
+  productId       String
+  productName     String
+  quantity        Int
+  buyPriceAtSale  Decimal @db.Decimal(12, 2)
+  sellPriceAtSale Decimal @db.Decimal(12, 2)
+  lineTotal       Decimal @db.Decimal(14, 2)
+  lineProfit      Decimal @db.Decimal(14, 2)
+
+  sale    Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([saleId])
+  @@index([productId])
+  @@map("sale_items")
+}
