@@ -5,9 +5,11 @@ import { ZodValidationPipe } from "nestjs-zod";
 
 import { AuthModule } from "./auth/auth.module";
 import { SupabaseAuthGuard } from "./auth/guards/supabase-auth.guard";
+import { CategoriesModule } from "./categories/categories.module";
 import { envValidation } from "./config/env.validation";
 import { HealthController } from "./health/health.controller";
 import { PrismaModule } from "./prisma/prisma.module";
+import { ProductsModule } from "./products/products.module";
 
 /**
  * Application root.
@@ -31,6 +33,8 @@ import { PrismaModule } from "./prisma/prisma.module";
     }),
     PrismaModule,
     AuthModule,
+    CategoriesModule,
+    ProductsModule,
   ],
   controllers: [HealthController],
   providers: [
