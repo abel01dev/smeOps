@@ -1,30 +1,41 @@
-"use client";
+import Link from "next/link";
 
-import { CategoriesManager } from "@/components/inventory/categories-manager";
-import { ProductsPanel } from "@/components/inventory/products-panel";
-import { useCategories } from "@/hooks/use-inventory";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
-export default function InventoryPage() {
-  const { data: categories = [] } = useCategories();
-
+export default function InventoryPlaceholderPage() {
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
+    <div className="mx-auto max-w-2xl space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
           Inventory
         </h1>
         <p className="mt-1 text-sm text-slate-600">
-          Manage categories, pricing, and stock levels. Changes sync to the
-          dashboard and will power the POS next.
+          Product and category management UI ships on{" "}
+          <span className="font-medium">Day 8</span>.
         </p>
       </div>
-
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)]">
-        <ProductsPanel categories={categories} />
-        <div className="lg:sticky lg:top-4 lg:self-start">
-          <CategoriesManager />
-        </div>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>API is ready</CardTitle>
+          <CardDescription>
+            Use Swagger at <code className="text-xs">/docs</code> to exercise{" "}
+            <code className="text-xs">/products</code> and{" "}
+            <code className="text-xs">/categories</code> until the UI lands.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button variant="outline" asChild>
+            <Link href="/dashboard">Back to dashboard</Link>
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }
