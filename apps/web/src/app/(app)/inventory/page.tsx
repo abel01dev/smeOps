@@ -1,5 +1,16 @@
-import Link from "next/link";
+"use client";
 
+import type { Product } from "@sme/shared";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import * as React from "react";
+
+import { CategoriesCard } from "@/components/inventory/categories-card";
+import {
+  InventoryFilters,
+  type InventoryFilterState,
+} from "@/components/inventory/inventory-filters";
+import { ProductDialog } from "@/components/inventory/product-dialog";
+import { ProductsTable } from "@/components/inventory/products-table";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,34 +19,176 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useCategories, useProductsList } from "@/hooks/use-inventory";
 
-export default function InventoryPlaceholderPage() {
+const PAGE_SIZE = 20;
+const DEFAULT_FILTERS: InventoryFilterState = {
+  search: "",
+  categoryId: undefined,
+  status: "ACTIVE",
+  lowStockOnly: false,
+};
+
+export default function InventoryPage() {
+  const [filters, setFilters] =
+    React.useState<InventoryFilterState>(DEFAULT_FILTERS);
+  const [page, setPage] = React.useState(1);
+  const [debouncedSearch, setDebouncedSearch] = React.useState("");
+
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [editing, setEditing] = React.useState<Product | null>(null);
+
+  React.useEffect(() => {
+    const t = window.setTimeout(
+      () => setDebouncedSearch(filters.search.trim()),
+      300,
+    );
+    return () => window.clearTimeout(t);
+  }, [filters.search]);
+
+  React.useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, filters.categoryId, filters.status, filters.lowStockOnly]);
+
+  const params = React.useMemo(
+    () => ({
+      page,
+      pageSize: PAGE_SIZE,
+      sortBy: "createdAt",
+      sortDir: "desc" as const,
+      search: debouncedSearch || undefined,
+      categoryId: filters.categoryId,
+      status: filters.status === "ALL" ? undefined : filters.status,
+      lowStockOnly: filters.lowStockOnly || undefined,
+    }),
+    [page, debouncedSearch, filters.categoryId, filters.status, filters.lowStockOnly],
+  );
+
+  const productsQ = useProductsList(params);
+  const categoriesQ = useCategories();
+  const categories = categoriesQ.data ?? [];
+
+  const items = productsQ.data?.items ?? [];
+  const total = productsQ.data?.total ?? 0;
+  const totalPages = productsQ.data?.totalPages ?? 1;
+
+  const openCreate = () => {
+    setEditing(null);
+    setDialogOpen(true);
+  };
+  const openEdit = (p: Product) => {
+    setEditing(p);
+    setDialogOpen(true);
+  };
+
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-          Inventory
-        </h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Product and category management UI ships on{" "}
-          <span className="font-medium">Day 8</span>.
-        </p>
+    <div className="mx-auto max-w-7xl space-y-6">
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+            Inventory
+          </h1>
+          <p className="mt-1 text-sm text-slate-600">
+            Manage products, pricing, and stock. Changes sync to the dashboard
+            and POS.
+          </p>
+        </div>
+        <Button
+          type="button"
+          className="h-11 gap-2"
+          onClick={openCreate}
+        >
+          <Plus className="h-4 w-4" />
+          Add product
+        </Button>
+      </header>
+
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)]">
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Products</CardTitle>
+            <CardDescription>
+              {productsQ.isLoading
+                ? "Loading…"
+                : total === 0
+                  ? "No products yet"
+                  : `${total} product${total === 1 ? "" : "s"}`}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <InventoryFilters
+              value={filters}
+              onChange={setFilters}
+              categories={categories}
+            />
+
+            {productsQ.isError ? (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                {(productsQ.error as Error).message}
+                <Button
+                  type="button"
+                  variant="link"
+                  className="ml-2 h-auto p-0 text-red-700"
+                  onClick={() => void productsQ.refetch()}
+                >
+                  Retry
+                </Button>
+              </div>
+            ) : (
+              <ProductsTable
+                products={items}
+                isLoading={productsQ.isLoading}
+                isFetching={productsQ.isFetching && !productsQ.isLoading}
+                onEdit={openEdit}
+                onCreate={openCreate}
+              />
+            )}
+
+            {items.length > 0 && totalPages > 1 && (
+              <div className="flex items-center justify-between border-t border-slate-100 pt-4">
+                <p className="text-xs text-slate-500">
+                  Page {page} of {totalPages}
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-9 w-9 p-0"
+                    aria-label="Previous page"
+                    disabled={page <= 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-9 w-9 p-0"
+                    aria-label="Next page"
+                    disabled={page >= totalPages}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <div className="lg:sticky lg:top-4 lg:self-start">
+          <CategoriesCard />
+        </div>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>API is ready</CardTitle>
-          <CardDescription>
-            Use Swagger at <code className="text-xs">/docs</code> to exercise{" "}
-            <code className="text-xs">/products</code> and{" "}
-            <code className="text-xs">/categories</code> until the UI lands.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button variant="outline" asChild>
-            <Link href="/dashboard">Back to dashboard</Link>
-          </Button>
-        </CardContent>
-      </Card>
+
+      <ProductDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        product={editing}
+        categories={categories}
+      />
     </div>
   );
 }
