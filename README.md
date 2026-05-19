@@ -106,7 +106,7 @@ Typical flow in Swagger:
 | `pnpm dev`          | Run API + Web concurrently                   |
 | `pnpm dev:api`      | Run only the API                             |
 | `pnpm dev:web`      | Run only the Web app                         |
-| `pnpm build`        | Build all packages and apps                  |
+| `pnpm build`        | Production build (shared + API + web)        |
 | `pnpm lint`         | Lint all packages and apps                   |
 | `pnpm typecheck`    | TypeScript type-check across the workspace   |
 | `pnpm db:migrate`   | Run Prisma migrations                        |
@@ -128,7 +128,19 @@ Typical flow in Swagger:
 - [x] Day 11: AI insights (rule-based)
 - [ ] Day 12: Polish + responsiveness *(deferred — implement when approved)*
 - [x] Day 13: Seeds, Swagger, docs
-- [ ] Day 14: Deploy
+- [x] Day 14: Production prep + deploy guide *(live deploy skipped)*
+
+## Production (when you are ready)
+
+Configs are in place; no live URLs were created during the MVP sprint.
+
+| File | Purpose |
+|------|---------|
+| [docs/DEPLOY.md](./docs/DEPLOY.md) | Step-by-step Vercel + Railway + Supabase |
+| `apps/web/vercel.json` | Monorepo build for Vercel |
+| `apps/api/railway.toml` | Build, health check, start command |
+
+Verify a production build locally: `pnpm build`
 
 ## License
 

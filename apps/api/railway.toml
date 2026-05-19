@@ -1,0 +1,12 @@
+# Railway config — set service root directory to `apps/api` in the dashboard.
+# Docs: docs/DEPLOY.md
+
+[build]
+builder = "nixpacks"
+buildCommand = "cd ../.. && corepack enable && pnpm install --frozen-lockfile && pnpm --filter @sme/shared build && pnpm --filter @sme/api build"
+
+[deploy]
+startCommand = "node dist/main.js"
+healthcheckPath = "/api/v1/health"
+healthcheckTimeout = 60
+restartPolicyType = "on_failure"
