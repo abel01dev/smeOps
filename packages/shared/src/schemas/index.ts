@@ -5,3 +5,4 @@ export * from "./category.schema";
 export * from "./customer.schema";
 export * from "./sale.schema";
 export * from "./dashboard.schema";
+export * from "./ai.schema";

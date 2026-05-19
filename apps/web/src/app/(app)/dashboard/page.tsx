@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import * as React from "react";
 
+import { AiInsightsPanel } from "@/components/dashboard/ai-insights-panel";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { LowStockList } from "@/components/dashboard/low-stock-list";
 import { RevenueTrendChart } from "@/components/dashboard/revenue-trend-chart";
@@ -145,6 +146,8 @@ export default function DashboardPage() {
           isLoading={summary.isLoading}
         />
       </div>
+
+      <AiInsightsPanel days={days} />
 
       {/* Revenue chart + top products row */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
