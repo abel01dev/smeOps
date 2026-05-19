@@ -13,6 +13,8 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { OrganizationId } from "../auth/decorators/current-user.decorator";
+import { Roles } from "../auth/decorators/roles.decorator";
+import { API_ROLE_ACCESS } from "../auth/permissions";
 import { CustomersService } from "./customers.service";
 import {
   CreateCustomerDto,
@@ -27,6 +29,7 @@ export class CustomersController {
   constructor(private readonly customers: CustomersService) {}
 
   @Get()
+  @Roles(...API_ROLE_ACCESS.customersRead)
   @ApiOperation({ summary: "Paginated customer list with name/phone search" })
   list(
     @OrganizationId() organizationId: string,
@@ -36,6 +39,7 @@ export class CustomersController {
   }
 
   @Get(":id")
+  @Roles(...API_ROLE_ACCESS.customersRead)
   @ApiOperation({
     summary: "Customer detail with the last 10 sales (for the profile page)",
   })
@@ -47,6 +51,7 @@ export class CustomersController {
   }
 
   @Post()
+  @Roles(...API_ROLE_ACCESS.customersWrite)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: "Create a customer" })
   create(
@@ -57,6 +62,7 @@ export class CustomersController {
   }
 
   @Patch(":id")
+  @Roles(...API_ROLE_ACCESS.customersWrite)
   @ApiOperation({ summary: "Update a customer" })
   update(
     @OrganizationId() organizationId: string,
@@ -67,6 +73,7 @@ export class CustomersController {
   }
 
   @Delete(":id")
+  @Roles(...API_ROLE_ACCESS.customersDelete)
   @ApiOperation({
     summary: "Delete a customer (past sales are preserved, anonymized)",
   })

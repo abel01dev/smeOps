@@ -7,8 +7,8 @@ import {
   Package,
   ReceiptText,
   TrendingUp,
-  Users,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 
 import { AiInsightsPanel } from "@/components/dashboard/ai-insights-panel";
@@ -33,14 +33,10 @@ import {
 } from "@/hooks/use-dashboard";
 import { useAuthStore } from "@/stores/auth.store";
 
-const PERIODS = [
-  { label: "7 days", days: 7 },
-  { label: "30 days", days: 30 },
-  { label: "90 days", days: 90 },
-] as const;
-
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
+  const t = useTranslations("dashboard");
+  const tc = useTranslations("common");
   const [days, setDays] = React.useState<number>(30);
 
   const summary = useDashboardSummary();
@@ -48,23 +44,29 @@ export default function DashboardPage() {
   const top = useTopProducts(days, 5);
   const lowStock = useLowStockProducts(5);
 
-  const greeting = greetingFor(user?.name);
+  const periods = [
+    { label: t("period7"), days: 7 },
+    { label: t("period30"), days: 30 },
+    { label: t("period90"), days: 90 },
+  ] as const;
+
+  const greeting = greetingFor(user?.name, t);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      {/* Greeting + period selector */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
             {greeting}
           </h1>
           <p className="mt-1 text-sm text-slate-600">
-            Here&apos;s how {user?.organizationName ?? "your business"} is doing
-            today.
+            {t("subtitle", {
+              org: user?.organizationName ?? "your business",
+            })}
           </p>
         </div>
         <div className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-1">
-          {PERIODS.map((p) => (
+          {periods.map((p) => (
             <Button
               key={p.days}
               variant={days === p.days ? "default" : "ghost"}
@@ -72,9 +74,7 @@ export default function DashboardPage() {
               onClick={() => setDays(p.days)}
               className={cn(
                 "h-8 px-3 text-xs font-medium",
-                days === p.days
-                  ? ""
-                  : "text-slate-600 hover:bg-slate-100",
+                days === p.days ? "" : "text-slate-600 hover:bg-slate-100",
               )}
             >
               {p.label}
@@ -83,18 +83,15 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* KPI cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          label="Revenue today"
+          label={t("revenueToday")}
           value={
-            summary.data
-              ? formatMoney(summary.data.today.revenue)
-              : "—"
+            summary.data ? formatMoney(summary.data.today.revenue) : tc("noData")
           }
           hint={
             summary.data
-              ? `${summary.data.today.salesCount} sale${summary.data.today.salesCount === 1 ? "" : "s"} so far`
+              ? t("salesSoFar", { count: summary.data.today.salesCount })
               : undefined
           }
           icon={Banknote}
@@ -102,15 +99,15 @@ export default function DashboardPage() {
           isLoading={summary.isLoading}
         />
         <KpiCard
-          label="Profit today"
+          label={t("profitToday")}
           value={
-            summary.data
-              ? formatMoney(summary.data.today.profit)
-              : "—"
+            summary.data ? formatMoney(summary.data.today.profit) : tc("noData")
           }
           hint={
             summary.data
-              ? `Last 7d: ${formatMoney(summary.data.week.profit)}`
+              ? t("last7dProfit", {
+                  amount: formatMoney(summary.data.week.profit),
+                })
               : undefined
           }
           icon={TrendingUp}
@@ -118,11 +115,13 @@ export default function DashboardPage() {
           isLoading={summary.isLoading}
         />
         <KpiCard
-          label="Active products"
-          value={summary.data ? summary.data.totals.activeProducts : "—"}
+          label={t("activeProducts")}
+          value={
+            summary.data ? summary.data.totals.activeProducts : tc("noData")
+          }
           hint={
             summary.data
-              ? `${summary.data.totals.customers} customers`
+              ? t("customerCount", { count: summary.data.totals.customers })
               : undefined
           }
           icon={Package}
@@ -130,12 +129,14 @@ export default function DashboardPage() {
           isLoading={summary.isLoading}
         />
         <KpiCard
-          label="Low stock"
-          value={summary.data ? summary.data.totals.lowStockCount : "—"}
+          label={t("lowStockKpi")}
+          value={
+            summary.data ? summary.data.totals.lowStockCount : tc("noData")
+          }
           hint={
             summary.data && summary.data.totals.lowStockCount > 0
-              ? "needs restocking"
-              : "all good"
+              ? t("needsRestocking")
+              : t("allGood")
           }
           icon={AlertTriangle}
           tone={
@@ -149,23 +150,19 @@ export default function DashboardPage() {
 
       <AiInsightsPanel days={days} />
 
-      {/* Revenue chart + top products row */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader className="flex-row items-center justify-between space-y-0">
             <div>
-              <CardTitle className="text-base">Revenue & profit</CardTitle>
-              <CardDescription>
-                Daily totals over the last {days} days.
-              </CardDescription>
+              <CardTitle className="text-base">{t("revenueProfitChart")}</CardTitle>
+              <CardDescription>{t("dailyTotals", { days })}</CardDescription>
             </div>
             {summary.data ? (
               <div className="hidden text-right text-xs text-slate-500 md:block">
                 <p>
-                  Period revenue:{" "}
-                  <span className="font-medium text-slate-900">
-                    {formatMoney(periodRevenue(trend.data))}
-                  </span>
+                  {t("periodRevenue", {
+                    amount: formatMoney(periodRevenue(trend.data)),
+                  })}
                 </p>
               </div>
             ) : null}
@@ -177,10 +174,8 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Top products</CardTitle>
-            <CardDescription>
-              By revenue over the last {days} days.
-            </CardDescription>
+            <CardTitle className="text-base">{t("topProducts")}</CardTitle>
+            <CardDescription>{t("topProductsDesc", { days })}</CardDescription>
           </CardHeader>
           <CardContent>
             <TopProductsList data={top.data} isLoading={top.isLoading} />
@@ -188,61 +183,54 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Low stock + month overview row */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex-row items-center justify-between space-y-0">
             <div>
-              <CardTitle className="text-base">Low stock</CardTitle>
-              <CardDescription>Restock these soon.</CardDescription>
+              <CardTitle className="text-base">{t("lowStockTitle")}</CardTitle>
+              <CardDescription>{t("lowStockDesc")}</CardDescription>
             </div>
-            <AlertTriangle
-              className="h-5 w-5 text-amber-500"
-              aria-hidden
-            />
+            <AlertTriangle className="h-5 w-5 text-amber-500" aria-hidden />
           </CardHeader>
           <CardContent>
-            <LowStockList
-              data={lowStock.data}
-              isLoading={lowStock.isLoading}
-            />
+            <LowStockList data={lowStock.data} isLoading={lowStock.isLoading} />
           </CardContent>
         </Card>
 
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-base">This month at a glance</CardTitle>
-            <CardDescription>Last 30-day rolling totals.</CardDescription>
+            <CardTitle className="text-base">{t("monthGlance")}</CardTitle>
+            <CardDescription>{t("monthGlanceDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <Stat
               icon={Banknote}
-              label="Revenue"
+              label={tc("revenue")}
               value={
                 summary.data
                   ? formatMoney(summary.data.month.revenue)
-                  : "—"
+                  : tc("noData")
               }
               loading={summary.isLoading}
             />
             <Stat
               icon={TrendingUp}
-              label="Profit"
+              label={tc("profit")}
               value={
                 summary.data
                   ? formatMoney(summary.data.month.profit)
-                  : "—"
+                  : tc("noData")
               }
               loading={summary.isLoading}
               tone="success"
             />
             <Stat
               icon={ReceiptText}
-              label="Sales today"
+              label={t("salesToday")}
               value={
                 summary.data
                   ? summary.data.today.salesCount.toString()
-                  : "—"
+                  : tc("noData")
               }
               loading={summary.isLoading}
             />
@@ -260,7 +248,7 @@ function Stat({
   loading,
   tone = "default",
 }: {
-  icon: typeof Users;
+  icon: typeof Banknote;
   label: string;
   value: React.ReactNode;
   loading?: boolean;
@@ -296,12 +284,25 @@ function Stat({
   );
 }
 
-function greetingFor(name: string | undefined): string {
+function greetingFor(
+  name: string | undefined,
+  t: ReturnType<typeof useTranslations<"dashboard">>,
+): string {
   const hour = new Date().getHours();
-  const part =
-    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
   const first = name?.split(" ")[0];
-  return first ? `${part}, ${first}.` : `${part}.`;
+  if (hour < 12) {
+    return first
+      ? t("greetingMorning", { name: first })
+      : t("greetingMorningOnly");
+  }
+  if (hour < 18) {
+    return first
+      ? t("greetingAfternoon", { name: first })
+      : t("greetingAfternoonOnly");
+  }
+  return first
+    ? t("greetingEvening", { name: first })
+    : t("greetingEveningOnly");
 }
 
 function periodRevenue(

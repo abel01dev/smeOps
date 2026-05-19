@@ -8,6 +8,7 @@ import {
   formatMoney,
   type Product,
 } from "@sme/shared";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -68,6 +69,8 @@ export function ProductDialog({
   product,
   categories,
 }: ProductDialogProps) {
+  const t = useTranslations("inventory");
+  const tc = useTranslations("common");
   const isEdit = !!product;
 
   const createMut = useCreateProduct();
@@ -112,10 +115,10 @@ export function ProductDialog({
     try {
       if (product) {
         await updateMut.mutateAsync({ id: product.id, input: values });
-        toast.success("Product updated");
+        toast.success(t("productSaved"));
       } else {
         await createMut.mutateAsync(values);
-        toast.success("Product created");
+        toast.success(t("productCreated"));
       }
       onOpenChange(false);
     } catch (e) {
@@ -126,15 +129,13 @@ export function ProductDialog({
   const onArchive = async () => {
     if (!product) return;
     if (
-      !window.confirm(
-        "Archive this product? It will be hidden from POS but past sales stay intact.",
-      )
+      !window.confirm(t("archiveConfirm"))
     ) {
       return;
     }
     try {
       await archiveMut.mutateAsync(product.id);
-      toast.success("Product archived");
+      toast.success(t("productArchived"));
       onOpenChange(false);
     } catch (e) {
       toast.error((e as Error).message);
@@ -147,20 +148,18 @@ export function ProductDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[min(90vh,760px)] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit product" : "Add product"}</DialogTitle>
-          <DialogDescription>
-            Prices are in ETB. Sell price must be at least the buy price.
-          </DialogDescription>
+          <DialogTitle>{isEdit ? t("dialogEdit") : t("dialogCreate")}</DialogTitle>
+          <DialogDescription>{t("dialogDesc")}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={onSubmit} className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="p-name">Name</Label>
+            <Label htmlFor="p-name">{t("productName")}</Label>
             <Input
               id="p-name"
               autoComplete="off"
               className="h-11"
-              placeholder="e.g. Coca Cola 500ml"
+              placeholder={t("productNamePlaceholder")}
               {...form.register("name")}
             />
             {errors.name && (
@@ -169,17 +168,19 @@ export function ProductDialog({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="p-desc">Description (optional)</Label>
+            <Label htmlFor="p-desc">
+              {t("description")} ({tc("optional")})
+            </Label>
             <Textarea
               id="p-desc"
               rows={2}
-              placeholder="Notes for staff…"
+              placeholder={t("descriptionPlaceholder")}
               {...form.register("description")}
             />
           </div>
 
           <div className="grid gap-2">
-            <Label>Category</Label>
+            <Label>{tc("category")}</Label>
             <Select
               value={categoryId ?? NO_CATEGORY}
               onValueChange={(v) =>
@@ -189,10 +190,10 @@ export function ProductDialog({
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="No category" />
+                <SelectValue placeholder={tc("noCategory")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={NO_CATEGORY}>No category</SelectItem>
+                <SelectItem value={NO_CATEGORY}>{tc("noCategory")}</SelectItem>
                 {categories.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
                     {c.name}
@@ -204,7 +205,7 @@ export function ProductDialog({
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="grid gap-2">
-              <Label htmlFor="p-buy">Buy price</Label>
+              <Label htmlFor="p-buy">{t("buyPrice")}</Label>
               <Input
                 id="p-buy"
                 type="number"
@@ -221,7 +222,7 @@ export function ProductDialog({
               )}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="p-sell">Sell price</Label>
+              <Label htmlFor="p-sell">{t("sellPrice")}</Label>
               <Input
                 id="p-sell"
                 type="number"
@@ -239,11 +240,11 @@ export function ProductDialog({
             </div>
           </div>
 
-          <ProfitHint margin={margin} marginPct={marginPct} />
+          <ProfitHint margin={margin} marginPct={marginPct} t={t} />
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="grid gap-2">
-              <Label htmlFor="p-stock">Stock quantity</Label>
+              <Label htmlFor="p-stock">{t("stockQty")}</Label>
               <Input
                 id="p-stock"
                 type="number"
@@ -260,7 +261,7 @@ export function ProductDialog({
               )}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="p-min">Low-stock alert at</Label>
+              <Label htmlFor="p-min">{t("minStockAlert")}</Label>
               <Input
                 id="p-min"
                 type="number"
@@ -280,7 +281,7 @@ export function ProductDialog({
 
           {isEdit && (
             <div className="grid gap-2">
-              <Label>Status</Label>
+              <Label>{tc("status")}</Label>
               <Select
                 value={status}
                 onValueChange={(v) =>
@@ -293,8 +294,8 @@ export function ProductDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ACTIVE">Active</SelectItem>
-                  <SelectItem value="ARCHIVED">Archived</SelectItem>
+                  <SelectItem value="ACTIVE">{t("statusActive")}</SelectItem>
+                  <SelectItem value="ARCHIVED">{t("statusArchived")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -309,7 +310,7 @@ export function ProductDialog({
                 disabled={busy}
                 onClick={() => void onArchive()}
               >
-                Archive
+                {t("archive")}
               </Button>
             )}
             <Button
@@ -319,14 +320,10 @@ export function ProductDialog({
               disabled={busy}
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button type="submit" className="h-11" disabled={busy}>
-              {busy
-                ? "Saving…"
-                : isEdit
-                  ? "Save changes"
-                  : "Create product"}
+              {busy ? tc("saving") : isEdit ? tc("save") : t("dialogCreate")}
             </Button>
           </DialogFooter>
         </form>
@@ -338,23 +335,24 @@ export function ProductDialog({
 function ProfitHint({
   margin,
   marginPct,
+  t,
 }: {
   margin: number;
   marginPct: number | null;
+  t: (key: string, values?: Record<string, string | number>) => string;
 }) {
   if (margin <= 0) {
     return (
-      <p className="-mt-1 text-xs text-slate-500">
-        Profit per unit appears here once both prices are set.
-      </p>
+      <p className="-mt-1 text-xs text-slate-500">{t("profitHintEmpty")}</p>
     );
   }
   return (
     <p className="-mt-1 text-xs text-emerald-700">
-      Profit per unit:{" "}
-      <span className="font-medium">{formatMoney(margin)}</span>
+      {t("profitHint", { amount: formatMoney(margin) })}
       {marginPct != null && (
-        <span className="text-slate-500"> · {marginPct.toFixed(0)}% margin</span>
+        <span className="text-slate-500">
+          {t("profitMargin", { percent: marginPct.toFixed(0) })}
+        </span>
       )}
     </p>
   );

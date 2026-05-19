@@ -2,6 +2,7 @@
 
 import type { RevenueTrendBucket } from "@sme/shared";
 import { formatMoney } from "@sme/shared";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import {
   Area,
@@ -15,6 +16,8 @@ import {
 } from "recharts";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import { intlLocale } from "@/lib/i18n-locale";
+import { useLocaleStore } from "@/stores/locale.store";
 
 interface Props {
   data: RevenueTrendBucket[] | undefined;
@@ -22,6 +25,15 @@ interface Props {
 }
 
 export function RevenueTrendChart({ data, isLoading }: Props) {
+  const t = useTranslations("dashboard");
+  const tc = useTranslations("charts");
+  const locale = useLocaleStore((s) => s.locale);
+
+  const dateFmt = React.useCallback(
+    (value: string) => shortDate(value, locale),
+    [locale],
+  );
+
   if (isLoading || !data) {
     return <Skeleton className="h-64 w-full" />;
   }
@@ -29,12 +41,11 @@ export function RevenueTrendChart({ data, isLoading }: Props) {
   if (data.length === 0) {
     return (
       <div className="grid h-64 place-items-center text-sm text-slate-500">
-        No sales yet in this period.
+        {t("noSalesPeriod")}
       </div>
     );
   }
 
-  // Recharts can't compute domains from string values reliably — convert here.
   const chartData = data.map((d) => ({
     date: d.date,
     revenue: Number(d.revenue),
@@ -62,7 +73,7 @@ export function RevenueTrendChart({ data, isLoading }: Props) {
           <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" vertical={false} />
           <XAxis
             dataKey="date"
-            tickFormatter={shortDate}
+            tickFormatter={dateFmt}
             tick={{ fill: "#64748b", fontSize: 12 }}
             axisLine={{ stroke: "#e2e8f0" }}
             tickLine={false}
@@ -75,11 +86,21 @@ export function RevenueTrendChart({ data, isLoading }: Props) {
             tickLine={false}
             width={60}
           />
-          <Tooltip content={<ChartTooltip />} cursor={{ stroke: "#cbd5e1" }} />
+          <Tooltip
+            content={(props) => (
+              <ChartTooltip
+                active={props.active}
+                payload={props.payload as TooltipProps<number, string>["payload"]}
+                label={props.label}
+                locale={locale}
+              />
+            )}
+            cursor={{ stroke: "#cbd5e1" }}
+          />
           <Area
             type="monotone"
             dataKey="revenue"
-            name="Revenue"
+            name={tc("revenue")}
             stroke="#0f172a"
             strokeWidth={2}
             fill="url(#revGrad)"
@@ -87,7 +108,7 @@ export function RevenueTrendChart({ data, isLoading }: Props) {
           <Area
             type="monotone"
             dataKey="profit"
-            name="Profit"
+            name={tc("profit")}
             stroke="#10b981"
             strokeWidth={2}
             fill="url(#profitGrad)"
@@ -98,9 +119,12 @@ export function RevenueTrendChart({ data, isLoading }: Props) {
   );
 }
 
-function shortDate(value: string): string {
+function shortDate(value: string, locale: "en" | "am"): string {
   const d = new Date(`${value}T00:00:00`);
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return d.toLocaleDateString(intlLocale(locale), {
+    month: "short",
+    day: "numeric",
+  });
 }
 
 function shortMoney(value: number): string {
@@ -109,7 +133,13 @@ function shortMoney(value: number): string {
   return value.toFixed(0);
 }
 
-function ChartTooltip({ active, payload, label }: TooltipProps<number, string>) {
+function ChartTooltip({
+  active,
+  payload,
+  label,
+  locale,
+}: TooltipProps<number, string> & { locale: "en" | "am" }) {
+  const tc = useTranslations("charts");
   if (!active || !payload?.length) return null;
 
   const get = (key: string) => payload.find((p) => p.dataKey === key)?.value ?? 0;
@@ -120,12 +150,12 @@ function ChartTooltip({ active, payload, label }: TooltipProps<number, string>) 
   return (
     <div className="rounded-md border border-slate-200 bg-white p-3 text-xs shadow-md">
       <p className="mb-2 font-medium text-slate-900">
-        {label ? shortDate(String(label)) : ""}
+        {label ? shortDate(String(label), locale) : ""}
       </p>
-      <Row color="#0f172a" label="Revenue" value={formatMoney(revenue)} />
-      <Row color="#10b981" label="Profit" value={formatMoney(profit)} />
+      <Row color="#0f172a" label={tc("revenue")} value={formatMoney(revenue)} />
+      <Row color="#10b981" label={tc("profit")} value={formatMoney(profit)} />
       <p className="mt-1 text-slate-500">
-        {sales} sale{sales === 1 ? "" : "s"}
+        {tc("salesCount", { count: sales })}
       </p>
     </div>
   );

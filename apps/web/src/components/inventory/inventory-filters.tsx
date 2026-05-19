@@ -2,6 +2,7 @@
 
 import type { Category, ProductStatus } from "@sme/shared";
 import { Search, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,9 @@ export function InventoryFilters({
   onChange,
   categories,
 }: InventoryFiltersProps) {
+  const t = useTranslations("inventory");
+  const tc = useTranslations("common");
+
   const update = <K extends keyof InventoryFilterState>(
     key: K,
     next: InventoryFilterState[K],
@@ -59,13 +63,13 @@ export function InventoryFilters({
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[1.5fr_1fr_1fr]">
         <div className="grid gap-1.5">
           <Label htmlFor="inv-search" className="sr-only">
-            Search products
+            {t("searchProductsLabel")}
           </Label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input
               id="inv-search"
-              placeholder="Search by name…"
+              placeholder={t("searchPlaceholder")}
               value={value.search}
               onChange={(e) => update("search", e.target.value)}
               className="h-11 pl-9"
@@ -75,17 +79,17 @@ export function InventoryFilters({
 
         <div className="grid gap-1.5">
           <Label className="text-xs font-medium text-slate-600">
-            Category
+            {tc("category")}
           </Label>
           <Select
             value={value.categoryId ?? ALL}
             onValueChange={(v) => update("categoryId", v === ALL ? undefined : v)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="All categories" />
+              <SelectValue placeholder={tc("allCategories")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={ALL}>All categories</SelectItem>
+              <SelectItem value={ALL}>{tc("allCategories")}</SelectItem>
               {categories.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
                   {c.name}
@@ -96,7 +100,7 @@ export function InventoryFilters({
         </div>
 
         <div className="grid gap-1.5">
-          <Label className="text-xs font-medium text-slate-600">Status</Label>
+          <Label className="text-xs font-medium text-slate-600">{tc("status")}</Label>
           <Select
             value={value.status}
             onValueChange={(v) => update("status", v as ProductStatus | "ALL")}
@@ -105,9 +109,9 @@ export function InventoryFilters({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ACTIVE">Active</SelectItem>
-              <SelectItem value="ARCHIVED">Archived</SelectItem>
-              <SelectItem value="ALL">All</SelectItem>
+              <SelectItem value="ACTIVE">{t("statusActive")}</SelectItem>
+              <SelectItem value="ARCHIVED">{t("statusArchived")}</SelectItem>
+              <SelectItem value="ALL">{t("statusAll")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -128,7 +132,7 @@ export function InventoryFilters({
             checked={value.lowStockOnly}
             onChange={(e) => update("lowStockOnly", e.target.checked)}
           />
-          <span className="font-medium">Low stock only</span>
+          <span className="font-medium">{tc("lowStockOnly")}</span>
         </label>
 
         {hasActiveFilter && (
@@ -140,7 +144,7 @@ export function InventoryFilters({
             onClick={clearAll}
           >
             <X className="h-3.5 w-3.5" />
-            Clear filters
+            {tc("clearFilters")}
           </Button>
         )}
       </div>

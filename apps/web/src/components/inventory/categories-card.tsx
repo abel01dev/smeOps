@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type Category, createCategorySchema } from "@sme/shared";
 import { Pencil, Plus, Tag, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -35,6 +36,8 @@ import {
 type CategoryFormValues = { name: string };
 
 export function CategoriesCard() {
+  const t = useTranslations("inventory");
+  const tc = useTranslations("common");
   const q = useCategories();
   const createMut = useCreateCategory();
   const updateMut = useUpdateCategory();
@@ -59,7 +62,7 @@ export function CategoriesCard() {
   const onAdd = addForm.handleSubmit(async ({ name }) => {
     try {
       await createMut.mutateAsync({ name });
-      toast.success("Category added");
+      toast.success(t("categoryAdded"));
       addForm.reset({ name: "" });
     } catch (e) {
       toast.error((e as Error).message);
@@ -70,7 +73,7 @@ export function CategoriesCard() {
     if (!renameTarget) return;
     try {
       await updateMut.mutateAsync({ id: renameTarget.id, input: { name } });
-      toast.success("Category renamed");
+      toast.success(t("categoryRenamed"));
       setRenameTarget(null);
     } catch (e) {
       toast.error((e as Error).message);
@@ -78,13 +81,11 @@ export function CategoriesCard() {
   });
 
   const onDelete = async (c: Category) => {
-    const ok = window.confirm(
-      `Delete "${c.name}"? Products in this category will lose their category link.`,
-    );
+    const ok = window.confirm(t("deleteCategoryConfirm", { name: c.name }));
     if (!ok) return;
     try {
       await deleteMut.mutateAsync(c.id);
-      toast.success("Category removed");
+      toast.success(t("categoryRemoved"));
     } catch (e) {
       toast.error((e as Error).message);
     }
@@ -100,11 +101,9 @@ export function CategoriesCard() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Tag className="h-4 w-4 text-slate-500" />
-            Categories
+            {t("categoriesTitle")}
           </CardTitle>
-          <CardDescription>
-            Group products for faster filtering in inventory and POS.
-          </CardDescription>
+          <CardDescription>{t("categoriesDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <form onSubmit={onAdd} className="flex flex-col gap-2 sm:flex-row">
@@ -114,7 +113,7 @@ export function CategoriesCard() {
               </Label>
               <Input
                 id="new-cat"
-                placeholder="New category…"
+                placeholder={t("newCategoryPlaceholder")}
                 className="h-11"
                 disabled={busy}
                 {...addForm.register("name")}
@@ -131,7 +130,7 @@ export function CategoriesCard() {
               disabled={busy}
             >
               <Plus className="h-4 w-4" />
-              Add
+              {tc("add")}
             </Button>
           </form>
 
@@ -152,14 +151,14 @@ export function CategoriesCard() {
                 className="ml-2 h-auto p-0 text-red-700"
                 onClick={() => void q.refetch()}
               >
-                Retry
+                {tc("retry")}
               </Button>
             </div>
           )}
 
           {!q.isLoading && !q.isError && list.length === 0 && (
             <p className="rounded-lg bg-slate-50 px-3 py-6 text-center text-sm text-slate-500">
-              No categories yet — add one above.
+              {t("noCategoriesHint")}
             </p>
           )}
 
@@ -176,8 +175,7 @@ export function CategoriesCard() {
                     </p>
                     {typeof c.productCount === "number" && (
                       <p className="text-xs text-slate-500">
-                        {c.productCount} product
-                        {c.productCount === 1 ? "" : "s"}
+                        {t("categoryProductCount", { count: c.productCount })}
                       </p>
                     )}
                   </div>
@@ -218,11 +216,11 @@ export function CategoriesCard() {
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Rename category</DialogTitle>
+            <DialogTitle>{t("renameCategory")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={onRename} className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="rename-cat">Name</Label>
+              <Label htmlFor="rename-cat">{t("categoryName")}</Label>
               <Input
                 id="rename-cat"
                 className="h-11"
@@ -244,10 +242,10 @@ export function CategoriesCard() {
                 disabled={busy}
                 onClick={() => setRenameTarget(null)}
               >
-                Cancel
+                {tc("cancel")}
               </Button>
               <Button type="submit" className="h-11" disabled={busy}>
-                {updateMut.isPending ? "Saving…" : "Save"}
+                {updateMut.isPending ? tc("saving") : tc("save")}
               </Button>
             </DialogFooter>
           </form>

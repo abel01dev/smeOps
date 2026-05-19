@@ -2,6 +2,7 @@
 
 import type { AiConversationSummary } from "@sme/shared";
 import { MessageSquarePlus, PanelLeftClose, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,9 @@ export function ConversationSidebar({
   onClose?: () => void;
   className?: string;
 }) {
+  const t = useTranslations("assistant");
+  const tc = useTranslations("common");
+
   return (
     <aside
       className={cn(
@@ -35,7 +39,7 @@ export function ConversationSidebar({
       <div className="flex items-center gap-2 border-b border-slate-200 p-3">
         <Button className="flex-1 justify-start gap-2" size="sm" onClick={onNewChat}>
           <MessageSquarePlus className="h-4 w-4" />
-          New chat
+          {t("newChat")}
         </Button>
         {onClose ? (
           <Button
@@ -44,7 +48,7 @@ export function ConversationSidebar({
             size="icon"
             className="shrink-0 lg:hidden"
             onClick={onClose}
-            aria-label="Close sidebar"
+            aria-label={t("closeSidebar")}
           >
             <PanelLeftClose className="h-4 w-4" />
           </Button>
@@ -53,11 +57,9 @@ export function ConversationSidebar({
 
       <div className="flex-1 overflow-y-auto p-2">
         {isLoading ? (
-          <p className="px-2 py-4 text-xs text-slate-500">Loading…</p>
+          <p className="px-2 py-4 text-xs text-slate-500">{tc("loading")}</p>
         ) : conversations.length === 0 ? (
-          <p className="px-2 py-4 text-xs text-slate-500">
-            No conversations yet. Start a new chat.
-          </p>
+          <p className="px-2 py-4 text-xs text-slate-500">{t("startNewChatHint")}</p>
         ) : (
           <ul className="space-y-0.5">
             {conversations.map((c) => {
@@ -90,7 +92,7 @@ export function ConversationSidebar({
                       variant="ghost"
                       size="icon"
                       className="mr-1 h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100"
-                      aria-label="Delete conversation"
+                      aria-label={t("deleteChat")}
                       onClick={() => onDelete(c.id)}
                     >
                       <Trash2 className="h-3.5 w-3.5 text-slate-500" />

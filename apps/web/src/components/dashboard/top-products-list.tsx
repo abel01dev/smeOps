@@ -1,5 +1,8 @@
+"use client";
+
 import type { TopProduct } from "@sme/shared";
 import { formatMoney } from "@sme/shared";
+import { useTranslations } from "next-intl";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -9,6 +12,8 @@ interface Props {
 }
 
 export function TopProductsList({ data, isLoading }: Props) {
+  const t = useTranslations("dashboard");
+
   if (isLoading || !data) {
     return (
       <ul className="space-y-3">
@@ -23,11 +28,7 @@ export function TopProductsList({ data, isLoading }: Props) {
   }
 
   if (data.length === 0) {
-    return (
-      <p className="text-sm text-slate-500">
-        No sales recorded in this period yet.
-      </p>
-    );
+    return <p className="text-sm text-slate-500">{t("noSalesRecorded")}</p>;
   }
 
   const max = Math.max(...data.map((p) => Number(p.revenue)));
@@ -55,7 +56,10 @@ export function TopProductsList({ data, isLoading }: Props) {
               />
             </div>
             <p className="text-xs text-slate-500">
-              {p.quantitySold} sold · {formatMoney(p.profit)} profit
+              {t("soldProfit", {
+                qty: p.quantitySold,
+                profit: formatMoney(p.profit),
+              })}
             </p>
           </li>
         );

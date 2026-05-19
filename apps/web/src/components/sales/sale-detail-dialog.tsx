@@ -1,6 +1,7 @@
 "use client";
 
 import { formatMoney, type Sale } from "@sme/shared";
+import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -10,8 +11,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useFormatSaleDate } from "@/hooks/use-format-sale-date";
+import { usePaymentLabels } from "@/hooks/use-payment-labels";
 import { useSaleDetail } from "@/hooks/use-sales";
-import { formatSaleDate, PAYMENT_LABELS } from "@/lib/payment-labels";
 
 export interface SaleDetailDialogProps {
   saleId: string | null;
@@ -25,6 +27,10 @@ export function SaleDetailDialog({
   onOpenChange,
   salePreview,
 }: SaleDetailDialogProps) {
+  const t = useTranslations("sales");
+  const tc = useTranslations("common");
+  const formatSaleDate = useFormatSaleDate();
+  const paymentLabels = usePaymentLabels();
   const q = useSaleDetail(salePreview ? null : saleId);
   const open = !!saleId || !!salePreview;
   const sale = salePreview ?? q.data;
@@ -33,7 +39,7 @@ export function SaleDetailDialog({
     <Dialog open={open} onOpenChange={(o) => !o && onOpenChange(false)}>
       <DialogContent className="max-h-[min(90vh,680px)] overflow-y-auto sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Sale receipt</DialogTitle>
+          <DialogTitle>{t("receiptTitle")}</DialogTitle>
         </DialogHeader>
 
         {q.isLoading && !salePreview && (
@@ -52,13 +58,13 @@ export function SaleDetailDialog({
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-slate-600">{formatSaleDate(sale.createdAt)}</span>
               <Badge variant="secondary" className="font-normal">
-                {PAYMENT_LABELS[sale.paymentMethod]}
+                {paymentLabels[sale.paymentMethod]}
               </Badge>
             </div>
 
             {sale.customer && (
               <p className="text-slate-700">
-                Customer:{" "}
+                {tc("customer")}:{" "}
                 <span className="font-medium text-slate-900">
                   {sale.customer.name}
                 </span>
@@ -68,9 +74,9 @@ export function SaleDetailDialog({
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-slate-200 text-xs text-slate-500">
-                  <th className="pb-2 font-medium">Item</th>
-                  <th className="pb-2 text-right font-medium">Qty</th>
-                  <th className="pb-2 text-right font-medium">Total</th>
+                  <th className="pb-2 font-medium">{tc("item")}</th>
+                  <th className="pb-2 text-right font-medium">{t("qty")}</th>
+                  <th className="pb-2 text-right font-medium">{tc("total")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -90,23 +96,23 @@ export function SaleDetailDialog({
 
             <dl className="space-y-1 border-t border-slate-200 pt-3">
               <div className="flex justify-between text-slate-600">
-                <dt>Subtotal</dt>
+                <dt>{tc("subtotal")}</dt>
                 <dd className="tabular-nums">{formatMoney(sale.subtotal)}</dd>
               </div>
               {Number(sale.discount) > 0 && (
                 <div className="flex justify-between text-slate-600">
-                  <dt>Discount</dt>
+                  <dt>{tc("discount")}</dt>
                   <dd className="tabular-nums text-emerald-700">
                     −{formatMoney(sale.discount)}
                   </dd>
                 </div>
               )}
               <div className="flex justify-between text-base font-semibold text-slate-900">
-                <dt>Total</dt>
+                <dt>{tc("total")}</dt>
                 <dd className="tabular-nums">{formatMoney(sale.total)}</dd>
               </div>
               <div className="flex justify-between text-xs text-slate-500">
-                <dt>Profit</dt>
+                <dt>{tc("profit")}</dt>
                 <dd className="tabular-nums">{formatMoney(sale.profit)}</dd>
               </div>
             </dl>

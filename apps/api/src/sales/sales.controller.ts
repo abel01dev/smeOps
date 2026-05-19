@@ -15,11 +15,14 @@ import {
   OrganizationId,
   type RequestUser,
 } from "../auth/decorators/current-user.decorator";
+import { Roles } from "../auth/decorators/roles.decorator";
+import { API_ROLE_ACCESS } from "../auth/permissions";
 import { CreateSaleDto, SaleListQueryDto } from "./dto/sale.dto";
 import { SalesService } from "./sales.service";
 
 @ApiTags("sales")
 @ApiBearerAuth("access-token")
+@Roles(...API_ROLE_ACCESS.sales)
 @Controller({ path: "sales", version: "1" })
 export class SalesController {
   constructor(private readonly sales: SalesService) {}

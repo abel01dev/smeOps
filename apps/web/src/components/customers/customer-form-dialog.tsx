@@ -6,6 +6,7 @@ import {
   type CreateCustomerInput,
   type Customer,
 } from "@sme/shared";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -41,6 +42,8 @@ export function CustomerFormDialog({
   onOpenChange,
   customer,
 }: CustomerFormDialogProps) {
+  const t = useTranslations("customers");
+  const tc = useTranslations("common");
   const isEdit = !!customer;
   const createMut = useCreateCustomer();
   const updateMut = useUpdateCustomer();
@@ -70,10 +73,10 @@ export function CustomerFormDialog({
     try {
       if (customer) {
         await updateMut.mutateAsync({ id: customer.id, input: values });
-        toast.success("Customer updated");
+        toast.success(t("customerUpdated"));
       } else {
         await createMut.mutateAsync(values);
-        toast.success("Customer added");
+        toast.success(t("customerAdded"));
       }
       onOpenChange(false);
     } catch (e) {
@@ -85,21 +88,21 @@ export function CustomerFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit customer" : "Add customer"}</DialogTitle>
-          <DialogDescription>
-            Track name, phone, and address for repeat buyers and POS checkout.
-          </DialogDescription>
+          <DialogTitle>{isEdit ? t("dialogEdit") : t("dialogAdd")}</DialogTitle>
+          <DialogDescription>{t("subtitle")}</DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="c-name">Name</Label>
+            <Label htmlFor="c-name">{t("name")}</Label>
             <Input id="c-name" className="h-11" {...form.register("name")} />
             {errors.name && (
               <p className="text-sm text-red-600">{errors.name.message}</p>
             )}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="c-phone">Phone (optional)</Label>
+            <Label htmlFor="c-phone">
+              {t("phone")} ({tc("optional")})
+            </Label>
             <Input
               id="c-phone"
               className="h-11"
@@ -113,7 +116,9 @@ export function CustomerFormDialog({
             )}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="c-address">Address (optional)</Label>
+            <Label htmlFor="c-address">
+              {t("address")} ({tc("optional")})
+            </Label>
             <Textarea
               id="c-address"
               rows={2}
@@ -128,10 +133,10 @@ export function CustomerFormDialog({
               disabled={busy}
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button type="submit" className="h-11" disabled={busy}>
-              {busy ? "Saving…" : isEdit ? "Save" : "Add customer"}
+              {busy ? tc("saving") : isEdit ? tc("save") : t("addCustomer")}
             </Button>
           </DialogFooter>
         </form>

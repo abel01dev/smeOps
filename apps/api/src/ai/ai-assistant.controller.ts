@@ -19,6 +19,8 @@ import {
   OrganizationId,
   type RequestUser,
 } from "../auth/decorators/current-user.decorator";
+import { Roles } from "../auth/decorators/roles.decorator";
+import { API_ROLE_ACCESS } from "../auth/permissions";
 import { SkipResponseTransform } from "../common/decorators/skip-response-transform.decorator";
 import {
   ChatStreamDto,
@@ -32,6 +34,7 @@ import { AiSettingsService } from "./services/ai-settings.service";
 
 @ApiTags("ai-assistant")
 @ApiBearerAuth("access-token")
+@Roles(...API_ROLE_ACCESS.aiAssistant)
 @Controller({ path: "ai", version: "1" })
 export class AiAssistantController {
   constructor(
