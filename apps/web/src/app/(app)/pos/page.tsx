@@ -1,43 +1,38 @@
-import Link from "next/link";
+"use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import type { Product } from "@sme/shared";
+import * as React from "react";
 
-export default function PosPlaceholderPage() {
+import { PosCartPanel } from "@/components/pos/pos-cart-panel";
+import { PosProductGrid } from "@/components/pos/pos-product-grid";
+import { usePosCategories } from "@/hooks/use-pos";
+import { usePosCartStore } from "@/stores/pos-cart.store";
+
+/**
+ * POS screen — screenshot-inspired split layout:
+ * product grid (left ~65%) + current sale sidebar (right ~35%).
+ * Uses full viewport height below the app header.
+ */
+export default function PosPage() {
+  const categoriesQ = usePosCategories();
+  const addProduct = usePosCartStore((s) => s.addProduct);
+  const categories = categoriesQ.data ?? [];
+
+  const onAdd = React.useCallback(
+    (product: Product) => {
+      addProduct(product);
+    },
+    [addProduct],
+  );
+
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-          Point of sale
-        </h1>
-        <p className="mt-1 text-sm text-slate-600">
-          The fast selling experience is the centerpiece of this product. It
-          lands on <span className="font-medium">Day 9</span>.
-        </p>
+    <div className="-m-4 flex h-[calc(100dvh-3.5rem)] min-h-[32rem] flex-col overflow-hidden md:-m-6 lg:flex-row">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col border-b border-slate-200 lg:border-b-0 lg:border-r">
+        <PosProductGrid categories={categories} onAddProduct={onAdd} />
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Coming next</CardTitle>
-          <CardDescription>
-            Product search, cart, one-tap checkout, and stock updates in one
-            atomic API call you already have on the backend.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-3">
-          <Button asChild>
-            <Link href="/inventory">Preview inventory API (Day 8)</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href="/dashboard">Back to dashboard</Link>
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="flex h-[min(42vh,22rem)] shrink-0 flex-col lg:h-auto lg:min-h-0 lg:shrink-0">
+        <PosCartPanel />
+      </div>
     </div>
   );
 }
