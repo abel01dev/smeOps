@@ -1,5 +1,11 @@
-import Link from "next/link";
+"use client";
 
+import { formatMoney, type PaymentMethod, type Sale } from "@sme/shared";
+import { ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import * as React from "react";
+
+import { SaleDetailDialog } from "@/components/sales/sale-detail-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,35 +14,222 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useSalesList } from "@/hooks/use-sales";
+import { formatSaleDate, PAYMENT_LABELS } from "@/lib/payment-labels";
 
-export default function SalesPlaceholderPage() {
+const PAGE_SIZE = 20;
+const ALL = "__all__";
+
+export default function SalesPage() {
+  const [page, setPage] = React.useState(1);
+  const [paymentMethod, setPaymentMethod] = React.useState<
+    PaymentMethod | typeof ALL
+  >(ALL);
+  const [dateFrom, setDateFrom] = React.useState("");
+  const [dateTo, setDateTo] = React.useState("");
+
+  const [selectedSale, setSelectedSale] = React.useState<Sale | null>(null);
+
+  React.useEffect(() => setPage(1), [paymentMethod, dateFrom, dateTo]);
+
+  const q = useSalesList({
+    page,
+    pageSize: PAGE_SIZE,
+    sortBy: "createdAt",
+    sortDir: "desc",
+    paymentMethod: paymentMethod === ALL ? undefined : paymentMethod,
+    dateFrom: dateFrom || undefined,
+    dateTo: dateTo ? `${dateTo}T23:59:59.999Z` : undefined,
+  });
+
+  const items = q.data?.items ?? [];
+  const totalPages = q.data?.totalPages ?? 1;
+
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div>
+    <div className="mx-auto max-w-5xl space-y-6">
+      <header>
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
           Sales
         </h1>
         <p className="mt-1 text-sm text-slate-600">
-          A searchable sales register with receipt-style detail ships on{" "}
-          <span className="font-medium">Day 10</span> alongside richer customer
-          views.
+          Searchable register of every checkout from POS.
         </p>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>API is ready</CardTitle>
+      </header>
+
+      <Card className="border-slate-200 shadow-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Sales history</CardTitle>
           <CardDescription>
-            <code className="text-xs">POST /sales</code> records checkout;{" "}
-            <code className="text-xs">GET /sales</code> lists history with
-            filters.
+            {q.isLoading
+              ? "Loading…"
+              : `${q.data?.total ?? 0} sale${q.data?.total === 1 ? "" : "s"}`}
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Button variant="outline" asChild>
-            <Link href="/dashboard">Back to dashboard</Link>
-          </Button>
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-1.5">
+              <Label htmlFor="date-from" className="text-xs text-slate-600">
+                From date
+              </Label>
+              <Input
+                id="date-from"
+                type="date"
+                className="h-11"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="date-to" className="text-xs text-slate-600">
+                To date
+              </Label>
+              <Input
+                id="date-to"
+                type="date"
+                className="h-11"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label className="text-xs text-slate-600">Payment</Label>
+              <Select
+                value={paymentMethod}
+                onValueChange={(v) =>
+                  setPaymentMethod(v as PaymentMethod | typeof ALL)
+                }
+              >
+                <SelectTrigger className="h-11">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL}>All methods</SelectItem>
+                  {(Object.keys(PAYMENT_LABELS) as PaymentMethod[]).map(
+                    (key) => (
+                      <SelectItem key={key} value={key}>
+                        {PAYMENT_LABELS[key]}
+                      </SelectItem>
+                    ),
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {q.isLoading && (
+            <div className="space-y-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          )}
+
+          {q.isError && (
+            <p className="text-sm text-red-600">{(q.error as Error).message}</p>
+          )}
+
+          {!q.isLoading && !q.isError && items.length === 0 && (
+            <p className="py-10 text-center text-sm text-slate-500">
+              No sales in this period. Record your first sale in{" "}
+              <a href="/pos" className="font-medium text-slate-900 underline">
+                POS
+              </a>
+              .
+            </p>
+          )}
+
+          {!q.isLoading && !q.isError && items.length > 0 && (
+            <>
+              <ul className="divide-y divide-slate-100 rounded-xl border border-slate-100">
+                {items.map((sale) => (
+                  <li
+                    key={sale.id}
+                    className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-medium tabular-nums text-slate-900">
+                        {formatMoney(sale.total)}
+                      </p>
+                      <p className="text-sm text-slate-600">
+                        {formatSaleDate(sale.createdAt)}
+                        {sale.customer
+                          ? ` · ${sale.customer.name}`
+                          : " · Walk-in"}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {sale.items.length} item
+                        {sale.items.length === 1 ? "" : "s"} · Profit{" "}
+                        {formatMoney(sale.profit)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="font-normal">
+                        {PAYMENT_LABELS[sale.paymentMethod]}
+                      </Badge>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-10"
+                        onClick={() => setSelectedSale(sale)}
+                      >
+                        <Eye className="mr-1 h-4 w-4" />
+                        Receipt
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between border-t border-slate-100 pt-4">
+                  <p className="text-xs text-slate-500">
+                    Page {page} of {totalPages}
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-9 w-9 p-0"
+                      disabled={page <= 1}
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-9 w-9 p-0"
+                      disabled={page >= totalPages}
+                      onClick={() => setPage((p) => p + 1)}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </CardContent>
       </Card>
+
+      <SaleDetailDialog
+        saleId={selectedSale?.id ?? null}
+        salePreview={selectedSale}
+        onOpenChange={() => setSelectedSale(null)}
+      />
     </div>
   );
 }
