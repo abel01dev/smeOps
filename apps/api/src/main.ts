@@ -33,22 +33,48 @@ async function bootstrap(): Promise<void> {
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(new TransformInterceptor());
 
-  // Swagger / OpenAPI docs
-  if (nodeEnv !== "production") {
+  // Swagger / OpenAPI — on in development; set SWAGGER_ENABLED=true in production if needed
+  const swaggerEnabled =
+    config.get<string>("SWAGGER_ENABLED") === "true" || nodeEnv !== "production";
+
+  if (swaggerEnabled) {
     const swaggerConfig = new DocumentBuilder()
       .setTitle("SME Ops Platform API")
       .setDescription(
-        "Multi-tenant SaaS API for buy-and-resell SMEs. POS, inventory, customers, dashboards, AI insights.",
+        [
+          "Multi-tenant SaaS API for buy-and-resell SMEs.",
+          "",
+          "**Auth:** Register or login via `/auth/login`, then click **Authorize** and paste the `accessToken`.",
+          "All routes except `/auth/*` (public) and `/health` require a Bearer token.",
+          "",
+          "See `docs/API.md` in the repo for a quick endpoint reference.",
+        ].join("\n"),
       )
       .setVersion("1.0")
+      .addServer(`http://localhost:${port}/api/v1`, "Local development")
       .addBearerAuth(
         { type: "http", scheme: "bearer", bearerFormat: "JWT" },
         "access-token",
       )
+      .addTag("auth", "Register, login, refresh, current user")
+      .addTag("categories", "Product categories")
+      .addTag("products", "Inventory / catalog")
+      .addTag("customers", "Customer CRM")
+      .addTag("sales", "POS checkout + sales history")
+      .addTag("dashboard", "KPIs, charts, aggregations")
+      .addTag("ai", "Rule-based business insights (no external API)")
+      .addTag("health", "Liveness and database probe")
       .build();
     const document = SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup("docs", app, document, {
-      swaggerOptions: { persistAuthorization: true },
+      swaggerOptions: {
+        persistAuthorization: true,
+        docExpansion: "list",
+        filter: true,
+        tagsSorter: "alpha",
+        operationsSorter: "alpha",
+      },
+      customSiteTitle: "SME Ops API",
     });
   }
 
