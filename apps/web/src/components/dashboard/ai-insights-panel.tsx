@@ -10,6 +10,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ const SEVERITY_STYLES: Record<
 };
 
 export function AiInsightsPanel({ days }: { days: number }) {
+  const t = useTranslations("dashboard");
   const q = useAiInsights(days);
 
   return (
@@ -42,11 +44,9 @@ export function AiInsightsPanel({ days }: { days: number }) {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Sparkles className="h-5 w-5 text-slate-600" />
-          Business insights
+          {t("insightsTitle")}
         </CardTitle>
-        <CardDescription>
-          Smart tips from your sales and inventory — no extra setup required.
-        </CardDescription>
+        <CardDescription>{t("insightsDesc")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {q.isLoading && (
@@ -65,13 +65,15 @@ export function AiInsightsPanel({ days }: { days: number }) {
           <>
             <div className="grid gap-3 sm:grid-cols-2">
               <ForecastCard
-                label="7-day revenue outlook"
+                label={t("forecastRevenue")}
                 value={formatMoney(q.data.forecast.next7DaysRevenue)}
                 trend={q.data.forecast.trend}
-                sub={`Avg ${formatMoney(q.data.forecast.avgDailyRevenue)}/day`}
+                sub={t("avgPerDay", {
+                  amount: formatMoney(q.data.forecast.avgDailyRevenue),
+                })}
               />
               <ForecastCard
-                label="Expected sales (7 days)"
+                label={t("forecastSales")}
                 value={String(q.data.prediction.next7DaysSalesCount)}
                 trend={
                   q.data.forecast.trend === "up"
@@ -80,7 +82,16 @@ export function AiInsightsPanel({ days }: { days: number }) {
                       ? "down"
                       : "flat"
                 }
-                sub={`${q.data.prediction.confidence} confidence · last ${q.data.prediction.basedOnDays}d`}
+                sub={t("confidence", {
+                  level: t(
+                    q.data.prediction.confidence === "low"
+                      ? "confidenceLow"
+                      : q.data.prediction.confidence === "medium"
+                        ? "confidenceMedium"
+                        : "confidenceHigh",
+                  ),
+                  days: q.data.prediction.basedOnDays,
+                })}
                 isCount
               />
             </div>
@@ -141,7 +152,16 @@ function ForecastCard({
 }
 
 function InsightCard({ insight }: { insight: BusinessInsight }) {
+  const t = useTranslations("dashboard");
   const style = SEVERITY_STYLES[insight.severity];
+  const categoryLabels: Record<string, string> = {
+    revenue: t("categories.revenue"),
+    inventory: t("categories.inventory"),
+    sales: t("categories.sales"),
+    customers: t("categories.customers"),
+    forecast: t("categories.forecast"),
+  };
+  const categoryLabel = categoryLabels[insight.category] ?? insight.category;
 
   return (
     <li
@@ -153,7 +173,7 @@ function InsightCard({ insight }: { insight: BusinessInsight }) {
       <div className="min-w-0 space-y-1">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant={style.badge} className="font-normal capitalize">
-            {insight.category}
+            {categoryLabel}
           </Badge>
           <h4 className="font-medium text-slate-900">{insight.title}</h4>
         </div>

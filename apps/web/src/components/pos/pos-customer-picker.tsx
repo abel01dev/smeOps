@@ -1,6 +1,7 @@
 "use client";
 
 import { Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ export function PosCustomerPicker({
   onOpenChange,
   onSelect,
 }: PosCustomerPickerProps) {
+  const t = useTranslations("pos");
   const [search, setSearch] = React.useState("");
   const q = usePosCustomers(search);
 
@@ -38,14 +40,14 @@ export function PosCustomerPicker({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Attach customer</DialogTitle>
+          <DialogTitle>{t("attachCustomer")}</DialogTitle>
         </DialogHeader>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name or phone…"
+            placeholder={t("searchCustomer")}
             className="h-11 pl-9"
             autoFocus
           />
@@ -53,7 +55,7 @@ export function PosCustomerPicker({
         <div className="max-h-64 overflow-y-auto">
           {search.trim().length === 0 && (
             <p className="py-6 text-center text-sm text-slate-500">
-              Type to search customers
+              {t("typeToSearchCustomers")}
             </p>
           )}
           {search.trim().length > 0 && q.isLoading && (
@@ -64,7 +66,7 @@ export function PosCustomerPicker({
           )}
           {search.trim().length > 0 && !q.isLoading && customers.length === 0 && (
             <p className="py-6 text-center text-sm text-slate-500">
-              No customers found
+              {t("noCustomers")}
             </p>
           )}
           {customers.length > 0 && (

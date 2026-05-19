@@ -2,6 +2,7 @@
 
 import { formatMoney, type PaymentMethod } from "@sme/shared";
 import { Minus, Plus, Trash2, User, UserX } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { toast } from "sonner";
 
@@ -17,19 +18,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCreateSale } from "@/hooks/use-pos";
+import { usePaymentLabels } from "@/hooks/use-payment-labels";
 import {
   cartTotals,
   usePosCartStore,
 } from "@/stores/pos-cart.store";
 import { cn } from "@/lib/utils";
 
-const PAYMENT_LABELS: Record<PaymentMethod, string> = {
-  CASH: "Cash",
-  MOBILE_MONEY: "Mobile money",
-  CARD: "Card",
-};
-
 export function PosCartPanel() {
+  const t = useTranslations("pos");
+  const tc = useTranslations("common");
+  const paymentLabels = usePaymentLabels();
+
   const lines = usePosCartStore((s) => s.lines);
   const customerId = usePosCartStore((s) => s.customerId);
   const customerName = usePosCartStore((s) => s.customerName);
@@ -50,7 +50,7 @@ export function PosCartPanel() {
 
   const onCharge = async () => {
     if (lines.length === 0) {
-      toast.error("Add at least one product to the sale");
+      toast.error(t("addProductFirst"));
       return;
     }
     try {
@@ -63,7 +63,7 @@ export function PosCartPanel() {
         discount: appliedDiscount,
         paymentMethod,
       });
-      toast.success(`Sale complete — ${formatMoney(total)}`);
+      toast.success(t("saleComplete", { amount: formatMoney(total) }));
       clearCart();
     } catch (e) {
       toast.error((e as Error).message);
@@ -75,7 +75,7 @@ export function PosCartPanel() {
       <aside className="flex h-full min-h-0 w-full flex-col border-l border-slate-200 bg-slate-50 lg:w-[min(100%,22rem)] xl:w-96">
         <div className="shrink-0 border-b border-slate-200 bg-white px-4 py-3">
           <h2 className="text-base font-semibold text-slate-900">
-            Current sale
+            {t("currentSale")}
             {itemCount > 0 && (
               <span className="ml-1.5 font-normal text-slate-500">
                 ({itemCount})
@@ -100,7 +100,7 @@ export function PosCartPanel() {
                 variant="ghost"
                 size="icon"
                 className="h-9 w-9 shrink-0"
-                aria-label="Remove customer"
+                aria-label={t("removeCustomer")}
                 onClick={() => setCustomer(null, null)}
               >
                 <UserX className="h-4 w-4" />
@@ -114,7 +114,7 @@ export function PosCartPanel() {
               onClick={() => setCustomerOpen(true)}
             >
               <User className="h-4 w-4" />
-              Add customer (optional)
+              {t("addCustomer")}
             </Button>
           )}
         </div>
@@ -122,7 +122,7 @@ export function PosCartPanel() {
         <ul className="min-h-0 flex-1 space-y-1 overflow-y-auto p-3">
           {lines.length === 0 && (
             <li className="py-8 text-center text-sm text-slate-500">
-              Tap products to add them here
+              {t("tapToAdd")}
             </li>
           )}
           {lines.map((line) => (
@@ -134,7 +134,7 @@ export function PosCartPanel() {
                 <div className="min-w-0">
                   <p className="font-medium text-slate-900">{line.name}</p>
                   <p className="text-sm tabular-nums text-slate-600">
-                    {formatMoney(line.sellPrice)} each
+                    {formatMoney(line.sellPrice)} {tc("each")}
                   </p>
                 </div>
                 <p className="shrink-0 text-sm font-semibold tabular-nums text-slate-900">
@@ -148,7 +148,7 @@ export function PosCartPanel() {
                     variant="ghost"
                     size="icon"
                     className="h-10 w-10 rounded-none"
-                    aria-label="Decrease quantity"
+                    aria-label={t("decreaseQty")}
                     onClick={() =>
                       setQuantity(line.productId, line.quantity - 1)
                     }
@@ -163,7 +163,7 @@ export function PosCartPanel() {
                     variant="ghost"
                     size="icon"
                     className="h-10 w-10 rounded-none"
-                    aria-label="Increase quantity"
+                    aria-label={t("increaseQty")}
                     disabled={line.quantity >= line.stockQuantity}
                     onClick={() =>
                       setQuantity(line.productId, line.quantity + 1)
@@ -177,7 +177,7 @@ export function PosCartPanel() {
                   variant="ghost"
                   size="icon"
                   className="h-10 w-10 text-slate-500 hover:text-red-600"
-                  aria-label="Remove item"
+                  aria-label={t("removeItem")}
                   onClick={() => removeLine(line.productId)}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -191,7 +191,7 @@ export function PosCartPanel() {
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
             <div className="grid gap-1.5">
               <Label htmlFor="pos-discount" className="text-xs text-slate-600">
-                Discount (ETB)
+                {t("discountEtb")}
               </Label>
               <Input
                 id="pos-discount"
@@ -207,7 +207,7 @@ export function PosCartPanel() {
               />
             </div>
             <div className="grid gap-1.5">
-              <Label className="text-xs text-slate-600">Payment</Label>
+              <Label className="text-xs text-slate-600">{tc("payment")}</Label>
               <Select
                 value={paymentMethod}
                 onValueChange={(v) =>
@@ -218,10 +218,10 @@ export function PosCartPanel() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {(Object.keys(PAYMENT_LABELS) as PaymentMethod[]).map(
+                  {(Object.keys(paymentLabels) as PaymentMethod[]).map(
                     (key) => (
                       <SelectItem key={key} value={key}>
-                        {PAYMENT_LABELS[key]}
+                        {paymentLabels[key]}
                       </SelectItem>
                     ),
                   )}
@@ -232,19 +232,19 @@ export function PosCartPanel() {
 
           <dl className="space-y-1 text-sm">
             <div className="flex justify-between text-slate-600">
-              <dt>Subtotal</dt>
+              <dt>{tc("subtotal")}</dt>
               <dd className="tabular-nums">{formatMoney(subtotal)}</dd>
             </div>
             {appliedDiscount > 0 && (
               <div className="flex justify-between text-slate-600">
-                <dt>Discount</dt>
+                <dt>{tc("discount")}</dt>
                 <dd className="tabular-nums text-emerald-700">
                   −{formatMoney(appliedDiscount)}
                 </dd>
               </div>
             )}
             <div className="flex justify-between border-t border-slate-100 pt-2 text-base font-semibold text-slate-900">
-              <dt>Total</dt>
+              <dt>{tc("total")}</dt>
               <dd className="tabular-nums">{formatMoney(total)}</dd>
             </div>
           </dl>
@@ -259,8 +259,8 @@ export function PosCartPanel() {
             onClick={() => void onCharge()}
           >
             {createSale.isPending
-              ? "Processing…"
-              : `Charge ${formatMoney(total)}`}
+              ? tc("processing")
+              : t("charge", { amount: formatMoney(total) })}
           </Button>
 
           {lines.length > 0 && (
@@ -271,7 +271,7 @@ export function PosCartPanel() {
               disabled={createSale.isPending}
               onClick={clearCart}
             >
-              Clear sale
+              {t("clearSale")}
             </Button>
           )}
         </div>

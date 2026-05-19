@@ -3,6 +3,7 @@
 import type { Product } from "@sme/shared";
 import { formatMoney } from "@sme/shared";
 import { Package } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 
@@ -12,6 +13,7 @@ export interface PosProductTileProps {
 }
 
 export function PosProductTile({ product, onAdd }: PosProductTileProps) {
+  const td = useTranslations("dashboard");
   const outOfStock = product.stockQuantity <= 0;
   const lowStock = product.isLowStock && !outOfStock;
 
@@ -40,14 +42,16 @@ export function PosProductTile({ product, onAdd }: PosProductTileProps) {
           {formatMoney(product.sellPrice)}
         </span>
         {outOfStock ? (
-          <span className="text-xs font-medium text-slate-400">Out of stock</span>
+          <span className="text-xs font-medium text-slate-400">
+            {td("outOfStock")}
+          </span>
         ) : lowStock ? (
           <span className="text-xs font-medium text-amber-700">
-            {product.stockQuantity} left
+            {td("stockLeftShort", { count: product.stockQuantity })}
           </span>
         ) : (
           <span className="text-xs text-slate-400">
-            Stock {product.stockQuantity}
+            {td("stockCount", { count: product.stockQuantity })}
           </span>
         )}
       </div>

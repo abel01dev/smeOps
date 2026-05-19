@@ -1,6 +1,7 @@
 "use client";
 
 import type { AiSettingsResponse } from "@sme/shared";
+import { useTranslations } from "next-intl";
 
 import {
   Select,
@@ -21,10 +22,11 @@ export function ModelSelector({
   onChange: (modelId: string) => void;
   disabled?: boolean;
 }) {
+  const t = useTranslations("assistant");
   return (
     <Select value={value} onValueChange={onChange} disabled={disabled}>
       <SelectTrigger className="h-9 w-[min(16rem,50vw)] border-slate-200 bg-white text-xs">
-        <SelectValue placeholder="Select model" />
+        <SelectValue placeholder={t("selectModel")} />
       </SelectTrigger>
       <SelectContent>
         {settings.models.map((m) => (

@@ -1,6 +1,7 @@
 "use client";
 
 import type { AiSettingsResponse, ChatStreamInput } from "@sme/shared";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { toast } from "sonner";
 
@@ -35,6 +36,8 @@ export function AssistantSettingsDialog({
   settings: AiSettingsResponse | null;
   onSaved: (s: AiSettingsResponse) => void;
 }) {
+  const t = useTranslations("assistant");
+  const tc = useTranslations("common");
   const [model, setModel] = React.useState(
     settings?.preferredModel ?? "openrouter/free",
   );
@@ -54,10 +57,10 @@ export function AssistantSettingsDialog({
         ...(apiKey.trim() ? { openRouterApiKey: apiKey.trim() } : {}),
       });
       onSaved(next);
-      toast.success("Assistant settings saved");
+      toast.success(t("saved"));
       onOpenChange(false);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to save");
+      toast.error(e instanceof Error ? e.message : t("saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -72,9 +75,9 @@ export function AssistantSettingsDialog({
       });
       onSaved(next);
       setApiKey("");
-      toast.success("API key removed");
+      toast.success(t("keyRemoved"));
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to clear key");
+      toast.error(e instanceof Error ? e.message : t("clearFailed"));
     } finally {
       setSaving(false);
     }
@@ -84,16 +87,13 @@ export function AssistantSettingsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Assistant settings</DialogTitle>
-          <DialogDescription>
-            Your OpenRouter API key is encrypted and stored on the server. It is
-            never sent to the browser after saving.
-          </DialogDescription>
+          <DialogTitle>{t("settingsTitle")}</DialogTitle>
+          <DialogDescription>{t("settingsDesc")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label>Preferred model</Label>
+            <Label>{t("preferredModel")}</Label>
             <Select value={model} onValueChange={setModel}>
               <SelectTrigger>
                 <SelectValue />
@@ -109,21 +109,21 @@ export function AssistantSettingsDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="openrouter-key">OpenRouter API key</Label>
+            <Label htmlFor="openrouter-key">{t("apiKey")}</Label>
             <Input
               id="openrouter-key"
               type="password"
               placeholder={
                 settings?.hasApiKey
-                  ? "•••••••••••••••• (saved — paste to replace)"
-                  : "sk-or-…"
+                  ? t("apiKeySavedPlaceholder")
+                  : t("apiKeyPlaceholder")
               }
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               autoComplete="off"
             />
             <p className="text-xs text-slate-500">
-              Get a free key at{" "}
+              {t("getKeyAt")}{" "}
               <a
                 href="https://openrouter.ai/keys"
                 target="_blank"
@@ -144,11 +144,11 @@ export function AssistantSettingsDialog({
               onClick={clearKey}
               disabled={saving}
             >
-              Remove key
+              {t("clearKey")}
             </Button>
           ) : null}
           <Button type="button" onClick={save} disabled={saving}>
-            {saving ? "Saving…" : "Save"}
+            {saving ? tc("saving") : tc("save")}
           </Button>
         </DialogFooter>
       </DialogContent>

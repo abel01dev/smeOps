@@ -2,6 +2,7 @@
 
 import { formatMoney, type PaymentMethod } from "@sme/shared";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,8 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCustomerDetail } from "@/hooks/use-customers";
-import { formatSaleDate, PAYMENT_LABELS } from "@/lib/payment-labels";
+import { useFormatSaleDate } from "@/hooks/use-format-sale-date";
+import { usePaymentLabels } from "@/hooks/use-payment-labels";
 
 export interface CustomerDetailDialogProps {
   customerId: string | null;
@@ -24,6 +26,10 @@ export function CustomerDetailDialog({
   customerId,
   onOpenChange,
 }: CustomerDetailDialogProps) {
+  const t = useTranslations("customers");
+  const tc = useTranslations("common");
+  const formatSaleDate = useFormatSaleDate();
+  const paymentLabels = usePaymentLabels();
   const q = useCustomerDetail(customerId);
   const open = !!customerId;
 
@@ -31,7 +37,7 @@ export function CustomerDetailDialog({
     <Dialog open={open} onOpenChange={(o) => !o && onOpenChange(false)}>
       <DialogContent className="max-h-[min(90vh,640px)] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Customer profile</DialogTitle>
+          <DialogTitle>{t("profile")}</DialogTitle>
         </DialogHeader>
 
         {q.isLoading && (
@@ -61,13 +67,13 @@ export function CustomerDetailDialog({
 
             <dl className="grid grid-cols-2 gap-3 rounded-lg border border-slate-100 bg-slate-50 p-3 text-sm">
               <div>
-                <dt className="text-slate-500">Total spent</dt>
+                <dt className="text-slate-500">{t("totalSpent")}</dt>
                 <dd className="font-semibold tabular-nums text-slate-900">
                   {formatMoney(q.data.totalSpent)}
                 </dd>
               </div>
               <div>
-                <dt className="text-slate-500">Sales</dt>
+                <dt className="text-slate-500">{tc("sales")}</dt>
                 <dd className="font-semibold text-slate-900">
                   {q.data.salesCount ?? q.data.recentSales.length}
                 </dd>
@@ -76,10 +82,10 @@ export function CustomerDetailDialog({
 
             <div>
               <h4 className="mb-2 text-sm font-medium text-slate-700">
-                Recent purchases
+                {t("recentPurchases")}
               </h4>
               {q.data.recentSales.length === 0 ? (
-                <p className="text-sm text-slate-500">No sales yet.</p>
+                <p className="text-sm text-slate-500">{t("noSales")}</p>
               ) : (
                 <ul className="space-y-2">
                   {q.data.recentSales.map((sale) => (
@@ -96,9 +102,8 @@ export function CustomerDetailDialog({
                         </span>
                       </div>
                       <Badge variant="secondary" className="mt-1 font-normal">
-                        {PAYMENT_LABELS[
-                          sale.paymentMethod as PaymentMethod
-                        ] ?? sale.paymentMethod}
+                        {paymentLabels[sale.paymentMethod as PaymentMethod] ??
+                          sale.paymentMethod}
                       </Badge>
                       <ul className="mt-2 space-y-0.5 text-xs text-slate-500">
                         {sale.items.map((item, i) => (
@@ -116,7 +121,7 @@ export function CustomerDetailDialog({
 
             <Button variant="outline" className="w-full" asChild>
               <Link href="/sales" onClick={() => onOpenChange(false)}>
-                View all sales
+                {t("viewAllSales")}
               </Link>
             </Button>
           </div>

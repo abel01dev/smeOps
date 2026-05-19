@@ -2,6 +2,7 @@
 
 import { formatMoney, type PaymentMethod, type Sale } from "@sme/shared";
 import { ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 
 import { SaleDetailDialog } from "@/components/sales/sale-detail-dialog";
@@ -24,13 +25,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useFormatSaleDate } from "@/hooks/use-format-sale-date";
+import { usePaymentLabels } from "@/hooks/use-payment-labels";
 import { useSalesList } from "@/hooks/use-sales";
-import { formatSaleDate, PAYMENT_LABELS } from "@/lib/payment-labels";
 
 const PAGE_SIZE = 20;
 const ALL = "__all__";
 
 export default function SalesPage() {
+  const t = useTranslations("sales");
+  const tc = useTranslations("common");
+  const paymentLabels = usePaymentLabels();
+  const formatSaleDate = useFormatSaleDate();
   const [page, setPage] = React.useState(1);
   const [paymentMethod, setPaymentMethod] = React.useState<
     PaymentMethod | typeof ALL
@@ -59,27 +65,25 @@ export default function SalesPage() {
     <div className="mx-auto max-w-5xl space-y-6">
       <header>
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-          Sales
+          {t("title")}
         </h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Searchable register of every checkout from POS.
-        </p>
+        <p className="mt-1 text-sm text-slate-600">{t("subtitle")}</p>
       </header>
 
       <Card className="border-slate-200 shadow-sm">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Sales history</CardTitle>
+          <CardTitle className="text-lg">{t("history")}</CardTitle>
           <CardDescription>
             {q.isLoading
-              ? "Loading…"
-              : `${q.data?.total ?? 0} sale${q.data?.total === 1 ? "" : "s"}`}
+              ? t("loading")
+              : t("count", { count: q.data?.total ?? 0 })}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="grid gap-1.5">
               <Label htmlFor="date-from" className="text-xs text-slate-600">
-                From date
+                {tc("fromDate")}
               </Label>
               <Input
                 id="date-from"
@@ -91,7 +95,7 @@ export default function SalesPage() {
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor="date-to" className="text-xs text-slate-600">
-                To date
+                {tc("toDate")}
               </Label>
               <Input
                 id="date-to"
@@ -102,7 +106,7 @@ export default function SalesPage() {
               />
             </div>
             <div className="grid gap-1.5">
-              <Label className="text-xs text-slate-600">Payment</Label>
+              <Label className="text-xs text-slate-600">{tc("payment")}</Label>
               <Select
                 value={paymentMethod}
                 onValueChange={(v) =>
@@ -113,11 +117,11 @@ export default function SalesPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={ALL}>All methods</SelectItem>
-                  {(Object.keys(PAYMENT_LABELS) as PaymentMethod[]).map(
+                  <SelectItem value={ALL}>{tc("allMethods")}</SelectItem>
+                  {(Object.keys(paymentLabels) as PaymentMethod[]).map(
                     (key) => (
                       <SelectItem key={key} value={key}>
-                        {PAYMENT_LABELS[key]}
+                        {paymentLabels[key]}
                       </SelectItem>
                     ),
                   )}
@@ -140,11 +144,13 @@ export default function SalesPage() {
 
           {!q.isLoading && !q.isError && items.length === 0 && (
             <p className="py-10 text-center text-sm text-slate-500">
-              No sales in this period. Record your first sale in{" "}
-              <a href="/pos" className="font-medium text-slate-900 underline">
-                POS
-              </a>
-              .
+              {t.rich("empty", {
+                link: (chunks) => (
+                  <a href="/pos" className="font-medium text-slate-900 underline">
+                    {chunks}
+                  </a>
+                ),
+              })}
             </p>
           )}
 
@@ -164,17 +170,18 @@ export default function SalesPage() {
                         {formatSaleDate(sale.createdAt)}
                         {sale.customer
                           ? ` · ${sale.customer.name}`
-                          : " · Walk-in"}
+                          : ` · ${tc("walkIn")}`}
                       </p>
                       <p className="text-xs text-slate-500">
-                        {sale.items.length} item
-                        {sale.items.length === 1 ? "" : "s"} · Profit{" "}
-                        {formatMoney(sale.profit)}
+                        {t("profitLine", {
+                          count: sale.items.length,
+                          amount: formatMoney(sale.profit),
+                        })}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary" className="font-normal">
-                        {PAYMENT_LABELS[sale.paymentMethod]}
+                        {paymentLabels[sale.paymentMethod]}
                       </Badge>
                       <Button
                         type="button"
@@ -184,7 +191,7 @@ export default function SalesPage() {
                         onClick={() => setSelectedSale(sale)}
                       >
                         <Eye className="mr-1 h-4 w-4" />
-                        Receipt
+                        {tc("receipt")}
                       </Button>
                     </div>
                   </li>
@@ -194,7 +201,7 @@ export default function SalesPage() {
               {totalPages > 1 && (
                 <div className="flex items-center justify-between border-t border-slate-100 pt-4">
                   <p className="text-xs text-slate-500">
-                    Page {page} of {totalPages}
+                    {tc("pageOf", { page, total: totalPages })}
                   </p>
                   <div className="flex gap-2">
                     <Button

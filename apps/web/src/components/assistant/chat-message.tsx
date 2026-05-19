@@ -1,6 +1,7 @@
 "use client";
 
 import { Bot, User } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 import type { LocalMessage } from "@/stores/assistant.store";
@@ -9,6 +10,7 @@ import { CopyButton } from "./copy-button";
 import { MarkdownMessage } from "./markdown-message";
 
 export function ChatMessage({ message }: { message: LocalMessage }) {
+  const t = useTranslations("assistant");
   const isUser = message.role === "user";
 
   return (
@@ -34,7 +36,7 @@ export function ChatMessage({ message }: { message: LocalMessage }) {
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-slate-500">
-            {isUser ? "You" : "AI Assistant"}
+            {isUser ? t("you") : t("aiLabel")}
           </span>
           {!isUser && message.content ? (
             <CopyButton
@@ -49,7 +51,7 @@ export function ChatMessage({ message }: { message: LocalMessage }) {
             {message.content}
           </p>
         ) : message.streaming && !message.content ? (
-          <TypingIndicator />
+          <TypingIndicator label={t("typing")} />
         ) : (
           <MarkdownMessage content={message.content || "…"} />
         )}
@@ -61,9 +63,9 @@ export function ChatMessage({ message }: { message: LocalMessage }) {
   );
 }
 
-function TypingIndicator() {
+function TypingIndicator({ label }: { label: string }) {
   return (
-    <div className="flex items-center gap-1 py-1" aria-label="Assistant is typing">
+    <div className="flex items-center gap-1 py-1" aria-label={label}>
       {[0, 1, 2].map((i) => (
         <span
           key={i}

@@ -2,6 +2,7 @@
 
 import { formatMoney, type Product } from "@sme/shared";
 import { Package, Pencil } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,9 @@ export function ProductsTable({
   onEdit,
   onCreate,
 }: ProductsTableProps) {
+  const t = useTranslations("inventory");
+  const tc = useTranslations("common");
+
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -38,14 +42,11 @@ export function ProductsTable({
       <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-slate-200 bg-white py-14 text-center">
         <Package className="h-10 w-10 text-slate-300" />
         <p className="mt-1 text-sm font-medium text-slate-800">
-          No products match these filters
+          {t("noMatch")}
         </p>
-        <p className="max-w-sm text-xs text-slate-500">
-          Adjust the filters above or add your first product to start tracking
-          inventory.
-        </p>
+        <p className="max-w-sm text-xs text-slate-500">{t("noMatchHint")}</p>
         <Button type="button" className="mt-3 h-11" onClick={onCreate}>
-          Add product
+          {t("addProduct")}
         </Button>
       </div>
     );
@@ -63,12 +64,12 @@ export function ProductsTable({
         <table className="w-full min-w-[760px] text-left text-sm">
           <thead className="bg-slate-50 text-xs font-medium uppercase tracking-wide text-slate-500">
             <tr>
-              <th className="px-4 py-3">Product</th>
-              <th className="px-4 py-3">Category</th>
-              <th className="px-4 py-3 text-right">Buy</th>
-              <th className="px-4 py-3 text-right">Sell</th>
-              <th className="px-4 py-3 text-right">Stock</th>
-              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">{tc("product")}</th>
+              <th className="px-4 py-3">{tc("category")}</th>
+              <th className="px-4 py-3 text-right">{t("buy")}</th>
+              <th className="px-4 py-3 text-right">{t("sell")}</th>
+              <th className="px-4 py-3 text-right">{t("stock")}</th>
+              <th className="px-4 py-3">{tc("status")}</th>
               <th className="px-4 py-3 text-right">
                 <span className="sr-only">Actions</span>
               </th>
@@ -119,7 +120,7 @@ export function ProductsTable({
                     onClick={() => onEdit(p)}
                   >
                     <Pencil className="mr-1.5 h-3.5 w-3.5" />
-                    Edit
+                    {tc("edit")}
                   </Button>
                 </td>
               </tr>
@@ -144,17 +145,17 @@ export function ProductsTable({
               <div className="min-w-0">
                 <p className="truncate font-medium text-slate-900">{p.name}</p>
                 <p className="mt-0.5 text-xs text-slate-500">
-                  {p.category?.name ?? "No category"}
+                  {p.category?.name ?? tc("noCategory")}
                 </p>
               </div>
               <StatusCell product={p} />
             </div>
 
             <dl className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
-              <Stat label="Buy" value={formatMoney(p.buyPrice)} />
-              <Stat label="Sell" value={formatMoney(p.sellPrice)} emphasis />
+              <Stat label={t("buy")} value={formatMoney(p.buyPrice)} />
+              <Stat label={t("sell")} value={formatMoney(p.sellPrice)} emphasis />
               <Stat
-                label="Stock"
+                label={t("stock")}
                 value={String(p.stockQuantity)}
                 tone={p.isLowStock ? "warn" : undefined}
               />
@@ -166,7 +167,7 @@ export function ProductsTable({
               className="mt-3 h-11 w-full"
               onClick={() => onEdit(p)}
             >
-              Edit product
+              {t("editProduct")}
             </Button>
           </li>
         ))}
@@ -176,13 +177,15 @@ export function ProductsTable({
 }
 
 function StatusCell({ product }: { product: Product }) {
+  const t = useTranslations("inventory");
+  const tc = useTranslations("common");
   if (product.status === "ARCHIVED") {
-    return <Badge variant="outline">Archived</Badge>;
+    return <Badge variant="outline">{t("statusArchived")}</Badge>;
   }
   if (product.isLowStock) {
-    return <Badge variant="warning">Low stock</Badge>;
+    return <Badge variant="warning">{tc("lowStock")}</Badge>;
   }
-  return <Badge variant="success">Active</Badge>;
+  return <Badge variant="success">{t("statusActive")}</Badge>;
 }
 
 function Stat({

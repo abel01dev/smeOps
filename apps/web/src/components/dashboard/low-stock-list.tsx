@@ -1,6 +1,9 @@
+"use client";
+
 import type { PaginatedResult, Product } from "@sme/shared";
 import { formatCount } from "@sme/shared";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,6 +14,8 @@ interface Props {
 }
 
 export function LowStockList({ data, isLoading }: Props) {
+  const t = useTranslations("dashboard");
+
   if (isLoading || !data) {
     return (
       <ul className="space-y-3">
@@ -25,11 +30,7 @@ export function LowStockList({ data, isLoading }: Props) {
   }
 
   if (data.items.length === 0) {
-    return (
-      <p className="text-sm text-slate-500">
-        Everything is stocked above the minimum — nice work.
-      </p>
-    );
+    return <p className="text-sm text-slate-500">{t("allStocked")}</p>;
   }
 
   return (
@@ -38,23 +39,24 @@ export function LowStockList({ data, isLoading }: Props) {
         <li key={p.id} className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <Link
-              href={`/inventory`}
+              href="/inventory"
               className="block truncate text-sm font-medium text-slate-900 hover:underline"
             >
               {p.name}
             </Link>
             <p className="text-xs text-slate-500">
-              {p.category?.name ?? "Uncategorized"} · min {formatCount(p.minStock)}
+              {p.category?.name ?? t("uncategorized")} ·{" "}
+              {t("minLabel", { min: formatCount(p.minStock) })}
             </p>
           </div>
           <Badge variant="warning" className="shrink-0">
-            {formatCount(p.stockQuantity)} left
+            {t("stockLeftBadge", { count: formatCount(p.stockQuantity) })}
           </Badge>
         </li>
       ))}
       {data.total > data.items.length ? (
         <li className="pt-1 text-xs text-slate-500">
-          + {data.total - data.items.length} more low on stock
+          {t("moreLowStock", { count: data.total - data.items.length })}
         </li>
       ) : null}
     </ul>

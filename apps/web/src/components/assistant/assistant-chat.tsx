@@ -1,6 +1,7 @@
 "use client";
 
 import { PanelLeft, Settings } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { toast } from "sonner";
 
@@ -18,6 +19,8 @@ import { ConversationSidebar } from "./conversation-sidebar";
 import { ModelSelector } from "./model-selector";
 
 export function AssistantChat() {
+  const t = useTranslations("assistant");
+  const tc = useTranslations("common");
   const {
     settings,
     setSettings,
@@ -55,7 +58,7 @@ export function AssistantChat() {
       setSettings(s);
       setSelectedModel(s.preferredModel);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to load settings");
+      toast.error(e instanceof Error ? e.message : t("loadSettingsFailed"));
     }
   }, [setSettings]);
 
@@ -65,7 +68,7 @@ export function AssistantChat() {
       const list = await aiAssistantApi.listConversations();
       setConversations(list);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to load chats");
+      toast.error(e instanceof Error ? e.message : t("loadChatsFailed"));
     } finally {
       setLoadingConversations(false);
     }
@@ -93,7 +96,7 @@ export function AssistantChat() {
         })),
       );
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to load chat");
+      toast.error(e instanceof Error ? e.message : t("loadChatFailed"));
     } finally {
       setLoadingMessages(false);
     }
@@ -110,9 +113,9 @@ export function AssistantChat() {
       await aiAssistantApi.deleteConversation(id);
       setConversations(conversations.filter((c) => c.id !== id));
       if (activeConversationId === id) handleNewChat();
-      toast.success("Conversation deleted");
+      toast.success(t("deleted"));
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Delete failed");
+      toast.error(e instanceof Error ? e.message : t("deleteFailed"));
     }
   };
 
@@ -184,8 +187,8 @@ export function AssistantChat() {
       );
     } catch (e) {
       if ((e as Error).name !== "AbortError") {
-        toast.error(e instanceof Error ? e.message : "Chat failed");
-        updateLastAssistant("Something went wrong. Try again.", true);
+        toast.error(e instanceof Error ? e.message : t("chatFailed"));
+        updateLastAssistant(t("chatError"), true);
       }
     } finally {
       setStreaming(false);
@@ -240,13 +243,13 @@ export function AssistantChat() {
             size="icon"
             className="lg:hidden"
             onClick={() => setSidebarOpen(true)}
-            aria-label="Open conversations"
+            aria-label={t("openConversations")}
           >
             <PanelLeft className="h-5 w-5" />
           </Button>
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-sm font-semibold text-slate-900">
-              AI Assistant
+              {t("aiLabel")}
             </h1>
           </div>
           {settings ? (
@@ -270,7 +273,7 @@ export function AssistantChat() {
             variant="outline"
             size="icon"
             onClick={() => setSettingsOpen(true)}
-            aria-label="Settings"
+            aria-label={tc("settings")}
           >
             <Settings className="h-4 w-4" />
           </Button>
@@ -278,7 +281,7 @@ export function AssistantChat() {
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto">
           {isLoadingMessages ? (
-            <p className="p-6 text-center text-sm text-slate-500">Loading chat…</p>
+            <p className="p-6 text-center text-sm text-slate-500">{t("loadingChat")}</p>
           ) : messages.length === 0 ? (
             <AssistantEmptyState
               hasApiKey={Boolean(settings?.hasApiKey)}

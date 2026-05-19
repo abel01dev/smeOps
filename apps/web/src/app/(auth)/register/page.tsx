@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { type RegisterInput, registerSchema } from "@sme/shared";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -21,6 +22,7 @@ import { authApi } from "@/lib/api/auth";
 import { useAuthStore } from "@/stores/auth.store";
 
 export default function RegisterPage() {
+  const t = useTranslations("auth");
   const router = useRouter();
   const setSession = useAuthStore((s) => s.setSession);
 
@@ -42,7 +44,7 @@ export default function RegisterPage() {
     try {
       const res = await authApi.register(values);
       setSession(res.user, res.tokens);
-      toast.success(`Welcome to SME Ops, ${res.user.name}!`);
+      toast.success(t("welcomeToast", { name: res.user.name }));
       router.replace("/dashboard");
     } catch (err) {
       toast.error((err as Error).message);
@@ -52,18 +54,16 @@ export default function RegisterPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Create your business account</CardTitle>
-        <CardDescription>
-          You can start adding products and recording sales in under a minute.
-        </CardDescription>
+        <CardTitle>{t("registerTitle")}</CardTitle>
+        <CardDescription>{t("registerSubtitle")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="organizationName">Business name</Label>
+            <Label htmlFor="organizationName">{t("businessName")}</Label>
             <Input
               id="organizationName"
-              placeholder="e.g. Abel Mini Market"
+              placeholder={t("orgPlaceholder")}
               {...register("organizationName")}
             />
             {errors.organizationName && (
@@ -73,19 +73,23 @@ export default function RegisterPage() {
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="name">Your name</Label>
-            <Input id="name" placeholder="Abel Sisay" {...register("name")} />
+            <Label htmlFor="name">{t("yourName")}</Label>
+            <Input
+              id="name"
+              placeholder={t("namePlaceholder")}
+              {...register("name")}
+            />
             {errors.name && (
               <p className="text-xs text-destructive">{errors.name.message}</p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("email")}</Label>
             <Input
               id="email"
               type="email"
               autoComplete="email"
-              placeholder="you@business.com"
+              placeholder={t("emailPlaceholder")}
               {...register("email")}
             />
             {errors.email && (
@@ -93,12 +97,12 @@ export default function RegisterPage() {
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t("password")}</Label>
             <Input
               id="password"
               type="password"
               autoComplete="new-password"
-              placeholder="At least 8 characters"
+              placeholder={t("passwordPlaceholder")}
               {...register("password")}
             />
             {errors.password && (
@@ -106,13 +110,13 @@ export default function RegisterPage() {
             )}
           </div>
           <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Creating your account..." : "Create account"}
+            {isSubmitting ? t("registering") : t("register")}
           </Button>
         </form>
         <p className="mt-6 text-center text-sm text-slate-600">
-          Already have an account?{" "}
+          {t("haveAccount")}{" "}
           <Link href="/login" className="font-medium text-slate-900 hover:underline">
-            Sign in
+            {t("signInLink")}
           </Link>
         </p>
       </CardContent>

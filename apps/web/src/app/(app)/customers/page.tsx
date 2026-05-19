@@ -2,6 +2,7 @@
 
 import { formatMoney, type Customer } from "@sme/shared";
 import { ChevronLeft, ChevronRight, Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { toast } from "sonner";
 
@@ -25,6 +26,8 @@ import {
 const PAGE_SIZE = 20;
 
 export default function CustomersPage() {
+  const t = useTranslations("customers");
+  const tc = useTranslations("common");
   const [page, setPage] = React.useState(1);
   const [search, setSearch] = React.useState("");
   const [debouncedSearch, setDebouncedSearch] = React.useState("");
@@ -63,12 +66,12 @@ export default function CustomersPage() {
   };
 
   const onDelete = async (c: Customer) => {
-    if (!window.confirm(`Delete "${c.name}"? Past sales will keep their records.`)) {
+    if (!window.confirm(t("deleteConfirm", { name: c.name }))) {
       return;
     }
     try {
       await deleteMut.mutateAsync(c.id);
-      toast.success("Customer removed");
+      toast.success(t("removed"));
     } catch (e) {
       toast.error((e as Error).message);
     }
@@ -79,32 +82,30 @@ export default function CustomersPage() {
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-            Customers
+            {t("title")}
           </h1>
-          <p className="mt-1 text-sm text-slate-600">
-            Repeat buyers, contact info, and purchase history.
-          </p>
+          <p className="mt-1 text-sm text-slate-600">{t("subtitle")}</p>
         </div>
         <Button type="button" className="h-11 gap-2" onClick={openCreate}>
           <Plus className="h-4 w-4" />
-          Add customer
+          {t("addCustomer")}
         </Button>
       </header>
 
       <Card className="border-slate-200 shadow-sm">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg">All customers</CardTitle>
+          <CardTitle className="text-lg">{t("allTitle")}</CardTitle>
           <CardDescription>
             {q.isLoading
-              ? "Loading…"
-              : `${q.data?.total ?? 0} customer${q.data?.total === 1 ? "" : "s"}`}
+              ? t("loading")
+              : t("count", { count: q.data?.total ?? 0 })}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input
-              placeholder="Search name or phone…"
+              placeholder={t("searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="h-11 pl-9"
@@ -125,7 +126,7 @@ export default function CustomersPage() {
 
           {!q.isLoading && !q.isError && items.length === 0 && (
             <p className="py-10 text-center text-sm text-slate-500">
-              No customers yet. Add one or record sales with a customer in POS.
+              {t("empty")}
             </p>
           )}
 
@@ -141,10 +142,13 @@ export default function CustomersPage() {
                       <p className="font-medium text-slate-900">{c.name}</p>
                       <p className="text-sm text-slate-500">
                         {[c.phone, c.address].filter(Boolean).join(" · ") ||
-                          "No contact info"}
+                          t("noContact")}
                       </p>
                       <p className="mt-1 text-xs text-slate-500">
-                        {c.salesCount ?? 0} sales · {formatMoney(c.totalSpent)} spent
+                        {t("spent", {
+                          count: c.salesCount ?? 0,
+                          amount: formatMoney(c.totalSpent),
+                        })}
                       </p>
                     </div>
                     <div className="flex shrink-0 gap-1">
@@ -156,14 +160,14 @@ export default function CustomersPage() {
                         onClick={() => setDetailId(c.id)}
                       >
                         <Eye className="mr-1 h-4 w-4" />
-                        View
+                        {tc("view")}
                       </Button>
                       <Button
                         type="button"
                         variant="outline"
                         size="icon"
                         className="h-10 w-10"
-                        aria-label="Edit"
+                        aria-label={tc("edit")}
                         onClick={() => openEdit(c)}
                       >
                         <Pencil className="h-4 w-4" />
@@ -173,7 +177,7 @@ export default function CustomersPage() {
                         variant="ghost"
                         size="icon"
                         className="h-10 w-10 text-slate-500 hover:text-red-600"
-                        aria-label="Delete"
+                        aria-label={tc("delete")}
                         disabled={deleteMut.isPending}
                         onClick={() => void onDelete(c)}
                       >
@@ -187,7 +191,7 @@ export default function CustomersPage() {
               {totalPages > 1 && (
                 <div className="flex items-center justify-between border-t border-slate-100 pt-4">
                   <p className="text-xs text-slate-500">
-                    Page {page} of {totalPages}
+                    {tc("pageOf", { page, total: totalPages })}
                   </p>
                   <div className="flex gap-2">
                     <Button

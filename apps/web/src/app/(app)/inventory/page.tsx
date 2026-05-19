@@ -2,6 +2,7 @@
 
 import type { Product } from "@sme/shared";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 
 import { CategoriesCard } from "@/components/inventory/categories-card";
@@ -30,6 +31,8 @@ const DEFAULT_FILTERS: InventoryFilterState = {
 };
 
 export default function InventoryPage() {
+  const t = useTranslations("inventory");
+  const tc = useTranslations("common");
   const [filters, setFilters] =
     React.useState<InventoryFilterState>(DEFAULT_FILTERS);
   const [page, setPage] = React.useState(1);
@@ -86,12 +89,9 @@ export default function InventoryPage() {
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-            Inventory
+            {t("title")}
           </h1>
-          <p className="mt-1 text-sm text-slate-600">
-            Manage products, pricing, and stock. Changes sync to the dashboard
-            and POS.
-          </p>
+          <p className="mt-1 text-sm text-slate-600">{t("subtitle")}</p>
         </div>
         <Button
           type="button"
@@ -99,20 +99,20 @@ export default function InventoryPage() {
           onClick={openCreate}
         >
           <Plus className="h-4 w-4" />
-          Add product
+          {t("addProduct")}
         </Button>
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)]">
         <Card className="border-slate-200 shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Products</CardTitle>
+            <CardTitle className="text-lg">{t("productsTitle")}</CardTitle>
             <CardDescription>
               {productsQ.isLoading
-                ? "Loading…"
+                ? t("loadingProducts")
                 : total === 0
-                  ? "No products yet"
-                  : `${total} product${total === 1 ? "" : "s"}`}
+                  ? t("noProductsYet")
+                  : t("productCount", { count: total })}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -131,7 +131,7 @@ export default function InventoryPage() {
                   className="ml-2 h-auto p-0 text-red-700"
                   onClick={() => void productsQ.refetch()}
                 >
-                  Retry
+                  {tc("retry")}
                 </Button>
               </div>
             ) : (
@@ -147,7 +147,7 @@ export default function InventoryPage() {
             {items.length > 0 && totalPages > 1 && (
               <div className="flex items-center justify-between border-t border-slate-100 pt-4">
                 <p className="text-xs text-slate-500">
-                  Page {page} of {totalPages}
+                  {tc("pageOf", { page, total: totalPages })}
                 </p>
                 <div className="flex gap-2">
                   <Button
@@ -155,7 +155,7 @@ export default function InventoryPage() {
                     variant="outline"
                     size="sm"
                     className="h-9 w-9 p-0"
-                    aria-label="Previous page"
+                    aria-label={tc("previousPage")}
                     disabled={page <= 1}
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                   >
@@ -166,7 +166,7 @@ export default function InventoryPage() {
                     variant="outline"
                     size="sm"
                     className="h-9 w-9 p-0"
-                    aria-label="Next page"
+                    aria-label={tc("nextPage")}
                     disabled={page >= totalPages}
                     onClick={() => setPage((p) => p + 1)}
                   >

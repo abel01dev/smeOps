@@ -2,6 +2,7 @@
 
 import type { Category, Product } from "@sme/shared";
 import { Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 
 import { PosProductTile } from "@/components/pos/pos-product-tile";
@@ -16,6 +17,8 @@ export interface PosProductGridProps {
 }
 
 export function PosProductGrid({ categories, onAddProduct }: PosProductGridProps) {
+  const t = useTranslations("pos");
+  const tc = useTranslations("common");
   const [search, setSearch] = React.useState("");
   const [debouncedSearch, setDebouncedSearch] = React.useState("");
   const [categoryId, setCategoryId] = React.useState<string | undefined>();
@@ -36,7 +39,7 @@ export function PosProductGrid({ categories, onAddProduct }: PosProductGridProps
             active={!categoryId}
             onClick={() => setCategoryId(undefined)}
           >
-            All products
+            {tc("allProducts")}
           </TabChip>
           {categories.map((c) => (
             <TabChip
@@ -56,7 +59,7 @@ export function PosProductGrid({ categories, onAddProduct }: PosProductGridProps
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search products…"
+            placeholder={t("searchProducts")}
             className="h-11 pl-9"
           />
         </div>
@@ -79,7 +82,7 @@ export function PosProductGrid({ categories, onAddProduct }: PosProductGridProps
 
         {!q.isLoading && !q.isError && products.length === 0 && (
           <p className="py-12 text-center text-sm text-slate-500">
-            No products found. Add items in Inventory first.
+            {t("noProductsInventory")}
           </p>
         )}
 

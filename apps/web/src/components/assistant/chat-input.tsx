@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUp, Square } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ export function ChatInput({
   onStop,
   disabled,
   isStreaming,
-  placeholder = "Ask about sales, inventory, or revenue…",
+  placeholder,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -24,6 +25,8 @@ export function ChatInput({
   isStreaming?: boolean;
   placeholder?: string;
 }) {
+  const t = useTranslations("assistant");
+  const resolvedPlaceholder = placeholder ?? t("inputPlaceholder");
   const ref = React.useRef<HTMLTextAreaElement>(null);
 
   React.useEffect(() => {
@@ -48,7 +51,7 @@ export function ChatInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           rows={1}
           disabled={disabled}
           className={cn(
@@ -62,7 +65,7 @@ export function ChatInput({
             variant="outline"
             className="h-10 w-10 shrink-0 rounded-xl"
             onClick={onStop}
-            aria-label="Stop generating"
+            aria-label={t("stop")}
           >
             <Square className="h-4 w-4" />
           </Button>
@@ -73,14 +76,14 @@ export function ChatInput({
             className="h-10 w-10 shrink-0 rounded-xl"
             disabled={disabled || !value.trim()}
             onClick={onSubmit}
-            aria-label="Send message"
+            aria-label={t("send")}
           >
             <ArrowUp className="h-4 w-4" />
           </Button>
         )}
       </div>
       <p className="mx-auto mt-2 max-w-3xl text-center text-[11px] text-slate-400">
-        AI can make mistakes. Verify important business decisions.
+        {t("disclaimer")}
       </p>
     </div>
   );

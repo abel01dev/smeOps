@@ -131,7 +131,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             className="absolute inset-0 bg-black/40"
-            aria-label="Close menu"
+            aria-label={t("common.closeMenu")}
             onClick={() => setMobileOpen(false)}
           />
           <div className="absolute left-0 top-0 flex h-full w-[min(18rem,85vw)] flex-col bg-white shadow-xl">
@@ -144,7 +144,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 variant="ghost"
                 size="icon"
                 onClick={() => setMobileOpen(false)}
-                aria-label="Close menu"
+                aria-label={t("common.closeMenu")}
               >
                 <X className="h-5 w-5" />
               </Button>
@@ -162,7 +162,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             size="icon"
             className="md:hidden"
             onClick={() => setMobileOpen(true)}
-            aria-label="Open menu"
+            aria-label={t("common.openMenu")}
           >
             <Menu className="h-5 w-5" />
           </Button>
