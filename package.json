@@ -18,6 +18,7 @@
     "db:generate": "pnpm --filter @sme/api db:generate",
     "db:migrate": "pnpm --filter @sme/api db:migrate",
     "db:seed": "pnpm --filter @sme/api db:seed",
+    "db:reset": "pnpm --filter @sme/api exec prisma migrate reset --force",
     "db:studio": "pnpm --filter @sme/api db:studio"
   },
   "devDependencies": {

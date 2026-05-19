@@ -1,6 +1,6 @@
 import { VersioningType } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { NestFactory } from "@nestjs/core";
+import { NestFactory, Reflector } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import helmet from "helmet";
 
@@ -31,24 +31,53 @@ async function bootstrap(): Promise<void> {
   // AppModule (APP_PIPE). DTOs use createZodDto() so a single zod schema in
   // @sme/shared validates the request body and produces Swagger types.
   app.useGlobalFilters(new AllExceptionsFilter());
-  app.useGlobalInterceptors(new TransformInterceptor());
+  app.useGlobalInterceptors(
+    new TransformInterceptor(app.get(Reflector)),
+  );
 
-  // Swagger / OpenAPI docs
-  if (nodeEnv !== "production") {
+  // Swagger / OpenAPI — on in development; set SWAGGER_ENABLED=true in production if needed
+  const swaggerEnabled =
+    config.get<string>("SWAGGER_ENABLED") === "true" || nodeEnv !== "production";
+
+  if (swaggerEnabled) {
     const swaggerConfig = new DocumentBuilder()
       .setTitle("SME Ops Platform API")
       .setDescription(
-        "Multi-tenant SaaS API for buy-and-resell SMEs. POS, inventory, customers, dashboards, AI insights.",
+        [
+          "Multi-tenant SaaS API for buy-and-resell SMEs.",
+          "",
+          "**Auth:** Register or login via `/auth/login`, then click **Authorize** and paste the `accessToken`.",
+          "All routes except `/auth/*` (public) and `/health` require a Bearer token.",
+          "",
+          "See `docs/API.md` in the repo for a quick endpoint reference.",
+        ].join("\n"),
       )
       .setVersion("1.0")
+      .addServer(`http://localhost:${port}/api/v1`, "Local development")
       .addBearerAuth(
         { type: "http", scheme: "bearer", bearerFormat: "JWT" },
         "access-token",
       )
+      .addTag("auth", "Register, login, refresh, current user")
+      .addTag("categories", "Product categories")
+      .addTag("products", "Inventory / catalog")
+      .addTag("customers", "Customer CRM")
+      .addTag("sales", "POS checkout + sales history")
+      .addTag("dashboard", "KPIs, charts, aggregations")
+      .addTag("ai", "Rule-based business insights (no external API)")
+      .addTag("ai-assistant", "OpenRouter chat assistant with conversation history")
+      .addTag("health", "Liveness and database probe")
       .build();
     const document = SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup("docs", app, document, {
-      swaggerOptions: { persistAuthorization: true },
+      swaggerOptions: {
+        persistAuthorization: true,
+        docExpansion: "list",
+        filter: true,
+        tagsSorter: "alpha",
+        operationsSorter: "alpha",
+      },
+      customSiteTitle: "SME Ops API",
     });
   }
 

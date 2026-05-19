@@ -25,7 +25,11 @@ export class AuthController {
   @Public()
   @Post("login")
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "Email + password sign in" })
+  @ApiOperation({
+    summary: "Email + password sign in",
+    description:
+      "Returns access + refresh tokens. Use accessToken as Bearer in Swagger Authorize. Demo: owner@demo.local / Password123! after `pnpm db:seed`.",
+  })
   login(@Body() dto: LoginDto): Promise<AuthResponse> {
     return this.auth.login(dto);
   }

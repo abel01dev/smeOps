@@ -1,25 +1,37 @@
 /**
- * Demo seed for development + the graduation demo.
+ * Demo seed for development + portfolio demos.
  *
- * Run with: pnpm db:seed
+ * Run: pnpm db:seed   (from repo root)
  *
  * Creates:
- *   - One Supabase auth user (auto-confirmed) you can log in with
- *   - One Organization linked to that user
- *   - 4 categories, 12 products (2 below minStock for low-stock demo)
- *   - 3 customers, ~30 days of randomized sales
+ *   - Supabase auth user (auto-confirmed)
+ *   - Organization + owner
+ *   - 4 categories, 14 products (2 intentionally low stock, 1 archived)
+ *   - 5 customers
+ *   - ~30 days of sales with mixed payment methods, occasional discounts
+ *   - Stock quantities adjusted to reflect seeded sales
  *
  * Demo login:
  *   email:    owner@demo.local
  *   password: Password123!
  */
-import { PrismaClient, type Prisma } from "@prisma/client";
+import {
+  PaymentMethod,
+  PrismaClient,
+  type Prisma,
+} from "@prisma/client";
 import { createClient } from "@supabase/supabase-js";
 
 const prisma = new PrismaClient();
 
 const DEMO_EMAIL = "owner@demo.local";
 const DEMO_PASSWORD = "Password123!";
+
+const PAYMENT_METHODS: PaymentMethod[] = [
+  PaymentMethod.CASH,
+  PaymentMethod.MOBILE_MONEY,
+  PaymentMethod.CARD,
+];
 
 function getSupabaseAdmin() {
   const url = process.env.SUPABASE_URL;
@@ -37,8 +49,6 @@ function getSupabaseAdmin() {
 async function ensureSupabaseUser(): Promise<string> {
   const supabase = getSupabaseAdmin();
 
-  // listUsers is paginated; the demo project only has a handful of users, so
-  // page 1 is enough.
   const { data: list, error: listErr } = await supabase.auth.admin.listUsers();
   if (listErr) throw listErr;
   const existing = list.users.find((u) => u.email === DEMO_EMAIL);
@@ -58,8 +68,15 @@ async function ensureSupabaseUser(): Promise<string> {
   return data.user.id;
 }
 
+function pickPayment(): PaymentMethod {
+  const r = Math.random();
+  if (r < 0.55) return PaymentMethod.CASH;
+  if (r < 0.85) return PaymentMethod.MOBILE_MONEY;
+  return PaymentMethod.CARD;
+}
+
 async function main(): Promise<void> {
-  console.log("Seeding database...");
+  console.log("Seeding database...\n");
 
   await prisma.saleItem.deleteMany();
   await prisma.sale.deleteMany();
@@ -97,41 +114,64 @@ async function main(): Promise<void> {
   );
   const catBy = (name: string) => categories.find((c) => c.name === name)!.id;
 
-  const productsData: Array<Omit<Prisma.ProductCreateManyInput, "organizationId">> = [
-    { name: "Coca-Cola 500ml", categoryId: catBy("Beverages"), buyPrice: "25.00", sellPrice: "35.00", stockQuantity: 80, minStock: 12 },
-    { name: "Pepsi 500ml", categoryId: catBy("Beverages"), buyPrice: "23.00", sellPrice: "33.00", stockQuantity: 60, minStock: 12 },
+  const productsData: Array<
+    Omit<Prisma.ProductCreateManyInput, "organizationId"> & { description?: string }
+  > = [
+    { name: "Coca-Cola 500ml", categoryId: catBy("Beverages"), description: "Chilled soft drink", buyPrice: "25.00", sellPrice: "35.00", stockQuantity: 80, minStock: 12 },
+    { name: "Pepsi 500ml", categoryId: catBy("Beverages"), description: "Chilled soft drink", buyPrice: "23.00", sellPrice: "33.00", stockQuantity: 60, minStock: 12 },
     { name: "Mineral Water 1L", categoryId: catBy("Beverages"), buyPrice: "12.00", sellPrice: "20.00", stockQuantity: 120, minStock: 24 },
     { name: "Mango Juice 250ml", categoryId: catBy("Beverages"), buyPrice: "18.00", sellPrice: "28.00", stockQuantity: 45, minStock: 12 },
+    { name: "Coffee Sachets (10pk)", categoryId: catBy("Beverages"), buyPrice: "55.00", sellPrice: "75.00", stockQuantity: 40, minStock: 10 },
     { name: "Potato Chips", categoryId: catBy("Snacks"), buyPrice: "20.00", sellPrice: "30.00", stockQuantity: 50, minStock: 10 },
     { name: "Chocolate Bar", categoryId: catBy("Snacks"), buyPrice: "30.00", sellPrice: "45.00", stockQuantity: 35, minStock: 10 },
     { name: "Biscuits Pack", categoryId: catBy("Snacks"), buyPrice: "15.00", sellPrice: "25.00", stockQuantity: 70, minStock: 15 },
+    { name: "Peanuts 200g", categoryId: catBy("Snacks"), buyPrice: "22.00", sellPrice: "32.00", stockQuantity: 28, minStock: 8 },
     { name: "Dish Soap 500ml", categoryId: catBy("Household"), buyPrice: "45.00", sellPrice: "65.00", stockQuantity: 25, minStock: 8 },
-    { name: "Laundry Powder 1kg", categoryId: catBy("Household"), buyPrice: "120.00", sellPrice: "160.00", stockQuantity: 8, minStock: 10 }, // low
+    { name: "Laundry Powder 1kg", categoryId: catBy("Household"), buyPrice: "120.00", sellPrice: "160.00", stockQuantity: 8, minStock: 10 },
     { name: "Toilet Paper 4-pack", categoryId: catBy("Household"), buyPrice: "90.00", sellPrice: "130.00", stockQuantity: 30, minStock: 8 },
     { name: "Toothpaste", categoryId: catBy("Personal Care"), buyPrice: "60.00", sellPrice: "90.00", stockQuantity: 22, minStock: 8 },
-    { name: "Shampoo 400ml", categoryId: catBy("Personal Care"), buyPrice: "150.00", sellPrice: "210.00", stockQuantity: 5, minStock: 6 }, // low
+    { name: "Shampoo 400ml", categoryId: catBy("Personal Care"), buyPrice: "150.00", sellPrice: "210.00", stockQuantity: 5, minStock: 6 },
+    {
+      name: "Discontinued Soap Bar",
+      categoryId: catBy("Personal Care"),
+      buyPrice: "10.00",
+      sellPrice: "15.00",
+      stockQuantity: 0,
+      minStock: 5,
+      status: "ARCHIVED",
+    },
   ];
 
   await prisma.product.createMany({
     data: productsData.map((p) => ({ ...p, organizationId: org.id })),
   });
-  const products = await prisma.product.findMany({ where: { organizationId: org.id } });
+  const products = await prisma.product.findMany({
+    where: { organizationId: org.id, status: "ACTIVE" },
+  });
+  const stockByProduct = new Map(
+    products.map((p) => [p.id, p.stockQuantity]),
+  );
 
   const customers = await Promise.all(
     [
       { name: "Walk-in Customer", phone: null, address: null },
       { name: "Selam Bekele", phone: "+251911223344", address: "Bole, Addis Ababa" },
       { name: "Daniel Tesfaye", phone: "+251922334455", address: "Piassa, Addis Ababa" },
+      { name: "Hanna Girma", phone: "+251933445566", address: "Megenagna, Addis Ababa" },
+      { name: "Mikiyas Alemu", phone: "+251944556677", address: "Kazanchis, Addis Ababa" },
     ].map((c) => prisma.customer.create({ data: { organizationId: org.id, ...c } })),
   );
+
+  let saleCount = 0;
+  let totalRevenue = 0;
 
   const now = new Date();
   for (let d = 30; d >= 0; d--) {
     const day = new Date(now);
     day.setDate(day.getDate() - d);
-    const salesCount = 3 + Math.floor(Math.random() * 6);
+    const salesPerDay = 4 + Math.floor(Math.random() * 7);
 
-    for (let s = 0; s < salesCount; s++) {
+    for (let s = 0; s < salesPerDay; s++) {
       const itemCount = 1 + Math.floor(Math.random() * 4);
       const used = new Set<string>();
       const items: Array<{
@@ -145,10 +185,14 @@ async function main(): Promise<void> {
       }> = [];
 
       for (let i = 0; i < itemCount; i++) {
-        const p = products[Math.floor(Math.random() * products.length)];
-        if (used.has(p.id)) continue;
+        const available = products.filter(
+          (p) => (stockByProduct.get(p.id) ?? 0) > 0 && !used.has(p.id),
+        );
+        if (available.length === 0) break;
+        const p = available[Math.floor(Math.random() * available.length)];
         used.add(p.id);
-        const qty = 1 + Math.floor(Math.random() * 3);
+        const maxQty = Math.min(3, stockByProduct.get(p.id) ?? 0);
+        const qty = 1 + Math.floor(Math.random() * maxQty);
         const sell = Number(p.sellPrice);
         const buy = Number(p.buyPrice);
         items.push({
@@ -160,11 +204,17 @@ async function main(): Promise<void> {
           lineTotal: sell * qty,
           lineProfit: (sell - buy) * qty,
         });
+        stockByProduct.set(p.id, (stockByProduct.get(p.id) ?? 0) - qty);
       }
       if (items.length === 0) continue;
 
       const subtotal = items.reduce((acc, it) => acc + it.lineTotal, 0);
       const profit = items.reduce((acc, it) => acc + it.lineProfit, 0);
+      const discount =
+        Math.random() < 0.12
+          ? Math.min(subtotal * 0.1, 50)
+          : 0;
+      const total = subtotal - discount;
       const customer = customers[Math.floor(Math.random() * customers.length)];
 
       const saleTime = new Date(day);
@@ -177,10 +227,10 @@ async function main(): Promise<void> {
           customerId: customer.id,
           cashierId: owner.id,
           subtotal: subtotal.toFixed(2),
-          discount: "0.00",
-          total: subtotal.toFixed(2),
-          profit: profit.toFixed(2),
-          paymentMethod: "CASH",
+          discount: discount.toFixed(2),
+          total: total.toFixed(2),
+          profit: (profit - discount).toFixed(2),
+          paymentMethod: pickPayment(),
           createdAt: saleTime,
           items: {
             create: items.map((it) => ({
@@ -198,13 +248,42 @@ async function main(): Promise<void> {
 
       await prisma.customer.update({
         where: { id: customer.id },
-        data: { totalSpent: { increment: subtotal } },
+        data: { totalSpent: { increment: total } },
       });
+
+      saleCount += 1;
+      totalRevenue += total;
     }
   }
 
-  console.log("Seed complete.");
-  console.log(`   Login: ${DEMO_EMAIL} / ${DEMO_PASSWORD}`);
+  await Promise.all(
+    [...stockByProduct.entries()].map(([id, qty]) =>
+      prisma.product.update({
+        where: { id },
+        data: { stockQuantity: Math.max(0, qty) },
+      }),
+    ),
+  );
+
+  const activeProducts = await prisma.product.findMany({
+    where: { organizationId: org.id, status: "ACTIVE" },
+    select: { stockQuantity: true, minStock: true },
+  });
+  const lowStockCount = activeProducts.filter(
+    (p) => p.stockQuantity <= p.minStock,
+  ).length;
+
+  console.log("Seed complete.\n");
+  console.log("   Organization:", org.name);
+  console.log("   Categories:  ", categories.length);
+  console.log("   Products:    ", productsData.length, `(${lowStockCount} low stock)`);
+  console.log("   Customers:   ", customers.length);
+  console.log("   Sales:       ", saleCount);
+  console.log("   Revenue:     ", `ETB ${totalRevenue.toFixed(2)}`);
+  console.log("\n   Web login:   ", DEMO_EMAIL);
+  console.log("   Password:    ", DEMO_PASSWORD);
+  console.log("\n   API docs:    http://localhost:4000/docs");
+  console.log("   Web app:     http://localhost:3000");
 }
 
 main()
