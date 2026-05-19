@@ -6,3 +6,4 @@ export * from "./customer.schema";
 export * from "./sale.schema";
 export * from "./dashboard.schema";
 export * from "./ai.schema";
+export * from "./ai-assistant.schema";

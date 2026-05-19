@@ -23,6 +23,9 @@ const envSchema = z.object({
   // SUPABASE_SERVICE_ROLE_KEY: bypasses RLS — backend only, NEVER ship to browser.
   // Accepts either "sb_secret_*" or the legacy service_role JWT.
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(20),
+
+  /** 32+ char secret for encrypting per-user OpenRouter API keys at rest. */
+  AI_ENCRYPTION_KEY: z.string().min(32).optional(),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

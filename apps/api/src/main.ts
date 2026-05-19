@@ -1,6 +1,6 @@
 import { VersioningType } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { NestFactory } from "@nestjs/core";
+import { NestFactory, Reflector } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import helmet from "helmet";
 
@@ -31,7 +31,9 @@ async function bootstrap(): Promise<void> {
   // AppModule (APP_PIPE). DTOs use createZodDto() so a single zod schema in
   // @sme/shared validates the request body and produces Swagger types.
   app.useGlobalFilters(new AllExceptionsFilter());
-  app.useGlobalInterceptors(new TransformInterceptor());
+  app.useGlobalInterceptors(
+    new TransformInterceptor(app.get(Reflector)),
+  );
 
   // Swagger / OpenAPI — on in development; set SWAGGER_ENABLED=true in production if needed
   const swaggerEnabled =
@@ -63,6 +65,7 @@ async function bootstrap(): Promise<void> {
       .addTag("sales", "POS checkout + sales history")
       .addTag("dashboard", "KPIs, charts, aggregations")
       .addTag("ai", "Rule-based business insights (no external API)")
+      .addTag("ai-assistant", "OpenRouter chat assistant with conversation history")
       .addTag("health", "Liveness and database probe")
       .build();
     const document = SwaggerModule.createDocument(app, swaggerConfig);

@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard,
+  MessageSquare,
   Package,
   Receipt,
   ScanLine,
@@ -17,6 +18,7 @@ export interface NavItem {
 
 export const APP_NAV: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/assistant", label: "AI Assistant", icon: MessageSquare },
   { href: "/pos", label: "POS", icon: ScanLine },
   { href: "/inventory", label: "Inventory", icon: Package },
   { href: "/customers", label: "Customers", icon: Users },
