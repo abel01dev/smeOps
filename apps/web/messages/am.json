@@ -1,0 +1,67 @@
+{
+  "common": {
+    "appName": "SME Ops",
+    "loading": "በመጫን ላይ…",
+    "retry": "እንደገና ሞክር",
+    "save": "አስቀምጥ",
+    "cancel": "ሰርዝ",
+    "delete": "ሰርዝ",
+    "edit": "አርትዕ",
+    "add": "ጨምር",
+    "search": "ፈልግ",
+    "signOut": "ውጣ",
+    "accountOverview": "የመለያ አጠቃላይ እይታ",
+    "menu": "ምናሌ",
+    "language": "ቋንቋ"
+  },
+  "roles": {
+    "owner": "ባለቤት",
+    "manager": "ማኔጅር",
+    "cashier": "ካሸየር"
+  },
+  "nav": {
+    "dashboard": "ዳሽቦርድ",
+    "assistant": "AI ረዳት",
+    "pos": "POS",
+    "inventory": "ክምችት",
+    "customers": "ደንበኞች",
+    "sales": "ሽያጮች"
+  },
+  "auth": {
+    "welcomeBack": "እንኳን ደህና መጡ",
+    "signInSubtitle": "ወደ የንግድ ዳሽቦርድዎ ይግቡ።",
+    "email": "ኢሜይል",
+    "password": "የይለፍ ቃል",
+    "signIn": "ግባ",
+    "signingIn": "በመግባት ላይ…",
+    "newToApp": "አዲስ ነዎት?",
+    "createAccount": "መለያ ይፍጠሩ",
+    "registerTitle": "ንግድዎን ይፍጠሩ",
+    "registerSubtitle": "አንድ ምዝገባ የሱቅዎን እና የባለቤት መለያዎን ይፈጥራል።",
+    "businessName": "የንግድ ስም",
+    "yourName": "ስምዎ",
+    "register": "መለያ ፍጠር",
+    "registering": "በመፍጠር ላይ…",
+    "haveAccount": "መለያ አለዎት?",
+    "signInLink": "ግባ"
+  },
+  "access": {
+    "deniedTitle": "መዳረሻ የለም",
+    "deniedMessage": "ይህን ገጽ በእርስዎ ሚና ሊከፈት አይችልም።",
+    "goToPos": "ወደ POS ይሂዱ"
+  },
+  "dashboard": {
+    "greetingMorning": "እንደምን አደሩ",
+    "greetingAfternoon": "እንደምን ዋሉ",
+    "greetingEvening": "እንደምን አመሹ",
+    "subtitle": "{org} ዛሬ እንዴት እንደሚሰራ ይኸው።",
+    "period7": "7 ቀናት",
+    "period30": "30 ቀናት",
+    "period90": "90 ቀናት"
+  },
+  "pos": {
+    "currentSale": "የአሁን ሽያጭ",
+    "charge": "ክፍያ",
+    "addCustomer": "ደንበኛ ጨምር (አማራጭ)"
+  }
+}

@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as React from "react";
 import { Toaster } from "sonner";
 
+import { IntlProvider } from "@/components/i18n/intl-provider";
 import { useAuthStore } from "@/stores/auth.store";
 
 function AuthHydrator({ children }: { children: React.ReactNode }) {
@@ -26,7 +27,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthHydrator>{children}</AuthHydrator>
+      <IntlProvider>
+        <AuthHydrator>{children}</AuthHydrator>
+      </IntlProvider>
       <Toaster position="top-right" richColors closeButton />
     </QueryClientProvider>
   );

@@ -5,6 +5,7 @@ import { ZodValidationPipe } from "nestjs-zod";
 
 import { AiModule } from "./ai/ai.module";
 import { AuthModule } from "./auth/auth.module";
+import { RolesGuard } from "./auth/guards/roles.guard";
 import { SupabaseAuthGuard } from "./auth/guards/supabase-auth.guard";
 import { CategoriesModule } from "./categories/categories.module";
 import { envValidation } from "./config/env.validation";
@@ -47,6 +48,7 @@ import { SalesModule } from "./sales/sales.module";
   controllers: [HealthController],
   providers: [
     { provide: APP_GUARD, useClass: SupabaseAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
     { provide: APP_PIPE, useClass: ZodValidationPipe },
   ],
 })

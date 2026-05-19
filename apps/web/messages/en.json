@@ -1,0 +1,67 @@
+{
+  "common": {
+    "appName": "SME Ops",
+    "loading": "Loading…",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "signOut": "Sign out",
+    "accountOverview": "Account overview",
+    "menu": "Menu",
+    "language": "Language"
+  },
+  "roles": {
+    "owner": "Owner",
+    "manager": "Manager",
+    "cashier": "Cashier"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "assistant": "AI Assistant",
+    "pos": "POS",
+    "inventory": "Inventory",
+    "customers": "Customers",
+    "sales": "Sales"
+  },
+  "auth": {
+    "welcomeBack": "Welcome back",
+    "signInSubtitle": "Sign in to your business dashboard.",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "newToApp": "New to SME Ops?",
+    "createAccount": "Create an account",
+    "registerTitle": "Create your business",
+    "registerSubtitle": "One signup creates your shop and owner account.",
+    "businessName": "Business name",
+    "yourName": "Your name",
+    "register": "Create account",
+    "registering": "Creating account…",
+    "haveAccount": "Already have an account?",
+    "signInLink": "Sign in"
+  },
+  "access": {
+    "deniedTitle": "Access restricted",
+    "deniedMessage": "Your role cannot open this page.",
+    "goToPos": "Go to POS"
+  },
+  "dashboard": {
+    "greetingMorning": "Good morning",
+    "greetingAfternoon": "Good afternoon",
+    "greetingEvening": "Good evening",
+    "subtitle": "Here's how {org} is doing today.",
+    "period7": "7 days",
+    "period30": "30 days",
+    "period90": "90 days"
+  },
+  "pos": {
+    "currentSale": "Current sale",
+    "charge": "Charge",
+    "addCustomer": "Add customer (optional)"
+  }
+}

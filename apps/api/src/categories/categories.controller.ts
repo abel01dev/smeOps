@@ -12,6 +12,8 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { OrganizationId } from "../auth/decorators/current-user.decorator";
+import { Roles } from "../auth/decorators/roles.decorator";
+import { API_ROLE_ACCESS } from "../auth/permissions";
 import { CategoriesService } from "./categories.service";
 import { CreateCategoryDto, UpdateCategoryDto } from "./dto/category.dto";
 
@@ -22,12 +24,14 @@ export class CategoriesController {
   constructor(private readonly categories: CategoriesService) {}
 
   @Get()
+  @Roles(...API_ROLE_ACCESS.categoriesRead)
   @ApiOperation({ summary: "List all categories in the current organization" })
   list(@OrganizationId() organizationId: string) {
     return this.categories.list(organizationId);
   }
 
   @Post()
+  @Roles(...API_ROLE_ACCESS.categoriesWrite)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: "Create a new category" })
   create(
@@ -38,6 +42,7 @@ export class CategoriesController {
   }
 
   @Patch(":id")
+  @Roles(...API_ROLE_ACCESS.categoriesWrite)
   @ApiOperation({ summary: "Update a category" })
   update(
     @OrganizationId() organizationId: string,
@@ -48,6 +53,7 @@ export class CategoriesController {
   }
 
   @Delete(":id")
+  @Roles(...API_ROLE_ACCESS.categoriesWrite)
   @ApiOperation({ summary: "Delete a category (products keep their data)" })
   remove(@OrganizationId() organizationId: string, @Param("id") id: string) {
     return this.categories.remove(organizationId, id);

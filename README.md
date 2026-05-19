@@ -72,8 +72,11 @@ After seeding (`pnpm db:seed`):
 
 | Field | Value |
 |-------|-------|
-| Email | `owner@demo.local` |
-| Password | `Password123!` |
+| Role | Email | Password |
+|------|-------|----------|
+| Owner | `owner@demo.local` | `Password123!` |
+| Manager | `manager@demo.local` | `Password123!` |
+| Cashier | `cashier@demo.local` | `Password123!` |
 
 The seed creates **Abel Mini Market** with categories, products (including low-stock items), customers, and ~30 days of sales so the dashboard and AI insights show real charts.
 
@@ -126,9 +129,10 @@ Typical flow in Swagger:
 - [x] Day 9: POS UI (priority feature)
 - [x] Day 10: Customers + Sales UI
 - [x] Day 11: AI insights (rule-based)
-- [ ] Day 12: Polish + responsiveness *(deferred — implement when approved)*
+- [ ] Day 12: Polish + responsiveness *(deferred — V3)*
 - [x] Day 13: Seeds, Swagger, docs
 - [x] Day 14: Production prep + deploy guide *(live deploy skipped)*
+- [x] V2: Role-based access (Owner / Manager / Cashier) + English & Amharic UI
 
 ## Production (when you are ready)
 

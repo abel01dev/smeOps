@@ -11,21 +11,32 @@
  *   - ~30 days of sales with mixed payment methods, occasional discounts
  *   - Stock quantities adjusted to reflect seeded sales
  *
- * Demo login:
- *   email:    owner@demo.local
- *   password: Password123!
+ * Demo logins (password for all): Password123!
+ *   owner@demo.local   — OWNER
+ *   manager@demo.local — MANAGER
+ *   cashier@demo.local — CASHIER
  */
 import {
   PaymentMethod,
   PrismaClient,
+  UserRole,
   type Prisma,
 } from "@prisma/client";
 import { createClient } from "@supabase/supabase-js";
 
 const prisma = new PrismaClient();
 
-const DEMO_EMAIL = "owner@demo.local";
 const DEMO_PASSWORD = "Password123!";
+
+const DEMO_TEAM: Array<{
+  email: string;
+  name: string;
+  role: UserRole;
+}> = [
+  { email: "owner@demo.local", name: "Abel Demo", role: UserRole.OWNER },
+  { email: "manager@demo.local", name: "Sara Manager", role: UserRole.MANAGER },
+  { email: "cashier@demo.local", name: "Kebede Cashier", role: UserRole.CASHIER },
+];
 
 const PAYMENT_METHODS: PaymentMethod[] = [
   PaymentMethod.CASH,
@@ -46,25 +57,28 @@ function getSupabaseAdmin() {
   });
 }
 
-async function ensureSupabaseUser(): Promise<string> {
+async function ensureSupabaseUser(
+  email: string,
+  name: string,
+): Promise<string> {
   const supabase = getSupabaseAdmin();
 
   const { data: list, error: listErr } = await supabase.auth.admin.listUsers();
   if (listErr) throw listErr;
-  const existing = list.users.find((u) => u.email === DEMO_EMAIL);
+  const existing = list.users.find((u) => u.email === email);
   if (existing) {
-    console.log(`Reusing existing Supabase user ${existing.id}`);
+    console.log(`  Reusing Supabase user ${email}`);
     return existing.id;
   }
 
   const { data, error } = await supabase.auth.admin.createUser({
-    email: DEMO_EMAIL,
+    email,
     password: DEMO_PASSWORD,
     email_confirm: true,
-    user_metadata: { name: "Abel Demo" },
+    user_metadata: { name },
   });
-  if (error || !data.user) throw error ?? new Error("Could not create demo user");
-  console.log(`Created Supabase user ${data.user.id}`);
+  if (error || !data.user) throw error ?? new Error(`Could not create ${email}`);
+  console.log(`  Created Supabase user ${email}`);
   return data.user.id;
 }
 
@@ -86,8 +100,6 @@ async function main(): Promise<void> {
   await prisma.user.deleteMany();
   await prisma.organization.deleteMany();
 
-  const supabaseUserId = await ensureSupabaseUser();
-
   const org = await prisma.organization.create({
     data: {
       name: "Abel Mini Market",
@@ -96,15 +108,22 @@ async function main(): Promise<void> {
     },
   });
 
-  const owner = await prisma.user.create({
-    data: {
-      id: supabaseUserId,
-      organizationId: org.id,
-      email: DEMO_EMAIL,
-      name: "Abel Demo",
-      role: "OWNER",
-    },
-  });
+  console.log("Creating demo team users...");
+  const team = await Promise.all(
+    DEMO_TEAM.map(async (member) => {
+      const id = await ensureSupabaseUser(member.email, member.name);
+      return prisma.user.create({
+        data: {
+          id,
+          organizationId: org.id,
+          email: member.email,
+          name: member.name,
+          role: member.role,
+        },
+      });
+    }),
+  );
+  const owner = team.find((u) => u.role === UserRole.OWNER)!;
 
   const categoriesData = ["Beverages", "Snacks", "Household", "Personal Care"];
   const categories = await Promise.all(
@@ -280,8 +299,10 @@ async function main(): Promise<void> {
   console.log("   Customers:   ", customers.length);
   console.log("   Sales:       ", saleCount);
   console.log("   Revenue:     ", `ETB ${totalRevenue.toFixed(2)}`);
-  console.log("\n   Web login:   ", DEMO_EMAIL);
-  console.log("   Password:    ", DEMO_PASSWORD);
+  console.log("\n   Demo accounts (password for all: Password123!):");
+  for (const m of DEMO_TEAM) {
+    console.log(`     ${m.role.padEnd(7)} ${m.email}`);
+  }
   console.log("\n   API docs:    http://localhost:4000/docs");
   console.log("   Web app:     http://localhost:3000");
 }

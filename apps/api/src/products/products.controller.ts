@@ -13,6 +13,8 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { OrganizationId } from "../auth/decorators/current-user.decorator";
+import { Roles } from "../auth/decorators/roles.decorator";
+import { API_ROLE_ACCESS } from "../auth/permissions";
 import {
   CreateProductDto,
   ProductListQueryDto,
@@ -27,6 +29,7 @@ export class ProductsController {
   constructor(private readonly products: ProductsService) {}
 
   @Get()
+  @Roles(...API_ROLE_ACCESS.productsRead)
   @ApiOperation({
     summary: "Paginated, searchable, filterable product list",
     description:
@@ -40,6 +43,7 @@ export class ProductsController {
   }
 
   @Get(":id")
+  @Roles(...API_ROLE_ACCESS.productsRead)
   @ApiOperation({ summary: "Get a single product by id" })
   findOne(
     @OrganizationId() organizationId: string,
@@ -49,6 +53,7 @@ export class ProductsController {
   }
 
   @Post()
+  @Roles(...API_ROLE_ACCESS.productsWrite)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: "Create a new product" })
   create(
@@ -59,6 +64,7 @@ export class ProductsController {
   }
 
   @Patch(":id")
+  @Roles(...API_ROLE_ACCESS.productsWrite)
   @ApiOperation({ summary: "Update a product (partial)" })
   update(
     @OrganizationId() organizationId: string,
@@ -69,6 +75,7 @@ export class ProductsController {
   }
 
   @Delete(":id")
+  @Roles(...API_ROLE_ACCESS.productsWrite)
   @ApiOperation({
     summary: "Archive a product (soft delete — past sales are preserved)",
   })

@@ -2,11 +2,16 @@ import { Controller, Get, Query } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { OrganizationId } from "../auth/decorators/current-user.decorator";
+import { Roles } from "../auth/decorators/roles.decorator";
+import { API_ROLE_ACCESS } from "../auth/permissions";
 import { DashboardService } from "./dashboard.service";
+
+const { dashboard: DASHBOARD_ROLES } = API_ROLE_ACCESS;
 import { TopProductsQueryDto, TrendQueryDto } from "./dto/dashboard.dto";
 
 @ApiTags("dashboard")
 @ApiBearerAuth("access-token")
+@Roles(...DASHBOARD_ROLES)
 @Controller({ path: "dashboard", version: "1" })
 export class DashboardController {
   constructor(private readonly dashboard: DashboardService) {}
