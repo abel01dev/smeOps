@@ -1,14 +1,14 @@
 "use client";
 
 import { formatMoney, type PaymentMethod } from "@sme/shared";
-import { Minus, Plus, Trash2, User, UserX } from "lucide-react";
+import { ChevronRight, Minus, Plus, Trash2, User, UserX } from "lucide-react";
 import { useTranslations } from "next-intl";
 import * as React from "react";
 import { toast } from "sonner";
 
 import { PosCustomerPicker } from "@/components/pos/pos-customer-picker";
+import { PosDiscountSheet } from "@/components/pos/pos-discount-sheet";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -43,6 +43,7 @@ export function PosCartPanel() {
   const clearCart = usePosCartStore((s) => s.clearCart);
 
   const [customerOpen, setCustomerOpen] = React.useState(false);
+  const [discountOpen, setDiscountOpen] = React.useState(false);
   const createSale = useCreateSale();
 
   const { subtotal, discount: appliedDiscount, total, itemCount } =
@@ -86,15 +87,22 @@ export function PosCartPanel() {
 
         <div className="shrink-0 border-b border-border bg-card px-4 py-3">
           {customerName ? (
-            <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2">
-              <div className="flex min-w-0 items-center gap-2">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-                  {customerName.charAt(0).toUpperCase()}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2 text-left transition hover:bg-muted/80"
+                onClick={() => setCustomerOpen(true)}
+              >
+                <div className="flex min-w-0 items-center gap-2">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                    {customerName.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="truncate text-sm font-medium text-foreground">
+                    {customerName}
+                  </span>
                 </div>
-                <span className="truncate text-sm font-medium text-foreground">
-                  {customerName}
-                </span>
-              </div>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+              </button>
               <Button
                 type="button"
                 variant="ghost"
@@ -188,24 +196,18 @@ export function PosCartPanel() {
         </ul>
 
         <div className="shrink-0 space-y-3 border-t border-border bg-card p-4">
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
-            <div className="grid gap-1.5">
-              <Label htmlFor="pos-discount" className="text-xs text-muted-foreground">
-                {t("discountEtb")}
-              </Label>
-              <Input
-                id="pos-discount"
-                type="number"
-                min={0}
-                step="0.01"
-                inputMode="decimal"
-                className="h-10"
-                value={discount || ""}
-                onChange={(e) =>
-                  setDiscount(e.target.value === "" ? 0 : Number(e.target.value))
-                }
-              />
-            </div>
+          <div className="grid gap-2">
+            <button
+              type="button"
+              onClick={() => setDiscountOpen(true)}
+              className="flex w-full items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-left text-sm transition hover:bg-muted/60"
+            >
+              <span className="text-muted-foreground">{t("discountEtb")}</span>
+              <span className="flex items-center gap-1 tabular-nums font-medium text-foreground">
+                {discount > 0 ? formatMoney(discount) : "—"}
+                <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />
+              </span>
+            </button>
             <div className="grid gap-1.5">
               <Label className="text-xs text-muted-foreground">{tc("payment")}</Label>
               <Select
@@ -238,7 +240,7 @@ export function PosCartPanel() {
             {appliedDiscount > 0 && (
               <div className="flex justify-between text-muted-foreground">
                 <dt>{tc("discount")}</dt>
-                <dd className="tabular-nums text-emerald-700">
+                <dd className="tabular-nums text-emerald-700 dark:text-emerald-400">
                   −{formatMoney(appliedDiscount)}
                 </dd>
               </div>
@@ -284,6 +286,12 @@ export function PosCartPanel() {
           setCustomer(id, name);
           setCustomerOpen(false);
         }}
+      />
+      <PosDiscountSheet
+        open={discountOpen}
+        onOpenChange={setDiscountOpen}
+        value={discount}
+        onApply={setDiscount}
       />
     </>
   );

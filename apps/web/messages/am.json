@@ -223,7 +223,10 @@
     "noCustomers": "ደንበኛ አልተገኘም።",
     "attachCustomer": "ደንበኛ አያይዝ",
     "typeToSearchCustomers": "ደንበኞችን ለመፈለግ ይተይቡ",
-    "noProductsInventory": "ምንም ምርት አልተገኘም። በመጀመሪያ በክምችት ውስጥ ይጨምሩ።"
+    "noProductsInventory": "ምንም ምርት አልተገኘም። በመጀመሪያ በክምችት ውስጥ ይጨምሩ።",
+    "customerSheetHint": "በስም ወይም በስልክ ይፈልጉ፣ ከዚያ እዚህ ሽያጭ ላይ ለማያያዝ ደንበኛውን ይንኩ።",
+    "discountSheetHint": "በ ETB ቋሚ ቅናሽ ያስገቡ። ከመስመር ድምሮች በኋላ ይተገበራል።",
+    "discountAmountLabel": "መጠን (ETB)"
   },
   "inventory": {
     "title": "ክምችት",

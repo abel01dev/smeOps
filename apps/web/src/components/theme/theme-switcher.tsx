@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { type ThemeMode, useThemeStore } from "@/stores/theme.store";
+import { cn } from "@/lib/utils";
 
 const OPTIONS: {
   value: ThemeMode;
@@ -22,7 +23,7 @@ const OPTIONS: {
   { value: "system", labelKey: "themeSystem", icon: Monitor },
 ];
 
-export function ThemeSwitcher() {
+export function ThemeSwitcher({ className }: { className?: string }) {
   const t = useTranslations("common");
   const theme = useThemeStore((s) => s.theme);
   const setTheme = useThemeStore((s) => s.setTheme);
@@ -36,7 +37,7 @@ export function ThemeSwitcher() {
           type="button"
           variant="outline"
           size="sm"
-          className="gap-1.5 px-2.5"
+          className={cn("gap-1.5 px-2.5", className)}
           aria-label={t("theme")}
         >
           <ActiveIcon className="h-4 w-4" />

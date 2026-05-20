@@ -223,7 +223,10 @@
     "noCustomers": "No customers found.",
     "attachCustomer": "Attach customer",
     "typeToSearchCustomers": "Type to search customers",
-    "noProductsInventory": "No products found. Add items in Inventory first."
+    "noProductsInventory": "No products found. Add items in Inventory first.",
+    "customerSheetHint": "Search by name or phone, then tap a customer to attach them to this sale.",
+    "discountSheetHint": "Enter a fixed discount in ETB. It is applied after line totals.",
+    "discountAmountLabel": "Amount (ETB)"
   },
   "inventory": {
     "title": "Inventory",
