@@ -12,9 +12,10 @@
  *   - Stock quantities adjusted to reflect seeded sales
  *
  * Demo logins (password for all): Password123!
- *   owner@demo.local   — OWNER
- *   manager@demo.local — MANAGER
- *   cashier@demo.local — CASHIER
+ *   owner@demo.local    — OWNER
+ *   manager@demo.local  — MANAGER (shop manager)
+ *   inventory@demo.local — INVENTORY_MANAGER (categories + products only)
+ *   cashier@demo.local  — CASHIER
  */
 import {
   PaymentMethod,
@@ -35,6 +36,11 @@ const DEMO_TEAM: Array<{
 }> = [
   { email: "owner@demo.local", name: "Abel Demo", role: UserRole.OWNER },
   { email: "manager@demo.local", name: "Sara Manager", role: UserRole.MANAGER },
+  {
+    email: "inventory@demo.local",
+    name: "Mesfin Inventory",
+    role: UserRole.INVENTORY_MANAGER,
+  },
   { email: "cashier@demo.local", name: "Kebede Cashier", role: UserRole.CASHIER },
 ];
 

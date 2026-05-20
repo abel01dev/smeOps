@@ -66,16 +66,15 @@ pnpm dev
 | API | http://localhost:4000 |
 | Swagger | http://localhost:4000/docs |
 
-## Demo account
+## Demo accounts
 
 After seeding (`pnpm db:seed`):
 
-| Field | Value |
-|-------|-------|
 | Role | Email | Password |
 |------|-------|----------|
 | Owner | `owner@demo.local` | `Password123!` |
-| Manager | `manager@demo.local` | `Password123!` |
+| Shop manager | `manager@demo.local` | `Password123!` |
+| Inventory manager | `inventory@demo.local` | `Password123!` |
 | Cashier | `cashier@demo.local` | `Password123!` |
 
 The seed creates **Abel Mini Market** with categories, products (including low-stock items), customers, and ~30 days of sales so the dashboard and AI insights show real charts.

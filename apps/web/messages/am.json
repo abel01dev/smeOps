@@ -62,7 +62,8 @@
   },
   "roles": {
     "owner": "ባለቤት",
-    "manager": "ማኔጅር",
+    "manager": "የሱቅ ማኔጅር",
+    "inventory_manager": "የክምችት ማኔጅር",
     "cashier": "ካሸየር"
   },
   "nav": {
@@ -70,6 +71,7 @@
     "assistant": "AI ረዳት",
     "pos": "POS",
     "inventory": "ክምችት",
+    "team": "ቡድን",
     "customers": "ደንበኞች",
     "sales": "ሽያጮች"
   },
@@ -100,7 +102,8 @@
   "access": {
     "deniedTitle": "መዳረሻ የለም",
     "deniedMessage": "ይህን ገጽ በእርስዎ ሚና ሊከፈት አይችልም።",
-    "goToPos": "ወደ POS ይሂዱ"
+    "goToPos": "ወደ POS ይሂዱ",
+    "goToInventory": "ወደ ክምችት ይሂዱ"
   },
   "payments": {
     "CASH": "ጥሬ ገንዘብ",
@@ -167,6 +170,29 @@
       "customers": "ደንበኞች",
       "forecast": "ትንበያ"
     }
+  },
+  "team": {
+    "title": "ቡድን",
+    "subtitle": "የስራ ኢሜይል እና የመጀመሪያ የይለፍ ቃል ያሉ ሰራተኞች ይጨምሩ። እርስዎ እንደሚሉት ተመሳሳይ መግባት ገጽ ይጠቀማሉ።",
+    "listTitle": "ሰዎች",
+    "addTitle": "ሰራተኛ ጨምር",
+    "email": "የስራ ኢሜይል",
+    "name": "የማሳያ ስም",
+    "role": "ሚና",
+    "password": "የመጀመሪያ የይለፍ ቃል",
+    "passwordHint": "ይህን ከሰራተኛው ጋር በደህና ያካፍሉ። በፕሮጅትዎ ላይ የይለፍ ቃል ዳግም ማስጀመር ካለ ተጠቃሚው ሊያድኑ ይችላሉ።",
+    "create": "መለያ ፍጠር",
+    "creating": "በመፍጠር ላይ…",
+    "createdToast": "ሰራተኛ ተፈጥሯል — አሁን መግባት ይችላሉ።",
+    "empty": "እርስዎ ብቻ የተዘረዘሩ። ከታች ሱቅ ሰራተኞች ይጨምሩ።",
+    "changeRole": "ሚና ቀይር",
+    "saveRole": "ሚና አስቀምጥ",
+    "roleUpdated": "ሚና ተዘመነ",
+    "roleShopManager": "የሱቅ ማኔጅር — ዳሽቦርድ፣ AI፣ POS፣ ክምችት፣ ደንበኞች፣ ሽያጮች",
+    "roleInventoryManager": "የክምችት ማኔጅር — ምድቦች እና ምርቶች ብቻ",
+    "roleCashier": "ካሸየር — POS፣ ደንበኞች፣ ሽያጮች",
+    "you": "እርስዎ",
+    "ownerNoEdit": "የባለቤት ሚና እዚህ መቀየር አይችልም።"
   },
   "charts": {
     "revenue": "ገቢ",

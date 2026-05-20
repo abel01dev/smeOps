@@ -50,6 +50,16 @@ Interactive docs: **http://localhost:4000/docs** (Swagger UI)
 | PATCH | `/customers/:id` | Update |
 | DELETE | `/customers/:id` | Delete |
 
+## Employees (team)
+
+**Owner only** — create Supabase users and assign non-owner roles.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/employees` | List users in the organization |
+| POST | `/employees` | Create user (`email`, `name`, `password`, `role`: `MANAGER` \| `INVENTORY_MANAGER` \| `CASHIER`) |
+| PATCH | `/employees/:id/role` | Change role (cannot change or assign `OWNER`) |
+
 ## Sales (POS)
 
 | Method | Path | Description |
@@ -102,5 +112,7 @@ Errors return `{ "success": false, "message": "..." }` with an appropriate HTTP 
 
 After `pnpm db:seed`:
 
-- **Email:** `owner@demo.local`
-- **Password:** `Password123!`
+- **Owner:** `owner@demo.local` / `Password123!`
+- **Shop manager:** `manager@demo.local`
+- **Inventory manager:** `inventory@demo.local` (categories + products only in the app)
+- **Cashier:** `cashier@demo.local`

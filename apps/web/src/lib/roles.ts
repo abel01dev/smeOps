@@ -6,14 +6,16 @@ export const ROUTE_ACCESS: Record<string, AppRole[]> = {
   "/dashboard": ["OWNER", "MANAGER"],
   "/assistant": ["OWNER", "MANAGER"],
   "/pos": ["OWNER", "MANAGER", "CASHIER"],
-  "/inventory": ["OWNER", "MANAGER"],
+  "/inventory": ["OWNER", "MANAGER", "INVENTORY_MANAGER"],
   "/customers": ["OWNER", "MANAGER", "CASHIER"],
   "/sales": ["OWNER", "MANAGER", "CASHIER"],
+  "/team": ["OWNER"],
 };
 
 export const DEFAULT_ROUTE_BY_ROLE: Record<AppRole, string> = {
   OWNER: "/dashboard",
   MANAGER: "/dashboard",
+  INVENTORY_MANAGER: "/inventory",
   CASHIER: "/pos",
 };
 

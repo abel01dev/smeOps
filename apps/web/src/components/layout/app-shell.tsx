@@ -76,7 +76,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           >
             {user.role === "CASHIER"
               ? t("access.goToPos")
-              : t("nav.dashboard")}
+              : user.role === "INVENTORY_MANAGER"
+                ? t("access.goToInventory")
+                : t("nav.dashboard")}
           </Button>
         </div>
       </div>

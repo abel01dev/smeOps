@@ -62,7 +62,8 @@
   },
   "roles": {
     "owner": "Owner",
-    "manager": "Manager",
+    "manager": "Shop manager",
+    "inventory_manager": "Inventory manager",
     "cashier": "Cashier"
   },
   "nav": {
@@ -70,6 +71,7 @@
     "assistant": "AI Assistant",
     "pos": "POS",
     "inventory": "Inventory",
+    "team": "Team",
     "customers": "Customers",
     "sales": "Sales"
   },
@@ -100,7 +102,8 @@
   "access": {
     "deniedTitle": "Access restricted",
     "deniedMessage": "Your role cannot open this page.",
-    "goToPos": "Go to POS"
+    "goToPos": "Go to POS",
+    "goToInventory": "Go to inventory"
   },
   "payments": {
     "CASH": "Cash",
@@ -167,6 +170,29 @@
       "customers": "customers",
       "forecast": "forecast"
     }
+  },
+  "team": {
+    "title": "Team",
+    "subtitle": "Add employees with their work email and an initial password. They sign in on the same login page as you.",
+    "listTitle": "People",
+    "addTitle": "Add employee",
+    "email": "Work email",
+    "name": "Display name",
+    "role": "Role",
+    "password": "Initial password",
+    "passwordHint": "Share this securely with the employee. They can use Supabase password reset if enabled on your project.",
+    "create": "Create account",
+    "creating": "Creating…",
+    "createdToast": "Employee created — they can sign in now.",
+    "empty": "Only you are listed. Add shop staff below.",
+    "changeRole": "Change role",
+    "saveRole": "Save role",
+    "roleUpdated": "Role updated",
+    "roleShopManager": "Shop manager — dashboard, AI, POS, inventory, customers, sales",
+    "roleInventoryManager": "Inventory manager — categories and products only",
+    "roleCashier": "Cashier — POS, customers, sales",
+    "you": "You",
+    "ownerNoEdit": "Owner role cannot be changed here."
   },
   "charts": {
     "revenue": "Revenue",
