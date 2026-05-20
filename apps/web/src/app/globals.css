@@ -19,20 +19,64 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Brand primary — #E15A65 */
+    --primary: 355 69% 62%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 355 40% 96%;
+    --secondary-foreground: 355 35% 28%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 355 55% 95%;
+    --accent-foreground: 355 40% 28%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --ring: 215 20.2% 65.1%;
+    --ring: 355 69% 62%;
     --radius: 0.5rem;
+
+    --chart-revenue: 355 69% 62%;
+    --chart-profit: 160 84% 39%;
+    --chart-grid: 214 32% 91%;
+    --chart-axis: 215 16% 47%;
+    --chart-cursor: 214 32% 80%;
+  }
+
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 96%;
+
+    --muted: 217 33% 14%;
+    --muted-foreground: 215 20% 65%;
+
+    --popover: 222 47% 8%;
+    --popover-foreground: 210 40% 96%;
+
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 96%;
+
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+
+    --primary: 355 72% 65%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 96%;
+
+    --accent: 355 35% 18%;
+    --accent-foreground: 355 55% 88%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --ring: 355 72% 65%;
+
+    --chart-revenue: 355 72% 65%;
+    --chart-profit: 160 70% 45%;
+    --chart-grid: 217 33% 20%;
+    --chart-axis: 215 16% 55%;
+    --chart-cursor: 217 33% 28%;
   }
 }
 

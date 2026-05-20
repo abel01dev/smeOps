@@ -113,9 +113,9 @@ export default function RegisterPage() {
             {isSubmitting ? t("registering") : t("register")}
           </Button>
         </form>
-        <p className="mt-6 text-center text-sm text-slate-600">
+        <p className="mt-6 text-center text-sm text-muted-foreground">
           {t("haveAccount")}{" "}
-          <Link href="/login" className="font-medium text-slate-900 hover:underline">
+          <Link href="/login" className="font-medium text-primary hover:underline">
             {t("signInLink")}
           </Link>
         </p>
