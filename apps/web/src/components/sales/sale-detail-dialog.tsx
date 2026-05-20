@@ -56,16 +56,16 @@ export function SaleDetailDialog({
         {sale && (
           <div className="space-y-4 text-sm">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-slate-600">{formatSaleDate(sale.createdAt)}</span>
+              <span className="text-muted-foreground">{formatSaleDate(sale.createdAt)}</span>
               <Badge variant="secondary" className="font-normal">
                 {paymentLabels[sale.paymentMethod]}
               </Badge>
             </div>
 
             {sale.customer && (
-              <p className="text-slate-700">
+              <p className="text-foreground">
                 {tc("customer")}:{" "}
-                <span className="font-medium text-slate-900">
+                <span className="font-medium text-foreground">
                   {sale.customer.name}
                 </span>
               </p>
@@ -73,17 +73,17 @@ export function SaleDetailDialog({
 
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-slate-200 text-xs text-slate-500">
+                <tr className="border-b border-border text-xs text-muted-foreground">
                   <th className="pb-2 font-medium">{tc("item")}</th>
                   <th className="pb-2 text-right font-medium">{t("qty")}</th>
                   <th className="pb-2 text-right font-medium">{tc("total")}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-border">
                 {sale.items.map((item) => (
                   <tr key={item.id}>
-                    <td className="py-2 pr-2 text-slate-900">{item.productName}</td>
-                    <td className="py-2 text-right tabular-nums text-slate-600">
+                    <td className="py-2 pr-2 text-foreground">{item.productName}</td>
+                    <td className="py-2 text-right tabular-nums text-muted-foreground">
                       {item.quantity}
                     </td>
                     <td className="py-2 text-right tabular-nums font-medium">
@@ -94,31 +94,31 @@ export function SaleDetailDialog({
               </tbody>
             </table>
 
-            <dl className="space-y-1 border-t border-slate-200 pt-3">
-              <div className="flex justify-between text-slate-600">
+            <dl className="space-y-1 border-t border-border pt-3">
+              <div className="flex justify-between text-muted-foreground">
                 <dt>{tc("subtotal")}</dt>
                 <dd className="tabular-nums">{formatMoney(sale.subtotal)}</dd>
               </div>
               {Number(sale.discount) > 0 && (
-                <div className="flex justify-between text-slate-600">
+                <div className="flex justify-between text-muted-foreground">
                   <dt>{tc("discount")}</dt>
                   <dd className="tabular-nums text-emerald-700">
                     −{formatMoney(sale.discount)}
                   </dd>
                 </div>
               )}
-              <div className="flex justify-between text-base font-semibold text-slate-900">
+              <div className="flex justify-between text-base font-semibold text-foreground">
                 <dt>{tc("total")}</dt>
                 <dd className="tabular-nums">{formatMoney(sale.total)}</dd>
               </div>
-              <div className="flex justify-between text-xs text-slate-500">
+              <div className="flex justify-between text-xs text-muted-foreground">
                 <dt>{tc("profit")}</dt>
                 <dd className="tabular-nums">{formatMoney(sale.profit)}</dd>
               </div>
             </dl>
 
             {sale.note && (
-              <p className="rounded-md bg-slate-50 p-2 text-slate-600">
+              <p className="rounded-md bg-muted/50 p-2 text-muted-foreground">
                 Note: {sale.note}
               </p>
             )}

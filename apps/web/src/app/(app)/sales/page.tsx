@@ -64,13 +64,13 @@ export default function SalesPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
           {t("title")}
         </h1>
-        <p className="mt-1 text-sm text-slate-600">{t("subtitle")}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
       </header>
 
-      <Card className="border-slate-200 shadow-sm">
+      <Card className="border-border shadow-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">{t("history")}</CardTitle>
           <CardDescription>
@@ -82,7 +82,7 @@ export default function SalesPage() {
         <CardContent className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="grid gap-1.5">
-              <Label htmlFor="date-from" className="text-xs text-slate-600">
+              <Label htmlFor="date-from" className="text-xs text-muted-foreground">
                 {tc("fromDate")}
               </Label>
               <Input
@@ -94,7 +94,7 @@ export default function SalesPage() {
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="date-to" className="text-xs text-slate-600">
+              <Label htmlFor="date-to" className="text-xs text-muted-foreground">
                 {tc("toDate")}
               </Label>
               <Input
@@ -106,7 +106,7 @@ export default function SalesPage() {
               />
             </div>
             <div className="grid gap-1.5">
-              <Label className="text-xs text-slate-600">{tc("payment")}</Label>
+              <Label className="text-xs text-muted-foreground">{tc("payment")}</Label>
               <Select
                 value={paymentMethod}
                 onValueChange={(v) =>
@@ -143,10 +143,10 @@ export default function SalesPage() {
           )}
 
           {!q.isLoading && !q.isError && items.length === 0 && (
-            <p className="py-10 text-center text-sm text-slate-500">
+            <p className="py-10 text-center text-sm text-muted-foreground">
               {t.rich("empty", {
                 link: (chunks) => (
-                  <a href="/pos" className="font-medium text-slate-900 underline">
+                  <a href="/pos" className="font-medium text-foreground underline">
                     {chunks}
                   </a>
                 ),
@@ -156,23 +156,23 @@ export default function SalesPage() {
 
           {!q.isLoading && !q.isError && items.length > 0 && (
             <>
-              <ul className="divide-y divide-slate-100 rounded-xl border border-slate-100">
+              <ul className="divide-y divide-border rounded-xl border border-border">
                 {items.map((sale) => (
                   <li
                     key={sale.id}
                     className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="min-w-0">
-                      <p className="font-medium tabular-nums text-slate-900">
+                      <p className="font-medium tabular-nums text-foreground">
                         {formatMoney(sale.total)}
                       </p>
-                      <p className="text-sm text-slate-600">
+                      <p className="text-sm text-muted-foreground">
                         {formatSaleDate(sale.createdAt)}
                         {sale.customer
                           ? ` · ${sale.customer.name}`
                           : ` · ${tc("walkIn")}`}
                       </p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-muted-foreground">
                         {t("profitLine", {
                           count: sale.items.length,
                           amount: formatMoney(sale.profit),
@@ -199,8 +199,8 @@ export default function SalesPage() {
               </ul>
 
               {totalPages > 1 && (
-                <div className="flex items-center justify-between border-t border-slate-100 pt-4">
-                  <p className="text-xs text-slate-500">
+                <div className="flex items-center justify-between border-t border-border pt-4">
+                  <p className="text-xs text-muted-foreground">
                     {tc("pageOf", { page, total: totalPages })}
                   </p>
                   <div className="flex gap-2">

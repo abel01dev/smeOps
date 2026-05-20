@@ -215,7 +215,7 @@ export function AssistantChat() {
   );
 
   return (
-    <div className="flex h-full min-h-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className="flex h-full min-h-0 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
       {sidebarOpen ? (
         <button
           type="button"
@@ -236,7 +236,7 @@ export function AssistantChat() {
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex shrink-0 items-center gap-2 border-b border-slate-200 px-3 py-2 md:px-4">
+        <header className="flex shrink-0 items-center gap-2 border-b border-border px-3 py-2 md:px-4">
           <Button
             type="button"
             variant="ghost"
@@ -248,7 +248,7 @@ export function AssistantChat() {
             <PanelLeft className="h-5 w-5" />
           </Button>
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-sm font-semibold text-slate-900">
+            <h1 className="truncate text-sm font-semibold text-foreground">
               {t("aiLabel")}
             </h1>
           </div>
@@ -281,7 +281,7 @@ export function AssistantChat() {
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto">
           {isLoadingMessages ? (
-            <p className="p-6 text-center text-sm text-slate-500">{t("loadingChat")}</p>
+            <p className="p-6 text-center text-sm text-muted-foreground">{t("loadingChat")}</p>
           ) : messages.length === 0 ? (
             <AssistantEmptyState
               hasApiKey={Boolean(settings?.hasApiKey)}

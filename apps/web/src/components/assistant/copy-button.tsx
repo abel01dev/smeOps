@@ -23,7 +23,7 @@ export function CopyButton({
       type="button"
       variant="ghost"
       size="icon"
-      className={cn("h-7 w-7 text-slate-500", className)}
+      className={cn("h-7 w-7 text-muted-foreground", className)}
       aria-label={copied ? tc("copied") : t("copyMessage")}
       onClick={async () => {
         await navigator.clipboard.writeText(text);

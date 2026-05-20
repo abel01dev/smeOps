@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
+import { ThemeSwitcher } from "@/components/theme/theme-switcher";
 import { authApi } from "@/lib/api/auth";
 import { useAuthStore } from "@/stores/auth.store";
 
@@ -53,7 +55,11 @@ export default function RegisterPage() {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="space-y-3">
+        <div className="flex justify-end gap-2">
+          <ThemeSwitcher />
+          <LanguageSwitcher />
+        </div>
         <CardTitle>{t("registerTitle")}</CardTitle>
         <CardDescription>{t("registerSubtitle")}</CardDescription>
       </CardHeader>

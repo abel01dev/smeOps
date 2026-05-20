@@ -88,10 +88,10 @@ export default function InventoryPage() {
     <div className="mx-auto max-w-7xl space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             {t("title")}
           </h1>
-          <p className="mt-1 text-sm text-slate-600">{t("subtitle")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
         <Button
           type="button"
@@ -104,7 +104,7 @@ export default function InventoryPage() {
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)]">
-        <Card className="border-slate-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg">{t("productsTitle")}</CardTitle>
             <CardDescription>
@@ -145,8 +145,8 @@ export default function InventoryPage() {
             )}
 
             {items.length > 0 && totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-slate-100 pt-4">
-                <p className="text-xs text-slate-500">
+              <div className="flex items-center justify-between border-t border-border pt-4">
+                <p className="text-xs text-muted-foreground">
                   {tc("pageOf", { page, total: totalPages })}
                 </p>
                 <div className="flex gap-2">

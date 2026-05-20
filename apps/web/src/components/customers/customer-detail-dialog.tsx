@@ -54,47 +54,47 @@ export function CustomerDetailDialog({
         {q.data && (
           <div className="space-y-5">
             <div>
-              <h3 className="text-lg font-semibold text-slate-900">
+              <h3 className="text-lg font-semibold text-foreground">
                 {q.data.name}
               </h3>
               {q.data.phone && (
-                <p className="text-sm text-slate-600">{q.data.phone}</p>
+                <p className="text-sm text-muted-foreground">{q.data.phone}</p>
               )}
               {q.data.address && (
-                <p className="mt-1 text-sm text-slate-500">{q.data.address}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{q.data.address}</p>
               )}
             </div>
 
-            <dl className="grid grid-cols-2 gap-3 rounded-lg border border-slate-100 bg-slate-50 p-3 text-sm">
+            <dl className="grid grid-cols-2 gap-3 rounded-lg border border-border bg-muted/50 p-3 text-sm">
               <div>
-                <dt className="text-slate-500">{t("totalSpent")}</dt>
-                <dd className="font-semibold tabular-nums text-slate-900">
+                <dt className="text-muted-foreground">{t("totalSpent")}</dt>
+                <dd className="font-semibold tabular-nums text-foreground">
                   {formatMoney(q.data.totalSpent)}
                 </dd>
               </div>
               <div>
-                <dt className="text-slate-500">{tc("sales")}</dt>
-                <dd className="font-semibold text-slate-900">
+                <dt className="text-muted-foreground">{tc("sales")}</dt>
+                <dd className="font-semibold text-foreground">
                   {q.data.salesCount ?? q.data.recentSales.length}
                 </dd>
               </div>
             </dl>
 
             <div>
-              <h4 className="mb-2 text-sm font-medium text-slate-700">
+              <h4 className="mb-2 text-sm font-medium text-foreground">
                 {t("recentPurchases")}
               </h4>
               {q.data.recentSales.length === 0 ? (
-                <p className="text-sm text-slate-500">{t("noSales")}</p>
+                <p className="text-sm text-muted-foreground">{t("noSales")}</p>
               ) : (
                 <ul className="space-y-2">
                   {q.data.recentSales.map((sale) => (
                     <li
                       key={sale.id}
-                      className="rounded-lg border border-slate-100 bg-white p-3 text-sm"
+                      className="rounded-lg border border-border bg-card p-3 text-sm"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-slate-600">
+                        <span className="text-muted-foreground">
                           {formatSaleDate(sale.createdAt)}
                         </span>
                         <span className="font-semibold tabular-nums">
@@ -105,7 +105,7 @@ export function CustomerDetailDialog({
                         {paymentLabels[sale.paymentMethod as PaymentMethod] ??
                           sale.paymentMethod}
                       </Badge>
-                      <ul className="mt-2 space-y-0.5 text-xs text-slate-500">
+                      <ul className="mt-2 space-y-0.5 text-xs text-muted-foreground">
                         {sale.items.map((item, i) => (
                           <li key={i}>
                             {item.quantity}× {item.productName} —{" "}

@@ -79,13 +79,13 @@ export default function TeamPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
           {t("title")}
         </h1>
-        <p className="mt-1 text-sm text-slate-600">{t("subtitle")}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
       </header>
 
-      <Card className="border-slate-200 shadow-sm">
+      <Card className="border-border shadow-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">{t("listTitle")}</CardTitle>
           <CardDescription>
@@ -97,10 +97,10 @@ export default function TeamPage() {
             <p className="text-sm text-red-600">{(listQ.error as Error).message}</p>
           )}
           {!listQ.isLoading && !listQ.isError && listQ.data?.length === 0 && (
-            <p className="text-sm text-slate-500">{t("empty")}</p>
+            <p className="text-sm text-muted-foreground">{t("empty")}</p>
           )}
           {listQ.data && listQ.data.length > 0 && (
-            <ul className="divide-y divide-slate-100 rounded-xl border border-slate-100">
+            <ul className="divide-y divide-border rounded-xl border border-border">
               {listQ.data.map((row) => {
                 const isSelf = row.id === user?.id;
                 const isOwner = row.role === "OWNER";
@@ -112,16 +112,16 @@ export default function TeamPage() {
                     className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="min-w-0">
-                      <p className="font-medium text-slate-900">
+                      <p className="font-medium text-foreground">
                         {row.name}
                         {isSelf && (
-                          <span className="ml-2 text-xs font-normal text-slate-500">
+                          <span className="ml-2 text-xs font-normal text-muted-foreground">
                             ({t("you")})
                           </span>
                         )}
                       </p>
-                      <p className="text-sm text-slate-600">{row.email}</p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="text-sm text-muted-foreground">{row.email}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
                         {row.role === "OWNER"
                           ? tr("owner")
                           : row.role === "MANAGER"
@@ -169,7 +169,7 @@ export default function TeamPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-slate-200 shadow-sm">
+      <Card className="border-border shadow-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">{t("addTitle")}</CardTitle>
         </CardHeader>
@@ -223,7 +223,7 @@ export default function TeamPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   {t(roleMessageKey(role))}
                 </p>
               </div>
@@ -241,7 +241,7 @@ export default function TeamPage() {
                 />
               </div>
             </div>
-            <p className="text-xs text-slate-500">{t("passwordHint")}</p>
+            <p className="text-xs text-muted-foreground">{t("passwordHint")}</p>
             <Button
               type="submit"
               className="h-11"
