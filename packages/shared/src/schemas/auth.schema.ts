@@ -30,7 +30,7 @@ export interface AuthUser {
   id: string;
   email: string;
   name: string;
-  role: "OWNER" | "MANAGER" | "CASHIER";
+  role: "OWNER" | "MANAGER" | "INVENTORY_MANAGER" | "CASHIER";
   organizationId: string;
   organizationName: string;
 }

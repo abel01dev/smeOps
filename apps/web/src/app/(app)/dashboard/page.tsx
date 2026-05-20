@@ -56,16 +56,16 @@ export default function DashboardPage() {
     <div className="mx-auto max-w-7xl space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             {greeting}
           </h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-muted-foreground">
             {t("subtitle", {
               org: user?.organizationName ?? "your business",
             })}
           </p>
         </div>
-        <div className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-1">
+        <div className="inline-flex items-center gap-1 rounded-lg border border-border bg-card p-1">
           {periods.map((p) => (
             <Button
               key={p.days}
@@ -74,7 +74,7 @@ export default function DashboardPage() {
               onClick={() => setDays(p.days)}
               className={cn(
                 "h-8 px-3 text-xs font-medium",
-                days === p.days ? "" : "text-slate-600 hover:bg-slate-100",
+                days === p.days ? "" : "text-muted-foreground hover:bg-muted",
               )}
             >
               {p.label}
@@ -158,7 +158,7 @@ export default function DashboardPage() {
               <CardDescription>{t("dailyTotals", { days })}</CardDescription>
             </div>
             {summary.data ? (
-              <div className="hidden text-right text-xs text-slate-500 md:block">
+              <div className="hidden text-right text-xs text-muted-foreground md:block">
                 <p>
                   {t("periodRevenue", {
                     amount: formatMoney(periodRevenue(trend.data)),
@@ -255,26 +255,26 @@ function Stat({
   tone?: "default" | "success";
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/60 p-4">
+    <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/40 p-4">
       <div
         className={cn(
           "flex h-9 w-9 shrink-0 items-center justify-center rounded-md",
           tone === "success"
             ? "bg-emerald-100 text-emerald-700"
-            : "bg-slate-200/70 text-slate-700",
+            : "bg-muted text-foreground",
         )}
         aria-hidden
       >
         <Icon className="h-4 w-4" />
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {label}
         </p>
         <p
           className={cn(
-            "mt-1 truncate text-lg font-semibold tracking-tight text-slate-900",
-            loading && "h-6 w-24 animate-pulse rounded bg-slate-200/70",
+            "mt-1 truncate text-lg font-semibold tracking-tight text-foreground",
+            loading && "h-6 w-24 animate-pulse rounded bg-muted",
           )}
         >
           {loading ? "" : value}

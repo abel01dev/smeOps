@@ -343,14 +343,14 @@ function ProfitHint({
 }) {
   if (margin <= 0) {
     return (
-      <p className="-mt-1 text-xs text-slate-500">{t("profitHintEmpty")}</p>
+      <p className="-mt-1 text-xs text-muted-foreground">{t("profitHintEmpty")}</p>
     );
   }
   return (
     <p className="-mt-1 text-xs text-emerald-700">
       {t("profitHint", { amount: formatMoney(margin) })}
       {marginPct != null && (
-        <span className="text-slate-500">
+        <span className="text-muted-foreground">
           {t("profitMargin", { percent: marginPct.toFixed(0) })}
         </span>
       )}

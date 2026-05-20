@@ -30,7 +30,7 @@ export function LowStockList({ data, isLoading }: Props) {
   }
 
   if (data.items.length === 0) {
-    return <p className="text-sm text-slate-500">{t("allStocked")}</p>;
+    return <p className="text-sm text-muted-foreground">{t("allStocked")}</p>;
   }
 
   return (
@@ -40,11 +40,11 @@ export function LowStockList({ data, isLoading }: Props) {
           <div className="min-w-0">
             <Link
               href="/inventory"
-              className="block truncate text-sm font-medium text-slate-900 hover:underline"
+              className="block truncate text-sm font-medium text-foreground hover:underline"
             >
               {p.name}
             </Link>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               {p.category?.name ?? t("uncategorized")} ·{" "}
               {t("minLabel", { min: formatCount(p.minStock) })}
             </p>
@@ -55,7 +55,7 @@ export function LowStockList({ data, isLoading }: Props) {
         </li>
       ))}
       {data.total > data.items.length ? (
-        <li className="pt-1 text-xs text-slate-500">
+        <li className="pt-1 text-xs text-muted-foreground">
           {t("moreLowStock", { count: data.total - data.items.length })}
         </li>
       ) : null}

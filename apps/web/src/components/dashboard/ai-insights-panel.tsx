@@ -29,7 +29,7 @@ const SEVERITY_STYLES: Record<
   InsightSeverity,
   { badge: "secondary" | "success" | "warning" | "destructive"; border: string }
 > = {
-  info: { badge: "secondary", border: "border-slate-200 bg-white" },
+  info: { badge: "secondary", border: "border-border bg-card" },
   success: { badge: "success", border: "border-emerald-200 bg-emerald-50/40" },
   warning: { badge: "warning", border: "border-amber-200 bg-amber-50/40" },
   critical: { badge: "destructive", border: "border-red-200 bg-red-50/40" },
@@ -40,10 +40,10 @@ export function AiInsightsPanel({ days }: { days: number }) {
   const q = useAiInsights(days);
 
   return (
-    <Card className="border-slate-200 shadow-sm">
+    <Card className="border-border shadow-sm">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Sparkles className="h-5 w-5 text-slate-600" />
+          <Sparkles className="h-5 w-5 text-muted-foreground" />
           {t("insightsTitle")}
         </CardTitle>
         <CardDescription>{t("insightsDesc")}</CardDescription>
@@ -128,17 +128,17 @@ function ForecastCard({
       ? "text-emerald-600"
       : trend === "down"
         ? "text-amber-700"
-        : "text-slate-500";
+        : "text-muted-foreground";
 
   return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50/80 p-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+    <div className="rounded-xl border border-border bg-muted/50 p-4">
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </p>
       <div className="mt-1 flex items-center gap-2">
         <p
           className={cn(
-            "font-semibold text-slate-900",
+            "font-semibold text-foreground",
             isCount ? "text-2xl tabular-nums" : "text-lg tabular-nums",
           )}
         >
@@ -146,7 +146,7 @@ function ForecastCard({
         </p>
         <TrendIcon className={cn("h-5 w-5", trendColor)} />
       </div>
-      <p className="mt-1 text-xs text-slate-500">{sub}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
     </div>
   );
 }
@@ -175,9 +175,9 @@ function InsightCard({ insight }: { insight: BusinessInsight }) {
           <Badge variant={style.badge} className="font-normal capitalize">
             {categoryLabel}
           </Badge>
-          <h4 className="font-medium text-slate-900">{insight.title}</h4>
+          <h4 className="font-medium text-foreground">{insight.title}</h4>
         </div>
-        <p className="text-sm text-slate-600">{insight.message}</p>
+        <p className="text-sm text-muted-foreground">{insight.message}</p>
       </div>
       {insight.actionHref && insight.actionLabel && (
         <Button variant="outline" size="sm" className="h-9 shrink-0" asChild>

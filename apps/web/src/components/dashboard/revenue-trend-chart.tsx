@@ -16,8 +16,10 @@ import {
 } from "recharts";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import { chartHsl } from "@/lib/chart-colors";
 import { intlLocale } from "@/lib/i18n-locale";
 import { useLocaleStore } from "@/stores/locale.store";
+import { useResolvedTheme } from "@/components/theme/theme-provider";
 
 interface Props {
   data: RevenueTrendBucket[] | undefined;
@@ -28,6 +30,18 @@ export function RevenueTrendChart({ data, isLoading }: Props) {
   const t = useTranslations("dashboard");
   const tc = useTranslations("charts");
   const locale = useLocaleStore((s) => s.locale);
+  const resolvedTheme = useResolvedTheme();
+
+  const palette = React.useMemo(
+    () => ({
+      revenue: chartHsl("chart-revenue"),
+      profit: chartHsl("chart-profit"),
+      grid: chartHsl("chart-grid"),
+      axis: chartHsl("chart-axis"),
+      cursor: chartHsl("chart-cursor"),
+    }),
+    [resolvedTheme],
+  );
 
   const dateFmt = React.useCallback(
     (value: string) => shortDate(value, locale),
@@ -40,7 +54,7 @@ export function RevenueTrendChart({ data, isLoading }: Props) {
 
   if (data.length === 0) {
     return (
-      <div className="grid h-64 place-items-center text-sm text-slate-500">
+      <div className="grid h-64 place-items-center text-sm text-muted-foreground">
         {t("noSalesPeriod")}
       </div>
     );
@@ -62,26 +76,26 @@ export function RevenueTrendChart({ data, isLoading }: Props) {
         >
           <defs>
             <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#0f172a" stopOpacity={0.25} />
-              <stop offset="100%" stopColor="#0f172a" stopOpacity={0.02} />
+              <stop offset="0%" stopColor={palette.revenue} stopOpacity={0.25} />
+              <stop offset="100%" stopColor={palette.revenue} stopOpacity={0.02} />
             </linearGradient>
             <linearGradient id="profitGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10b981" stopOpacity={0.22} />
-              <stop offset="100%" stopColor="#10b981" stopOpacity={0.02} />
+              <stop offset="0%" stopColor={palette.profit} stopOpacity={0.22} />
+              <stop offset="100%" stopColor={palette.profit} stopOpacity={0.02} />
             </linearGradient>
           </defs>
-          <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" vertical={false} />
+          <CartesianGrid stroke={palette.grid} strokeDasharray="3 3" vertical={false} />
           <XAxis
             dataKey="date"
             tickFormatter={dateFmt}
-            tick={{ fill: "#64748b", fontSize: 12 }}
-            axisLine={{ stroke: "#e2e8f0" }}
+            tick={{ fill: palette.axis, fontSize: 12 }}
+            axisLine={{ stroke: palette.grid }}
             tickLine={false}
             minTickGap={24}
           />
           <YAxis
             tickFormatter={shortMoney}
-            tick={{ fill: "#64748b", fontSize: 12 }}
+            tick={{ fill: palette.axis, fontSize: 12 }}
             axisLine={false}
             tickLine={false}
             width={60}
@@ -93,15 +107,16 @@ export function RevenueTrendChart({ data, isLoading }: Props) {
                 payload={props.payload as TooltipProps<number, string>["payload"]}
                 label={props.label}
                 locale={locale}
+                palette={palette}
               />
             )}
-            cursor={{ stroke: "#cbd5e1" }}
+            cursor={{ stroke: palette.cursor }}
           />
           <Area
             type="monotone"
             dataKey="revenue"
             name={tc("revenue")}
-            stroke="#0f172a"
+            stroke={palette.revenue}
             strokeWidth={2}
             fill="url(#revGrad)"
           />
@@ -109,7 +124,7 @@ export function RevenueTrendChart({ data, isLoading }: Props) {
             type="monotone"
             dataKey="profit"
             name={tc("profit")}
-            stroke="#10b981"
+            stroke={palette.profit}
             strokeWidth={2}
             fill="url(#profitGrad)"
           />
@@ -138,7 +153,11 @@ function ChartTooltip({
   payload,
   label,
   locale,
-}: TooltipProps<number, string> & { locale: "en" | "am" }) {
+  palette,
+}: TooltipProps<number, string> & {
+  locale: "en" | "am";
+  palette: { revenue: string; profit: string };
+}) {
   const tc = useTranslations("charts");
   if (!active || !payload?.length) return null;
 
@@ -148,13 +167,13 @@ function ChartTooltip({
   const sales = Number(get("salesCount"));
 
   return (
-    <div className="rounded-md border border-slate-200 bg-white p-3 text-xs shadow-md">
-      <p className="mb-2 font-medium text-slate-900">
+    <div className="rounded-md border border-border bg-popover p-3 text-xs text-popover-foreground shadow-md">
+      <p className="mb-2 font-medium">
         {label ? shortDate(String(label), locale) : ""}
       </p>
-      <Row color="#0f172a" label={tc("revenue")} value={formatMoney(revenue)} />
-      <Row color="#10b981" label={tc("profit")} value={formatMoney(profit)} />
-      <p className="mt-1 text-slate-500">
+      <Row color={palette.revenue} label={tc("revenue")} value={formatMoney(revenue)} />
+      <Row color={palette.profit} label={tc("profit")} value={formatMoney(profit)} />
+      <p className="mt-1 text-muted-foreground">
         {tc("salesCount", { count: sales })}
       </p>
     </div>
@@ -177,8 +196,8 @@ function Row({
         style={{ backgroundColor: color }}
         aria-hidden
       />
-      <span className="text-slate-600">{label}:</span>
-      <span className="font-medium text-slate-900">{value}</span>
+      <span className="text-muted-foreground">{label}:</span>
+      <span className="font-medium">{value}</span>
     </div>
   );
 }

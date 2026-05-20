@@ -58,10 +58,13 @@ model Organization {
   @@map("organizations")
 }
 
+// MANAGER = shop manager (full shop except owner-only team).
+// INVENTORY_MANAGER = categories + products only (no POS/sales/customers/dashboard).
 enum UserRole {
   OWNER
-  MANAGER // reserved for future use
-  CASHIER // reserved for future use
+  MANAGER
+  INVENTORY_MANAGER
+  CASHIER
 }
 
 // User.id stores the Supabase `auth.users.id` (UUID). Passwords / email

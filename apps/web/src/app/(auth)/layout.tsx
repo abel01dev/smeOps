@@ -6,13 +6,13 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <main className="min-h-screen bg-gradient-to-br from-muted/50 via-background to-muted/30">
       <div className="container mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-10">
         <Link href="/" className="mx-auto mb-8 flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900 text-sm font-semibold text-white">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground">
             SO
           </div>
-          <span className="text-base font-semibold tracking-tight text-slate-900">
+          <span className="text-base font-semibold tracking-tight text-foreground">
             SME Ops
           </span>
         </Link>

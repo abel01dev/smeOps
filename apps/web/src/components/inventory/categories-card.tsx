@@ -97,10 +97,10 @@ export function CategoriesCard() {
 
   return (
     <>
-      <Card className="border-slate-200 shadow-sm">
+      <Card className="border-border shadow-sm">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Tag className="h-4 w-4 text-slate-500" />
+            <Tag className="h-4 w-4 text-muted-foreground" />
             {t("categoriesTitle")}
           </CardTitle>
           <CardDescription>{t("categoriesDesc")}</CardDescription>
@@ -157,24 +157,24 @@ export function CategoriesCard() {
           )}
 
           {!q.isLoading && !q.isError && list.length === 0 && (
-            <p className="rounded-lg bg-slate-50 px-3 py-6 text-center text-sm text-slate-500">
+            <p className="rounded-lg bg-muted/50 px-3 py-6 text-center text-sm text-muted-foreground">
               {t("noCategoriesHint")}
             </p>
           )}
 
           {!q.isLoading && !q.isError && list.length > 0 && (
-            <ul className="divide-y divide-slate-100 overflow-hidden rounded-lg border border-slate-100">
+            <ul className="divide-y divide-border overflow-hidden rounded-lg border border-border">
               {list.map((c) => (
                 <li
                   key={c.id}
-                  className="flex items-center justify-between gap-2 px-3 py-2.5 hover:bg-slate-50/70"
+                  className="flex items-center justify-between gap-2 px-3 py-2.5 hover:bg-muted/50"
                 >
                   <div className="min-w-0">
-                    <p className="truncate font-medium text-slate-900">
+                    <p className="truncate font-medium text-foreground">
                       {c.name}
                     </p>
                     {typeof c.productCount === "number" && (
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-muted-foreground">
                         {t("categoryProductCount", { count: c.productCount })}
                       </p>
                     )}
@@ -184,7 +184,7 @@ export function CategoriesCard() {
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="h-9 w-9 text-slate-500 hover:text-slate-900"
+                      className="h-9 w-9 text-muted-foreground hover:text-foreground"
                       aria-label={`Rename ${c.name}`}
                       disabled={busy}
                       onClick={() => setRenameTarget(c)}
@@ -195,7 +195,7 @@ export function CategoriesCard() {
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="h-9 w-9 text-slate-500 hover:text-red-600"
+                      className="h-9 w-9 text-muted-foreground hover:text-red-600"
                       aria-label={`Delete ${c.name}`}
                       disabled={busy}
                       onClick={() => void onDelete(c)}

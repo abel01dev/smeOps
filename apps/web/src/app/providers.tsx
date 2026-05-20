@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import { ChunkLoadRecovery } from "@/components/chunk-load-recovery";
 import { IntlProvider } from "@/components/i18n/intl-provider";
 import { LocaleHtmlSync } from "@/components/i18n/locale-html-sync";
+import { ThemeProvider, useResolvedTheme } from "@/components/theme/theme-provider";
 import { useAuthStore } from "@/stores/auth.store";
 
 function AuthHydrator({ children }: { children: React.ReactNode }) {
@@ -15,6 +16,13 @@ function AuthHydrator({ children }: { children: React.ReactNode }) {
     void hydrate();
   }, [hydrate]);
   return <>{children}</>;
+}
+
+function ThemedToaster() {
+  const resolved = useResolvedTheme();
+  return (
+    <Toaster position="top-right" richColors closeButton theme={resolved} />
+  );
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -32,9 +40,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <ChunkLoadRecovery />
       <IntlProvider>
         <LocaleHtmlSync />
-        <AuthHydrator>{children}</AuthHydrator>
+        <ThemeProvider>
+          <AuthHydrator>{children}</AuthHydrator>
+        </ThemeProvider>
       </IntlProvider>
-      <Toaster position="top-right" richColors closeButton />
+      <ThemedToaster />
     </QueryClientProvider>
   );
 }

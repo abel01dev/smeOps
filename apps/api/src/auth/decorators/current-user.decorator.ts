@@ -13,7 +13,7 @@ export interface RequestUser {
   id: string;
   email: string;
   name: string;
-  role: "OWNER" | "MANAGER" | "CASHIER";
+  role: "OWNER" | "MANAGER" | "INVENTORY_MANAGER" | "CASHIER";
   organizationId: string;
 }
 

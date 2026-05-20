@@ -5,6 +5,7 @@ import {
   Package,
   Receipt,
   ScanLine,
+  UserCog,
   Users,
 } from "lucide-react";
 
@@ -13,7 +14,14 @@ import { ROUTE_ACCESS } from "@/lib/roles";
 
 export interface NavItem {
   href: string;
-  labelKey: "dashboard" | "assistant" | "pos" | "inventory" | "customers" | "sales";
+  labelKey:
+    | "dashboard"
+    | "assistant"
+    | "pos"
+    | "inventory"
+    | "customers"
+    | "sales"
+    | "team";
   icon: LucideIcon;
   roles: AppRole[];
 }
@@ -42,6 +50,12 @@ export const APP_NAV: NavItem[] = [
     labelKey: "inventory",
     icon: Package,
     roles: ROUTE_ACCESS["/inventory"],
+  },
+  {
+    href: "/team",
+    labelKey: "team",
+    icon: UserCog,
+    roles: ROUTE_ACCESS["/team"],
   },
   {
     href: "/customers",

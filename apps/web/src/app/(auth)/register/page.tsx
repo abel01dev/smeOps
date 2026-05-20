@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
+import { ThemeSwitcher } from "@/components/theme/theme-switcher";
 import { authApi } from "@/lib/api/auth";
 import { useAuthStore } from "@/stores/auth.store";
 
@@ -53,7 +55,11 @@ export default function RegisterPage() {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="space-y-3">
+        <div className="flex justify-end gap-2">
+          <ThemeSwitcher />
+          <LanguageSwitcher />
+        </div>
         <CardTitle>{t("registerTitle")}</CardTitle>
         <CardDescription>{t("registerSubtitle")}</CardDescription>
       </CardHeader>
@@ -113,9 +119,9 @@ export default function RegisterPage() {
             {isSubmitting ? t("registering") : t("register")}
           </Button>
         </form>
-        <p className="mt-6 text-center text-sm text-slate-600">
+        <p className="mt-6 text-center text-sm text-muted-foreground">
           {t("haveAccount")}{" "}
-          <Link href="/login" className="font-medium text-slate-900 hover:underline">
+          <Link href="/login" className="font-medium text-primary hover:underline">
             {t("signInLink")}
           </Link>
         </p>

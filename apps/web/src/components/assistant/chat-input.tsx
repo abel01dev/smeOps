@@ -44,8 +44,8 @@ export function ChatInput({
   };
 
   return (
-    <div className="border-t border-slate-200 bg-white px-3 py-3 md:px-6">
-      <div className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-2 shadow-sm focus-within:border-slate-300 focus-within:ring-1 focus-within:ring-slate-200">
+    <div className="border-t border-border bg-card px-3 py-3 md:px-6">
+      <div className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border border-border bg-muted/50 p-2 shadow-sm focus-within:border-ring/40 focus-within:ring-1 focus-within:ring-border">
         <Textarea
           ref={ref}
           value={value}
@@ -82,7 +82,7 @@ export function ChatInput({
           </Button>
         )}
       </div>
-      <p className="mx-auto mt-2 max-w-3xl text-center text-[11px] text-slate-400">
+      <p className="mx-auto mt-2 max-w-3xl text-center text-[11px] text-muted-foreground/80">
         {t("disclaimer")}
       </p>
     </div>

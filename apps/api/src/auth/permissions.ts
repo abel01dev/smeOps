@@ -1,16 +1,22 @@
 import { UserRole } from "@prisma/client";
 
+const O = UserRole.OWNER;
+const M = UserRole.MANAGER;
+const I = UserRole.INVENTORY_MANAGER;
+const C = UserRole.CASHIER;
+
 /** Roles allowed per API resource — extend here as features grow. */
 export const API_ROLE_ACCESS = {
-  dashboard: [UserRole.OWNER, UserRole.MANAGER],
-  aiInsights: [UserRole.OWNER, UserRole.MANAGER],
-  aiAssistant: [UserRole.OWNER, UserRole.MANAGER],
-  categoriesRead: [UserRole.OWNER, UserRole.MANAGER, UserRole.CASHIER],
-  categoriesWrite: [UserRole.OWNER, UserRole.MANAGER],
-  productsRead: [UserRole.OWNER, UserRole.MANAGER, UserRole.CASHIER],
-  productsWrite: [UserRole.OWNER, UserRole.MANAGER],
-  customersRead: [UserRole.OWNER, UserRole.MANAGER, UserRole.CASHIER],
-  customersWrite: [UserRole.OWNER, UserRole.MANAGER, UserRole.CASHIER],
-  customersDelete: [UserRole.OWNER, UserRole.MANAGER],
-  sales: [UserRole.OWNER, UserRole.MANAGER, UserRole.CASHIER],
+  dashboard: [O, M],
+  aiInsights: [O, M],
+  aiAssistant: [O, M],
+  categoriesRead: [O, M, C, I],
+  categoriesWrite: [O, M, I],
+  productsRead: [O, M, C, I],
+  productsWrite: [O, M, I],
+  customersRead: [O, M, C],
+  customersWrite: [O, M, C],
+  customersDelete: [O, M],
+  sales: [O, M, C],
+  employees: [O],
 } as const satisfies Record<string, UserRole[]>;

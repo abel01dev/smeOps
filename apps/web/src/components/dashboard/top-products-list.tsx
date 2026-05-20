@@ -28,7 +28,7 @@ export function TopProductsList({ data, isLoading }: Props) {
   }
 
   if (data.length === 0) {
-    return <p className="text-sm text-slate-500">{t("noSalesRecorded")}</p>;
+    return <p className="text-sm text-muted-foreground">{t("noSalesRecorded")}</p>;
   }
 
   const max = Math.max(...data.map((p) => Number(p.revenue)));
@@ -41,21 +41,21 @@ export function TopProductsList({ data, isLoading }: Props) {
         return (
           <li key={p.productId} className="space-y-1.5">
             <div className="flex items-baseline justify-between gap-3 text-sm">
-              <span className="truncate font-medium text-slate-900">
+              <span className="truncate font-medium text-foreground">
                 {p.productName}
               </span>
-              <span className="shrink-0 tabular-nums text-slate-700">
+              <span className="shrink-0 tabular-nums text-foreground">
                 {formatMoney(p.revenue)}
               </span>
             </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full rounded-full bg-slate-900"
+                className="h-full rounded-full bg-primary"
                 style={{ width: `${pct}%` }}
                 aria-hidden
               />
             </div>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               {t("soldProfit", {
                 qty: p.quantitySold,
                 profit: formatMoney(p.profit),
