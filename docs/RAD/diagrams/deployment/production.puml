@@ -1,5 +1,5 @@
 @startuml SME_Ops_Deployment
-title SME Ops — Deployment diagram
+title SME Ops - Deployment Diagram (3.1.2)
 
 node "Client" {
   artifact "Web Browser" as Browser

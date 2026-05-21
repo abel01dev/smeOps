@@ -1,0 +1,47 @@
+@startuml SME_Ops_Subsystem
+title SME Ops - Subsystem Diagram (3.1)
+
+skinparam componentStyle rectangle
+
+package "Client Tier" {
+  [Web Browser] as Browser
+}
+
+package "Presentation Tier" {
+  [Next.js Web App\n(Vercel)] as Web
+}
+
+package "Application Tier" {
+  [NestJS REST API\n(Railway)] as API
+}
+
+package "Security Tier" {
+  [Supabase Auth\nJWT / JWKS] as Auth
+}
+
+package "Data Tier" {
+  database "PostgreSQL\n(Supabase)" as DB
+}
+
+package "External Services" {
+  [OpenRouter LLM API] as LLM
+}
+
+Browser --> Web : HTTPS\nUI + API client
+Web --> API : REST /api/v1\nBearer JWT
+API --> Auth : register, login,\nverify token
+API --> DB : Prisma ORM\nSQL queries
+API ..> LLM : optional\nAI chat (SSE)
+
+note right of API
+  Provides: POS, inventory,
+  customers, expenses,
+  dashboard, team, AI
+end note
+
+note bottom of Web
+  Accepts: user input
+  Provides: pages per role
+end note
+
+@enduml

@@ -1,0 +1,97 @@
+@startuml SME_Ops_Design_Class_API
+title SME Ops - Design Class Model (API Layer) - 3.2.1
+
+skinparam classAttributeIconSize 0
+
+class PrismaService {
+  - prisma: PrismaClient
+  + onModuleInit(): void
+  + client: PrismaClient
+}
+
+class AuthService {
+  - prisma: PrismaService
+  - supabase: SupabaseClient
+  + register(input: RegisterInput): Promise<AuthResponse>
+  + login(input: LoginInput): Promise<AuthResponse>
+  + refresh(token: string): Promise<TokenPair>
+  + me(userId: string): Promise<AuthUser>
+}
+
+class SalesService {
+  - prisma: PrismaService
+  + create(orgId, cashierId, dto): Promise<Sale>
+  + list(orgId, filters): Promise<PaginatedSales>
+  + findOne(orgId, id): Promise<Sale>
+}
+
+class ProductsService {
+  - prisma: PrismaService
+  + create(orgId, dto): Promise<Product>
+  + update(orgId, id, dto): Promise<Product>
+  + findAll(orgId, query): Promise<PaginatedProducts>
+  + archive(orgId, id): Promise<Product>
+}
+
+class DashboardService {
+  - prisma: PrismaService
+  + summary(orgId): Promise<DashboardSummary>
+  + revenueTrend(orgId, days): Promise<TrendPoint[]>
+  + topProducts(orgId, days, limit): Promise<TopProduct[]>
+}
+
+class ExpensesService {
+  - prisma: PrismaService
+  + create(orgId, userId, dto): Promise<Expense>
+  + list(orgId, filters): Promise<PaginatedExpenses>
+}
+
+class EmployeesService {
+  - prisma: PrismaService
+  + list(orgId): Promise<User[]>
+  + invite(orgId, dto): Promise<User>
+  + changeRole(orgId, id, role): Promise<User>
+}
+
+class AiService {
+  - prisma: PrismaService
+  + getInsights(orgId, days): Promise<InsightCard[]>
+}
+
+class AiAssistantService {
+  - prisma: PrismaService
+  - context: AiContextService
+  + streamChat(userId, orgId, message): Observable<SSE>
+}
+
+class SupabaseAuthGuard {
+  + canActivate(context): Promise<boolean>
+}
+
+class RolesGuard {
+  + canActivate(context): Promise<boolean>
+}
+
+class SalesController {
+  - salesService: SalesService
+  + create(dto): Promise<Sale>
+  + list(query): Promise<PaginatedSales>
+  + findOne(id): Promise<Sale>
+}
+
+SalesController --> SalesService
+SalesService --> PrismaService
+AuthService --> PrismaService
+ProductsService --> PrismaService
+DashboardService --> PrismaService
+ExpensesService --> PrismaService
+EmployeesService --> PrismaService
+AiService --> PrismaService
+AiAssistantService --> PrismaService
+AiAssistantService --> DashboardService
+
+SupabaseAuthGuard ..> AuthService : validates JWT
+SalesController ..> SupabaseAuthGuard
+SalesController ..> RolesGuard
+
+@enduml

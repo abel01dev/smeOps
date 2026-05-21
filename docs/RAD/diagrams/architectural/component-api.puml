@@ -1,0 +1,61 @@
+@startuml SME_Ops_Component_API
+title SME Ops - API Component Diagram (3.1.1)
+
+skinparam componentStyle rectangle
+
+package "NestJS API (apps/api)" {
+
+  component [AppModule] as App
+  component [ConfigModule] as Config
+  component [PrismaModule] as PrismaMod
+  component [AuthModule] as Auth
+  component [CategoriesModule] as Cat
+  component [ProductsModule] as Prod
+  component [CustomersModule] as Cust
+  component [SalesModule] as Sales
+  component [DashboardModule] as Dash
+  component [ExpensesModule] as Exp
+  component [EmployeesModule] as Emp
+  component [AiModule] as Ai
+
+  component [SupabaseAuthGuard] as Guard
+  component [RolesGuard] as Roles
+  component [ZodValidationPipe] as Zod
+}
+
+cloud "Supabase Auth" as SAuth
+database "PostgreSQL" as DB
+cloud "OpenRouter" as LLM
+
+App --> Config
+App --> PrismaMod
+App --> Auth
+App --> Cat
+App --> Prod
+App --> Cust
+App --> Sales
+App --> Dash
+App --> Exp
+App --> Emp
+App --> Ai
+App --> Guard
+App --> Roles
+App --> Zod
+
+Auth --> PrismaMod
+Auth --> SAuth
+Cat --> PrismaMod
+Prod --> PrismaMod
+Cust --> PrismaMod
+Sales --> PrismaMod
+Dash --> PrismaMod
+Exp --> PrismaMod
+Emp --> PrismaMod
+Emp --> SAuth
+Ai --> PrismaMod
+Ai --> Dash
+Ai ..> LLM
+
+PrismaMod --> DB
+
+@enduml

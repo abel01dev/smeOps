@@ -700,6 +700,51 @@ See [`docs/uml/class-diagram.puml`](../uml/class-diagram.puml).
 
 See **[ui-screen-catalogue.md](./ui-screen-catalogue.md)**. Replace placeholder figures with exported PNGs from the running application.
 
+---
+
+# 3. System Design
+
+## 3.1 Architectural design
+
+SME Ops uses a **three-tier client-server** architecture: Next.js web (presentation), NestJS API (application), PostgreSQL + Supabase Auth (data and security). Optional OpenRouter provides LLM chat.
+
+### 3.1.1 Component modeling
+
+| Diagram | File |
+|---------|------|
+| API modules and dependencies | [`diagrams/architectural/component-api.puml`](./diagrams/architectural/component-api.puml) |
+| Web UI modules and API client | [`diagrams/architectural/component-web.puml`](./diagrams/architectural/component-web.puml) |
+
+### 3.1.2 Deployment modeling
+
+| Diagram | File |
+|---------|------|
+| Production deployment | [`diagrams/deployment/production.puml`](./diagrams/deployment/production.puml) |
+
+**Subsystem diagram (services and coupling):** [`diagrams/architectural/subsystem.puml`](./diagrams/architectural/subsystem.puml).
+
+---
+
+## 3.2 Detail design
+
+### 3.2.1 Design class model
+
+Analysis domain classes (entities only) are in §2.3.8. **Design class models** add methods, visibility, and layer separation:
+
+| Layer | File |
+|-------|------|
+| API (controllers, services, guards) | [`diagrams/design-class/api-layer.puml`](./diagrams/design-class/api-layer.puml) |
+| Web (pages, stores, API client) | [`diagrams/design-class/web-layer.puml`](./diagrams/design-class/web-layer.puml) |
+
+### 3.2.2 Persistent model
+
+The system uses a **relational database** (PostgreSQL via Prisma), not an object-oriented database. The persistent model shows tables, keys, foreign keys, and multiplicity:
+
+| Diagram | File |
+|---------|------|
+| ER / physical data model | [`diagrams/persistence/er-model.puml`](./diagrams/persistence/er-model.puml) |
+
+Source of truth: `apps/api/prisma/schema.prisma`.
 
 ---
 
