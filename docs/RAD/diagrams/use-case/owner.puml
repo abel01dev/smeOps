@@ -1,12 +1,12 @@
 @startuml SME_Ops_Use_Case_Owner
-title SME Ops — Use Cases: Owner (inherits Manager)
+title SME Ops - Use Cases: Owner (inherits Manager)
 
 skinparam shadowing false
 left to right direction
 
 actor Owner as owner
-actor Manager as manager
-manager <|-- owner
+actor Manager as mgr
+mgr <|-- owner
 
 rectangle "SME Ops" {
   usecase "UC19 Dashboard KPIs" as UC19

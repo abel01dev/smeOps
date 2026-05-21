@@ -1,28 +1,28 @@
 @startuml SME_Ops_Use_Case_By_Actor
-title SME Ops — Actors & Primary Use Case Groups
+title SME Ops - Actors and Primary Use Case Groups
 
 skinparam shadowing false
 
-actor Guest
-actor Owner
-actor Manager
+actor Guest as guest
+actor Owner as owner
+actor Manager as mgr
 actor "Inventory Mgr" as IM
-actor Cashier
+actor Cashier as cashier
 
-Manager <|-- Owner
+mgr <|-- owner
 
-Guest --> (Register UC1)
-Guest --> (Login UC2)
+guest --> (Register UC1)
+guest --> (Login UC2)
 
-Owner --> (Operations)
-Owner --> (Team UC26-28)
+owner --> (Operations)
+owner --> (Team UC26-28)
 
-Manager --> (Operations)
+mgr --> (Operations)
 
 IM --> (Inventory UC3-5)
 
-Cashier --> (POS UC6)
-Cashier --> (Customers UC12-13)
+cashier --> (POS UC6)
+cashier --> (Customers UC12-13)
 
 rectangle Operations {
   usecase Dashboard

@@ -1,8 +1,8 @@
 @startuml SME_Ops_Use_Case_Manager
-title SME Ops — Use Cases: Manager
+title SME Ops - Use Cases: Manager
 
 left to right direction
-actor Manager as manager
+actor Manager as mgr
 
 rectangle "SME Ops" {
   usecase "UC19 Dashboard" as UC19
@@ -14,16 +14,16 @@ rectangle "SME Ops" {
   usecase "UC23..UC25 AI" as UCAI
 }
 
-manager --> UC19
-manager --> UC6
-manager --> UC10
-manager --> UCINV
-manager --> UCCUST
-manager --> UCEXP
-manager --> UCAI
+mgr --> UC19
+mgr --> UC6
+mgr --> UC10
+mgr --> UCINV
+mgr --> UCCUST
+mgr --> UCEXP
+mgr --> UCAI
 
-note right of manager
-  No UC26–UC28 (team)
+note right of mgr
+  No UC26-UC28 (team)
 end note
 
 @enduml

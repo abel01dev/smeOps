@@ -1,5 +1,5 @@
 @startuml SME_Ops_Use_Case_Overview
-title SME Ops — Use Case Diagram (Overview)\n§2.3.2.1 — maps to FR-01..FR-21
+title SME Ops - Use Case Diagram (Overview)\n2.3.2.1 - FR-01 to FR-21
 
 skinparam shadowing false
 skinparam packageStyle rectangle
@@ -8,67 +8,67 @@ left to right direction
 
 actor Guest as guest
 actor Owner as owner
-actor Manager as manager
-actor "Inventory\nManager" as invmgr
+actor Manager as mgr
+actor "Inventory Manager" as invmgr
 actor Cashier as cashier
 
-manager <|-- owner : <<generalization>>
+mgr <|-- owner
 
-rectangle "SME Ops Platform\n(multi-tenant SaaS)" as system {
+rectangle "SME Ops Platform" as system {
 
   package "Authentication" {
-    usecase "UC1\nRegister org\n+ owner" as UC1
-    usecase "UC2\nLogin" as UC2
-    usecase "UC30\nRefresh token" as UC30
-    usecase "UC31\nView profile" as UC31
+    usecase "UC1 Register org and owner" as UC1
+    usecase "UC2 Login" as UC2
+    usecase "UC30 Refresh token" as UC30
+    usecase "UC31 View profile" as UC31
   }
 
-  package "Dashboard & Analytics" {
-    usecase "UC19\nView KPI summary" as UC19
-    usecase "UC21\nRevenue trend" as UC21
-    usecase "UC22\nTop products" as UC22
-    usecase "UC20\nGross & net profit" as UC20
-    usecase "UC15\nLow-stock alerts" as UC15
+  package "Dashboard and Analytics" {
+    usecase "UC19 View KPI summary" as UC19
+    usecase "UC21 Revenue trend" as UC21
+    usecase "UC22 Top products" as UC22
+    usecase "UC20 Gross and net profit" as UC20
+    usecase "UC15 Low-stock alerts" as UC15
   }
 
-  package "Point of Sale & Sales" {
-    usecase "UC6\nRecord sale\n(POS)" as UC6
-    usecase "UC7\nValidate stock" as UC7
-    usecase "UC8\nDiscount & payment" as UC8
-    usecase "UC9\nDecrement stock" as UC9
-    usecase "UC10\nSales history" as UC10
-    usecase "UC11\nSale detail" as UC11
+  package "Point of Sale and Sales" {
+    usecase "UC6 Record sale (POS)" as UC6
+    usecase "UC7 Validate stock" as UC7
+    usecase "UC8 Discount and payment" as UC8
+    usecase "UC9 Decrement stock" as UC9
+    usecase "UC10 Sales history" as UC10
+    usecase "UC11 Sale detail" as UC11
   }
 
   package "Inventory" {
-    usecase "UC3\nManage categories" as UC3
-    usecase "UC4\nManage products" as UC4
-    usecase "UC5\nArchive product" as UC5
+    usecase "UC3 Manage categories" as UC3
+    usecase "UC4 Manage products" as UC4
+    usecase "UC5 Archive product" as UC5
   }
 
   package "Customers" {
-    usecase "UC12\nCreate/update\ncustomer" as UC12
-    usecase "UC14\nDelete customer" as UC14
-    usecase "UC13\nLink customer\nto sale" as UC13
+    usecase "UC12 Create or update customer" as UC12
+    usecase "UC14 Delete customer" as UC14
+    usecase "UC13 Link customer to sale" as UC13
   }
 
   package "Operating Expenses" {
-    usecase "UC16\nExpense categories" as UC16
-    usecase "UC17\nRecord expense" as UC17
-    usecase "UC18\nEdit/delete expense" as UC18
-    usecase "UC29\nAuto-seed categories" as UC29
+    usecase "UC16 Expense categories" as UC16
+    usecase "UC17 Record expense" as UC17
+    usecase "UC18 Edit or delete expense" as UC18
+    usecase "UC29 Auto-seed categories" as UC29
   }
 
   package "Team" {
-    usecase "UC26\nList employees" as UC26
-    usecase "UC27\nInvite employee" as UC27
-    usecase "UC28\nChange role" as UC28
+    usecase "UC26 List employees" as UC26
+    usecase "UC27 Invite employee" as UC27
+    usecase "UC28 Change role" as UC28
   }
 
   package "AI Assistant" {
-    usecase "UC23\nAI insights" as UC23
-    usecase "UC24\nAI chat" as UC24
-    usecase "UC25\nConversations" as UC25
+    usecase "UC23 AI insights" as UC23
+    usecase "UC24 AI chat" as UC24
+    usecase "UC25 Conversations" as UC25
   }
 }
 
@@ -84,7 +84,7 @@ UC29 ..> UC16 : <<extend>>
 guest --> UC1
 guest --> UC2
 owner --> UC2
-manager --> UC2
+mgr --> UC2
 invmgr --> UC2
 cashier --> UC2
 
@@ -109,19 +109,19 @@ owner --> UC23
 owner --> UC24
 owner --> UC25
 
-manager --> UC19
-manager --> UC21
-manager --> UC22
-manager --> UC6
-manager --> UC10
-manager --> UC3
-manager --> UC4
-manager --> UC12
-manager --> UC14
-manager --> UC16
-manager --> UC17
-manager --> UC23
-manager --> UC24
+mgr --> UC19
+mgr --> UC21
+mgr --> UC22
+mgr --> UC6
+mgr --> UC10
+mgr --> UC3
+mgr --> UC4
+mgr --> UC12
+mgr --> UC14
+mgr --> UC16
+mgr --> UC17
+mgr --> UC23
+mgr --> UC24
 
 invmgr --> UC3
 invmgr --> UC4

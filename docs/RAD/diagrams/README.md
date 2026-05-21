@@ -28,6 +28,13 @@ java -jar plantuml.jar -tpng use-case/*.puml state/*.puml activity/*.puml sequen
 
 Save PNGs under `images/` and reference in `RAD.md`.
 
+### Troubleshooting (Alt+D preview errors)
+
+1. **`manager` alias** — Do not use `as manager`; it is a PlantUML reserved word. Use `as mgr`.
+2. **`&` in labels** — Prefer `and` in package and use case names.
+3. **Unicode** — Avoid em dashes (`—`) and section symbols (`§`) in titles if preview fails.
+4. **Java** — PlantUML extension needs a JRE installed; set `plantuml.java` in VS Code settings if needed.
+
 ## Traceability
 
 | Lab UC | Sequence | Activity |
