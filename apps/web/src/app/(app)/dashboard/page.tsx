@@ -5,7 +5,6 @@ import {
   AlertTriangle,
   Banknote,
   Package,
-  ReceiptText,
   TrendingUp,
   Wallet,
 } from "lucide-react";
@@ -14,8 +13,10 @@ import * as React from "react";
 
 import { AiInsightsPanel } from "@/components/dashboard/ai-insights-panel";
 import { KpiCard } from "@/components/dashboard/kpi-card";
+import { InventoryStatusChart } from "@/components/dashboard/inventory-status-chart";
 import { LowStockList } from "@/components/dashboard/low-stock-list";
 import { RevenueTrendChart } from "@/components/dashboard/revenue-trend-chart";
+import { SalesByCategoryChart } from "@/components/dashboard/sales-by-category-chart";
 import { TopProductsList } from "@/components/dashboard/top-products-list";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,8 +29,10 @@ import {
 import { cn } from "@/lib/utils";
 import {
   useDashboardSummary,
+  useInventoryStatus,
   useLowStockProducts,
   useRevenueTrend,
+  useSalesByCategory,
   useTopProducts,
 } from "@/hooks/use-dashboard";
 import { useAuthStore } from "@/stores/auth.store";
@@ -44,6 +47,8 @@ export default function DashboardPage() {
   const trend = useRevenueTrend(days);
   const top = useTopProducts(days, 5);
   const lowStock = useLowStockProducts(5);
+  const salesByCategory = useSalesByCategory(days);
+  const inventoryStatus = useInventoryStatus();
 
   const periods = [
     { label: t("period7"), days: 7 },
@@ -232,113 +237,33 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-base">{t("monthGlance")}</CardTitle>
-            <CardDescription>{t("monthGlanceDesc")}</CardDescription>
+            <CardTitle className="text-base">{t("salesByCategory")}</CardTitle>
+            <CardDescription>
+              {t("salesByCategoryDesc", { days })}
+            </CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            <Stat
-              icon={Banknote}
-              label={tc("revenue")}
-              value={
-                summary.data
-                  ? formatMoney(summary.data.month.revenue)
-                  : tc("noData")
-              }
-              loading={summary.isLoading}
-            />
-            <Stat
-              icon={TrendingUp}
-              label={tc("profit")}
-              value={
-                summary.data
-                  ? formatMoney(summary.data.month.profit)
-                  : tc("noData")
-              }
-              loading={summary.isLoading}
-              tone="success"
-            />
-            <Stat
-              icon={Wallet}
-              label={t("monthExpenses")}
-              value={
-                summary.data
-                  ? formatMoney(summary.data.month.operatingExpenses)
-                  : tc("noData")
-              }
-              loading={summary.isLoading}
-            />
-            <Stat
-              icon={TrendingUp}
-              label={t("monthNetProfit")}
-              value={
-                summary.data
-                  ? formatMoney(summary.data.month.netProfit)
-                  : tc("noData")
-              }
-              loading={summary.isLoading}
-              tone={
-                summary.data && Number(summary.data.month.netProfit) < 0
-                  ? "warning"
-                  : "success"
-              }
-            />
-            <Stat
-              icon={ReceiptText}
-              label={t("salesToday")}
-              value={
-                summary.data
-                  ? summary.data.today.salesCount.toString()
-                  : tc("noData")
-              }
-              loading={summary.isLoading}
+          <CardContent>
+            <SalesByCategoryChart
+              data={salesByCategory.data}
+              isLoading={salesByCategory.isLoading}
             />
           </CardContent>
         </Card>
-      </div>
-    </div>
-  );
-}
 
-function Stat({
-  icon: Icon,
-  label,
-  value,
-  loading,
-  tone = "default",
-}: {
-  icon: typeof Banknote;
-  label: string;
-  value: React.ReactNode;
-  loading?: boolean;
-  tone?: "default" | "success";
-}) {
-  return (
-    <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/40 p-4">
-      <div
-        className={cn(
-          "flex h-9 w-9 shrink-0 items-center justify-center rounded-md",
-          tone === "success"
-            ? "bg-emerald-100 text-emerald-700"
-            : "bg-muted text-foreground",
-        )}
-        aria-hidden
-      >
-        <Icon className="h-4 w-4" />
-      </div>
-      <div className="min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {label}
-        </p>
-        <p
-          className={cn(
-            "mt-1 truncate text-lg font-semibold tracking-tight text-foreground",
-            loading && "h-6 w-24 animate-pulse rounded bg-muted",
-          )}
-        >
-          {loading ? "" : value}
-        </p>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">{t("inventoryStatusChart")}</CardTitle>
+            <CardDescription>{t("inventoryStatusDesc")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <InventoryStatusChart
+              data={inventoryStatus.data}
+              isLoading={inventoryStatus.isLoading}
+            />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

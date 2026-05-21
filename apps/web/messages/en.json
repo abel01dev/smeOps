@@ -149,8 +149,15 @@
     "topProductsDesc": "By revenue over the last {days} days.",
     "lowStockTitle": "Low stock",
     "lowStockDesc": "Restock these soon.",
-    "monthGlance": "This month at a glance",
-    "monthGlanceDesc": "Last 30-day rolling totals.",
+    "salesByCategory": "Sales by category",
+    "salesByCategoryDesc": "Revenue share over the last {days} days.",
+    "inventoryStatusChart": "Inventory alerts",
+    "inventoryStatusDesc": "Active products by stock status.",
+    "stockInStock": "In stock",
+    "stockLow": "Low stock",
+    "stockOut": "Out of stock",
+    "noCategorySales": "No sales in this period to show categories.",
+    "noActiveProducts": "No active products.",
     "salesToday": "Sales today",
     "noSalesPeriod": "No sales yet in this period.",
     "noTopProducts": "No product sales in this period.",
@@ -209,7 +216,8 @@
   "charts": {
     "revenue": "Revenue",
     "profit": "Profit",
-    "salesCount": "{count, plural, one {# sale} other {# sales}}"
+    "salesCount": "{count, plural, one {# sale} other {# sales}}",
+    "share": "{percent}% of total"
   },
   "pos": {
     "currentSale": "Current sale",

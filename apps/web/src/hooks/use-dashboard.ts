@@ -32,6 +32,22 @@ export function useTopProducts(days: number, limit = 5) {
   });
 }
 
+export function useSalesByCategory(days: number) {
+  return useQuery({
+    queryKey: ["dashboard", "sales-by-category", days],
+    queryFn: () => dashboardApi.salesByCategory(days),
+    staleTime: 60_000,
+  });
+}
+
+export function useInventoryStatus() {
+  return useQuery({
+    queryKey: ["dashboard", "inventory-status"],
+    queryFn: () => dashboardApi.inventoryStatus(),
+    staleTime: 60_000,
+  });
+}
+
 export function useLowStockProducts(limit = 5) {
   return useQuery({
     queryKey: ["dashboard", "low-stock", limit],

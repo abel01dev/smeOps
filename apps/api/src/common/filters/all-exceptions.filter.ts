@@ -108,6 +108,13 @@ function mapPrismaError(
           "Database schema is out of date. Run: pnpm --filter @sme/api exec prisma migrate deploy",
         error: "ServiceUnavailable",
       };
+    case "P1001":
+      return {
+        statusCode: HttpStatus.SERVICE_UNAVAILABLE,
+        message:
+          "Cannot reach the database server. Check Supabase is running (unpause project), your internet/VPN, and apps/api/.env DATABASE_URL — use Session pooler port 5432 or the direct db.*.supabase.co host (see apps/api/.env.example).",
+        error: "ServiceUnavailable",
+      };
     default:
       return {
         statusCode: HttpStatus.BAD_REQUEST,

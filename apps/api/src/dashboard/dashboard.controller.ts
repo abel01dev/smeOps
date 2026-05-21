@@ -47,4 +47,23 @@ export class DashboardController {
   ) {
     return this.dashboard.topProducts(organizationId, query.days, query.limit);
   }
+
+  @Get("sales-by-category")
+  @ApiOperation({
+    summary: "Revenue share by product category for the last N days",
+  })
+  salesByCategory(
+    @OrganizationId() organizationId: string,
+    @Query() query: TrendQueryDto,
+  ) {
+    return this.dashboard.salesByCategory(organizationId, query.days);
+  }
+
+  @Get("inventory-status")
+  @ApiOperation({
+    summary: "Active product counts: in stock, low stock, out of stock",
+  })
+  inventoryStatus(@OrganizationId() organizationId: string) {
+    return this.dashboard.inventoryStatusBreakdown(organizationId);
+  }
 }

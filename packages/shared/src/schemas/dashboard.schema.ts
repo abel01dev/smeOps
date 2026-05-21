@@ -56,3 +56,16 @@ export interface TopProduct {
   revenue: string;
   profit: string;
 }
+
+export interface SalesByCategorySlice {
+  categoryId: string | null;
+  categoryName: string;
+  revenue: string;
+  quantitySold: number;
+}
+
+export interface InventoryStatusBreakdown {
+  inStock: number;
+  lowStock: number;
+  outOfStock: number;
+}
