@@ -81,9 +81,13 @@ async function bootstrap(): Promise<void> {
     });
   }
 
-  await app.listen(port);
+  await app.listen(port, "0.0.0.0");
   // eslint-disable-next-line no-console
   console.log(`API listening on http://localhost:${port} (docs at /docs)`);
+  // eslint-disable-next-line no-console
+  console.log(
+    `Mobile/Expo Go: set EXPO_PUBLIC_API_URL=http://<this-machine-LAN-IP>:${port}/api/v1`,
+  );
 }
 
 bootstrap();

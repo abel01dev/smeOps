@@ -10,12 +10,13 @@
     "start:prod": "node dist/main.js",
     "lint": "eslint \"{src,test}/**/*.ts\" --max-warnings=0",
     "typecheck": "tsc --noEmit",
+    "check:env": "tsx scripts/check-env.ts",
     "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
+    "db:migrate": "pnpm check:env && prisma migrate dev",
     "db:migrate:prod": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "db:seed": "tsx --env-file=.env prisma/seed.ts"
+    "db:seed": "pnpm check:env && tsx --env-file=.env prisma/seed.ts"
   },
   "prisma": {
     "seed": "tsx --env-file=.env prisma/seed.ts"

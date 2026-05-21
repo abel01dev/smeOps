@@ -4,7 +4,7 @@
 
 A multi-tenant SaaS platform that gives buy-and-resell businesses (mini markets, electronics
 shops, village shops) a fast POS, inventory, customers, dashboards, and AI-driven business
-insights — built around a desktop-first selling experience (mobile layout deferred).
+insights — with a native mobile app for field staff and cashiers.
 
 ## Monorepo layout
 
@@ -12,7 +12,8 @@ insights — built around a desktop-first selling experience (mobile layout defe
 sme-ops-platform/
 ├── apps/
 │   ├── api/        # NestJS + Prisma + PostgreSQL
-│   └── web/        # Next.js 15 + Tailwind + shadcn/ui
+│   ├── web/        # Next.js 15 + Tailwind + shadcn/ui
+│   └── mobile/     # Expo (React Native) + NativeWind
 ├── packages/
 │   └── shared/     # Zod schemas + shared TypeScript types
 └── docs/
@@ -44,10 +45,12 @@ sme-ops-platform/
 # 1. Install dependencies
 pnpm install
 
-# 2. Configure environment
+# 2. Configure environment (required — placeholders will not work)
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
-# Edit DATABASE_URL, DIRECT_URL, SUPABASE_* keys (see apps/api/.env.example)
+cp apps/mobile/.env.example apps/mobile/.env
+# Edit apps/api/.env with real Supabase values (Dashboard → Settings → Database & API)
+pnpm check:env   # fails fast with a clear message if still using examples
 
 # 3. Generate Prisma client + run migrations
 pnpm db:generate
@@ -65,6 +68,26 @@ pnpm dev
 | Web | http://localhost:3000 |
 | API | http://localhost:4000 |
 | Swagger | http://localhost:4000/docs |
+| Mobile | Expo dev server (`pnpm dev:mobile`) |
+
+### Mobile app (Expo)
+
+```bash
+pnpm dev:mobile
+```
+
+Set `EXPO_PUBLIC_API_URL` in `apps/mobile/.env`. On a physical device, use your machine LAN IP (e.g. `http://192.168.1.10:4000/api/v1`) instead of `localhost`.
+
+**Role-based navigation**
+
+| Role | Tabs | FAB |
+|------|------|-----|
+| Owner | Dashboard, AI, Sales, Profile | POS |
+| Manager | Same (no Team in Profile) | POS |
+| Cashier | Customers, Sales | POS |
+| Inventory manager | Inventory only | Add product |
+
+**Manual test matrix:** register owner → login each demo role → POS checkout → dashboard refresh → AI chat stream → inventory CRUD → team invite (owner).
 
 ## Demo accounts
 

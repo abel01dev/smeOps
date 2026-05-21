@@ -1,9 +1,4 @@
-import {
-  canAccessRoute,
-  DEFAULT_ROUTE_BY_ROLE,
-  ROUTE_ACCESS,
-  type AppRole,
-} from "@sme/shared";
+import type { AuthUser } from "./schemas/auth.schema";
 
 export type AppRole = AuthUser["role"];
 
@@ -15,7 +10,6 @@ export const ROUTE_ACCESS: Record<string, AppRole[]> = {
   "/customers": ["OWNER", "MANAGER", "CASHIER"],
   "/sales": ["OWNER", "MANAGER", "CASHIER"],
   "/team": ["OWNER"],
-  "/expenses": ["OWNER", "MANAGER"],
 };
 
 export const DEFAULT_ROUTE_BY_ROLE: Record<AppRole, string> = {
@@ -33,12 +27,31 @@ export function canAccessRoute(role: AppRole, pathname: string): boolean {
   return ROUTE_ACCESS[base]?.includes(role) ?? false;
 }
 
-export function navItemsForRole(role: AppRole): string[] {
-  return Object.entries(ROUTE_ACCESS)
-    .filter(([, roles]) => roles.includes(role))
-    .map(([href]) => href);
+export function roleHomeSegment(role: AppRole): string {
+  switch (role) {
+    case "OWNER":
+    case "MANAGER":
+      return "(owner-manager)";
+    case "CASHIER":
+      return "(cashier)";
+    case "INVENTORY_MANAGER":
+      return "(inventory)";
+    default:
+      return "(owner-manager)";
+  }
 }
 
-export function roleLabelKey(role: AppRole): string {
-  return `roles.${role.toLowerCase()}`;
+/** Expo Router path after login (must match a real screen file). */
+export function roleMobileHomeRoute(role: AppRole): string {
+  switch (role) {
+    case "OWNER":
+    case "MANAGER":
+      return "/(app)/(owner-manager)/dashboard";
+    case "CASHIER":
+      return "/(app)/(cashier)/customers";
+    case "INVENTORY_MANAGER":
+      return "/(app)/(inventory)";
+    default:
+      return "/(app)/(owner-manager)/dashboard";
+  }
 }

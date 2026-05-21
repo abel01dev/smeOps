@@ -30,13 +30,42 @@ const envSchema = z.object({
 
 export type EnvConfig = z.infer<typeof envSchema>;
 
+const PLACEHOLDER_HINT =
+  "\n\nCopy apps/api/.env.example → apps/api/.env and replace PROJECT_REF, [YOUR-PASSWORD], and Supabase API keys with values from your Supabase dashboard.\nRun: pnpm --filter @sme/api check:env";
+
+function assertNotPlaceholder(key: string, value: string): void {
+  if (
+    /PROJECT_REF/i.test(value) ||
+    /\[YOUR-PASSWORD\]/i.test(value) ||
+    /sb_publishable_\.\.\./i.test(value) ||
+    /sb_secret_\.\.\./i.test(value)
+  ) {
+    throw new Error(
+      `Invalid environment configuration:\n  - ${key}: still contains example placeholder values.${PLACEHOLDER_HINT}`,
+    );
+  }
+}
+
 export function envValidation(raw: Record<string, unknown>): EnvConfig {
   const parsed = envSchema.safeParse(raw);
   if (!parsed.success) {
     const issues = parsed.error.issues
       .map((i) => `  - ${i.path.join(".")}: ${i.message}`)
       .join("\n");
-    throw new Error(`Invalid environment configuration:\n${issues}`);
+    throw new Error(
+      `Invalid environment configuration:\n${issues}${PLACEHOLDER_HINT}`,
+    );
   }
-  return parsed.data;
+
+  const data = parsed.data;
+  assertNotPlaceholder("DATABASE_URL", data.DATABASE_URL);
+  assertNotPlaceholder("SUPABASE_URL", data.SUPABASE_URL);
+  assertNotPlaceholder("SUPABASE_ANON_KEY", data.SUPABASE_ANON_KEY);
+  assertNotPlaceholder(
+    "SUPABASE_SERVICE_ROLE_KEY",
+    data.SUPABASE_SERVICE_ROLE_KEY,
+  );
+  if (data.DIRECT_URL) assertNotPlaceholder("DIRECT_URL", data.DIRECT_URL);
+
+  return data;
 }
