@@ -1,0 +1,19 @@
+@startuml SME_Ops_State_User_Session
+title User session — §2.3.5
+
+[*] --> Anonymous
+
+Anonymous --> Authenticated : UC2 Login success\n(JWT issued)
+
+state Authenticated {
+  Authenticated : accessToken valid
+  Authenticated : role-based routes
+}
+
+Authenticated --> TokenRefresh : access token expired
+TokenRefresh --> Authenticated : UC30 refresh OK
+TokenRefresh --> Anonymous : refresh invalid
+
+Authenticated --> Anonymous : logout / token revoked
+
+@enduml

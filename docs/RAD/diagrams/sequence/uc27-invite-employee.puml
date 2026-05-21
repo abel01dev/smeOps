@@ -1,0 +1,22 @@
+@startuml SME_Ops_Sequence_Invite
+title UC27 — Invite employee — §2.3.7
+
+actor Owner
+participant "Team UI" as Web
+participant "EmployeesController" as API
+participant "EmployeesService" as Svc
+participant "Supabase Auth" as Auth
+database "PostgreSQL" as DB
+
+Owner -> Web : submit invite
+Web -> API : POST /employees
+API -> Svc : invite(dto, orgId)
+Svc -> Auth : createUser(email, password)
+Auth --> Svc : user id
+Svc -> DB : insert User (role != OWNER)
+DB --> Svc : employee
+Svc --> API : employee DTO
+API --> Web : 201
+Web --> Owner : refresh team list
+
+@enduml

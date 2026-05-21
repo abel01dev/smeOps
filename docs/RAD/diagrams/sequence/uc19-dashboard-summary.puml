@@ -1,0 +1,20 @@
+@startuml SME_Ops_Sequence_Dashboard
+title UC19 — View dashboard KPI summary — §2.3.7
+
+actor Manager
+participant "Dashboard UI" as Web
+participant "DashboardController" as API
+participant "DashboardService" as Svc
+database "PostgreSQL" as DB
+
+Manager -> Web : open /dashboard
+Web -> API : GET /dashboard/summary
+API -> Svc : getSummary(orgId)
+Svc -> DB : aggregate Sales (revenue, profit)
+Svc -> DB : aggregate OperationalExpense
+Svc -> DB : count products, customers, low stock
+Svc --> API : KPI DTO (incl. netProfit)
+API --> Web : JSON
+Web --> Manager : render cards & charts
+
+@enduml

@@ -1,0 +1,17 @@
+@startuml SME_Ops_State_Sale
+title Sale record lifecycle — §2.3.5
+
+[*] --> Draft : cart building (UI)
+
+Draft --> Validating : UC6 confirm checkout
+Validating --> Committed : UC7 pass + transaction OK
+Validating --> Draft : stock fail / validation error
+
+Committed --> [*] : immutable history
+
+note right of Committed
+  Sale + SaleItems + stock update
+  atomic (BR-20)
+end note
+
+@enduml

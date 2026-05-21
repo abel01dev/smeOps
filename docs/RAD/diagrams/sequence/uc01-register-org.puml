@@ -1,0 +1,22 @@
+@startuml SME_Ops_Sequence_Register
+title UC1 — Register organization and owner — §2.3.7
+
+actor Guest
+participant "Web UI" as Web
+participant "AuthController" as API
+participant "AuthService" as Svc
+participant "Supabase Auth" as Auth
+database "PostgreSQL" as DB
+
+Guest -> Web : submit registration form
+Web -> API : POST /auth/register
+API -> Svc : register(dto)
+Svc -> Auth : createUser(email, password)
+Auth --> Svc : auth user id
+Svc -> DB : $transaction\nOrganization + User(OWNER)
+DB --> Svc : org + profile
+Svc --> API : tokens + user
+API --> Web : 201 + JWT
+Web --> Guest : redirect /dashboard
+
+@enduml

@@ -1,0 +1,23 @@
+@startuml SME_Ops_Activity_Expense
+title UC17 — Record operating expense — §2.3.6
+
+|Manager|
+start
+:Open /expenses;
+|System|
+if (Categories empty?) then (yes)
+  :UC29 auto-seed defaults;
+endif
+|Manager|
+:Select category;
+:Enter amount, date, note;
+:Submit;
+|System|
+:POST /expenses;
+:Save with recordedById;
+:Return success;
+|Manager|
+:Refresh list & period totals;
+stop
+
+@enduml

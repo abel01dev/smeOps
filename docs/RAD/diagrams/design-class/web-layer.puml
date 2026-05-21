@@ -1,0 +1,61 @@
+@startuml SME_Ops_Design_Class_Web
+title SME Ops - Design Class Model (Web Layer) - 3.2.1
+
+skinparam classAttributeIconSize 0
+
+class AppShell {
+  - user: AuthUser
+  + renderNav(): NavItem[]
+  + canAccessRoute(path): boolean
+}
+
+class AuthStore {
+  - accessToken: string
+  - refreshToken: string
+  - user: AuthUser
+  + setSession(tokens, user): void
+  + clear(): void
+}
+
+class ApiClient {
+  - baseUrl: string
+  + get(path, token): Promise<Response>
+  + post(path, body, token): Promise<Response>
+  + patch(path, body, token): Promise<Response>
+}
+
+class PosPage {
+  - cart: CartLine[]
+  + addToCart(product): void
+  + checkout(): Promise<void>
+}
+
+class DashboardPage {
+  + loadSummary(): Promise<DashboardSummary>
+  + loadInsights(): Promise<InsightCard[]>
+}
+
+class InventoryPage {
+  + loadProducts(filters): Promise<Product[]>
+  + saveProduct(form): Promise<void>
+}
+
+class TeamPage {
+  + loadEmployees(): Promise<User[]>
+  + inviteEmployee(form): Promise<void>
+}
+
+class RoleUtils {
+  + {static} canAccessRoute(role, path): boolean
+  + {static} navItemsForRole(role): string[]
+}
+
+AppShell --> AuthStore
+AppShell --> RoleUtils
+PosPage --> ApiClient
+DashboardPage --> ApiClient
+InventoryPage --> ApiClient
+TeamPage --> ApiClient
+PosPage --> AuthStore
+
+@enduml

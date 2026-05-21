@@ -1,0 +1,38 @@
+@startuml SME_Ops_Deployment
+title SME Ops - Deployment Diagram (3.1.2)
+
+node "Client" {
+  artifact "Web Browser" as Browser
+}
+
+cloud "Vercel" {
+  node "Next.js 15" as WebApp {
+    component "App Router UI" as UI
+    component "TanStack Query" as TQ
+  }
+}
+
+cloud "Railway" {
+  node "NestJS API" as API {
+    component "REST /api/v1" as REST
+    component "Prisma ORM" as Prisma
+  }
+}
+
+cloud "Supabase" {
+  database "PostgreSQL" as DB
+  node "Supabase Auth" as Auth
+}
+
+cloud "OpenRouter" {
+  node "LLM API" as LLM
+}
+
+Browser --> UI : HTTPS
+UI --> REST : HTTPS + JWT
+REST --> Prisma
+Prisma --> DB
+REST --> Auth : JWKS verify\nregister/login
+REST ..> LLM : optional AI chat
+
+@enduml

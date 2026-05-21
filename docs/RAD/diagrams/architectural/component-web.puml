@@ -1,0 +1,57 @@
+@startuml SME_Ops_Component_Web
+title SME Ops - Web Component Diagram (3.1.1)
+
+skinparam componentStyle rectangle
+
+package "Next.js Web (apps/web)" {
+
+  component [App Router Pages] as Pages
+  component [AppShell + Nav] as Shell
+  component [Auth Pages\nlogin, register] as AuthUI
+  component [POS Module] as POS
+  component [Inventory Module] as Inv
+  component [Dashboard Module] as DashUI
+  component [Customers Module] as CustUI
+  component [Sales Module] as SalesUI
+  component [Expenses Module] as ExpUI
+  component [Team Module] as TeamUI
+  component [Assistant Module] as AssistUI
+
+  component [API Client\nfetch + JWT] as ApiClient
+  component [Auth Store\nZustand] as AuthStore
+  component [TanStack Query] as Query
+  component [Role Guards\nroles.ts] as Roles
+  component [i18n next-intl] as I18n
+}
+
+component [NestJS REST API] as API
+
+Pages --> Shell
+Shell --> AuthUI
+Shell --> POS
+Shell --> Inv
+Shell --> DashUI
+Shell --> CustUI
+Shell --> SalesUI
+Shell --> ExpUI
+Shell --> TeamUI
+Shell --> AssistUI
+
+POS --> ApiClient
+Inv --> ApiClient
+DashUI --> ApiClient
+CustUI --> ApiClient
+SalesUI --> ApiClient
+ExpUI --> ApiClient
+TeamUI --> ApiClient
+AssistUI --> ApiClient
+AuthUI --> ApiClient
+
+ApiClient --> Query
+ApiClient --> AuthStore
+Shell --> Roles
+Pages --> I18n
+
+ApiClient --> API : HTTPS REST
+
+@enduml

@@ -1,0 +1,159 @@
+@startuml SME_Ops_ER_Model
+title SME Ops - Persistent Model (PostgreSQL / Prisma) - 3.2.2
+
+skinparam linetype ortho
+
+entity "organizations" as org {
+  * **id** : String <<PK>> cuid
+  --
+  name : String
+  slug : String <<unique>>
+  currency : String default ETB
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "users" as usr {
+  * **id** : UUID <<PK>>
+  --
+  * organizationId : String <<FK>>
+  email : String <<unique>>
+  name : String
+  role : UserRole
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "categories" as cat {
+  * **id** : String <<PK>>
+  --
+  * organizationId : String <<FK>>
+  name : String
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "products" as prd {
+  * **id** : String <<PK>>
+  --
+  * organizationId : String <<FK>>
+  categoryId : String <<FK>> nullable
+  name : String
+  buyPrice : Decimal(12,2)
+  sellPrice : Decimal(12,2)
+  stockQuantity : Int
+  minStock : Int
+  status : ProductStatus
+}
+
+entity "customers" as cus {
+  * **id** : String <<PK>>
+  --
+  * organizationId : String <<FK>>
+  name : String
+  phone : String nullable
+  totalSpent : Decimal(14,2)
+}
+
+entity "sales" as sal {
+  * **id** : String <<PK>>
+  --
+  * organizationId : String <<FK>>
+  customerId : String <<FK>> nullable
+  * cashierId : UUID <<FK>>
+  subtotal : Decimal(14,2)
+  discount : Decimal(14,2)
+  total : Decimal(14,2)
+  profit : Decimal(14,2)
+  paymentMethod : enum
+  createdAt : DateTime
+}
+
+entity "sale_items" as si {
+  * **id** : String <<PK>>
+  --
+  * saleId : String <<FK>>
+  * productId : String <<FK>>
+  productName : String
+  quantity : Int
+  buyPriceAtSale : Decimal(12,2)
+  sellPriceAtSale : Decimal(12,2)
+  lineTotal : Decimal(14,2)
+  lineProfit : Decimal(14,2)
+}
+
+entity "expense_categories" as ec {
+  * **id** : String <<PK>>
+  --
+  * organizationId : String <<FK>>
+  name : String
+}
+
+entity "operational_expenses" as opex {
+  * **id** : String <<PK>>
+  --
+  * organizationId : String <<FK>>
+  * categoryId : String <<FK>>
+  * recordedById : UUID <<FK>>
+  amount : Decimal(14,2)
+  expenseDate : DateTime
+  paymentMethod : enum
+}
+
+entity "ai_conversations" as aic {
+  * **id** : String <<PK>>
+  --
+  * organizationId : String <<FK>>
+  * userId : UUID <<FK>>
+  title : String
+}
+
+entity "ai_messages" as aim {
+  * **id** : String <<PK>>
+  --
+  * conversationId : String <<FK>>
+  * organizationId : String <<FK>>
+  role : AIMessageRole
+  content : Text
+}
+
+entity "ai_settings" as ais {
+  * **id** : String <<PK>>
+  --
+  * organizationId : String <<FK>>
+  * userId : UUID <<FK>>
+  openRouterApiKeyEnc : String nullable
+  preferredModel : String
+}
+
+org ||--o{ usr : "1..*"
+org ||--o{ cat : "1..*"
+org ||--o{ prd : "1..*"
+org ||--o{ cus : "1..*"
+org ||--o{ sal : "1..*"
+org ||--o{ ec : "1..*"
+org ||--o{ opex : "1..*"
+org ||--o{ aic : "1..*"
+org ||--o{ aim : "1..*"
+org ||--o{ ais : "1..*"
+
+cat |o--o{ prd : "0..*"
+usr ||--o{ sal : "cashier 1..*"
+cus |o--o{ sal : "0..*"
+sal ||--|{ si : "1..*"
+prd ||--o{ si : "1..* Restrict"
+ec ||--o{ opex : "1..*"
+usr ||--o{ opex : "recordedBy"
+aic ||--o{ aim : "1..*"
+usr ||--o{ aic : "1..*"
+usr ||--o| ais : "0..1 unique(org,user)"
+
+note bottom of si
+  Snapshot prices at sale time (BR-21)
+end note
+
+note bottom of prd
+  onDelete: Restrict from sale_items
+end note
+
+@enduml

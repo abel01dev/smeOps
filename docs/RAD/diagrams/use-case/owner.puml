@@ -1,0 +1,31 @@
+@startuml SME_Ops_Use_Case_Owner
+title SME Ops - Use Cases: Owner (inherits Manager)
+
+skinparam shadowing false
+left to right direction
+
+actor Owner as owner
+actor Manager as mgr
+mgr <|-- owner
+
+rectangle "SME Ops" {
+  usecase "UC19 Dashboard KPIs" as UC19
+  usecase "UC6 POS checkout" as UC6
+  usecase "UC10 Sales history" as UC10
+  usecase "UC3..UC5 Inventory" as UCINV
+  usecase "UC12..UC14 Customers" as UCCUST
+  usecase "UC16..UC18 Expenses" as UCEXP
+  usecase "UC26..UC28 Team" as UCTEAM
+  usecase "UC23..UC25 AI" as UCAI
+}
+
+owner --> UC19
+owner --> UC6
+owner --> UC10
+owner --> UCINV
+owner --> UCCUST
+owner --> UCEXP
+owner --> UCTEAM
+owner --> UCAI
+
+@enduml

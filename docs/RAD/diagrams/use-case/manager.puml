@@ -1,0 +1,29 @@
+@startuml SME_Ops_Use_Case_Manager
+title SME Ops - Use Cases: Manager
+
+left to right direction
+actor Manager as mgr
+
+rectangle "SME Ops" {
+  usecase "UC19 Dashboard" as UC19
+  usecase "UC6 POS" as UC6
+  usecase "UC10 Sales" as UC10
+  usecase "UC3..UC5 Inventory" as UCINV
+  usecase "UC12..UC14 Customers" as UCCUST
+  usecase "UC16..UC18 Expenses" as UCEXP
+  usecase "UC23..UC25 AI" as UCAI
+}
+
+mgr --> UC19
+mgr --> UC6
+mgr --> UC10
+mgr --> UCINV
+mgr --> UCCUST
+mgr --> UCEXP
+mgr --> UCAI
+
+note right of mgr
+  No UC26-UC28 (team)
+end note
+
+@enduml

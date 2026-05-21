@@ -1,0 +1,26 @@
+@startuml SME_Ops_State_Product
+title Product lifecycle — §2.3.5
+
+[*] --> ACTIVE : create product
+
+state ACTIVE {
+  ACTIVE : stockQuantity tracked
+}
+
+ACTIVE --> LowStock : stockQuantity <= minStock\n[minStock > 0]
+LowStock --> ACTIVE : restock above minStock
+ACTIVE --> ARCHIVED : archive / discontinue
+LowStock --> ARCHIVED : archive
+ARCHIVED --> [*]
+
+note right of LowStock
+  Computed condition (BR-14);
+  not a separate DB enum value
+end note
+
+note bottom of ARCHIVED
+  BR-15: soft delete;
+  sale history preserved
+end note
+
+@enduml
