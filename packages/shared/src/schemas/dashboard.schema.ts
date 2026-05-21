@@ -20,10 +20,19 @@ export type TopProductsQuery = z.infer<typeof topProductsQuerySchema>;
 
 // ---------------------- Response shapes ----------------------
 
+export interface DashboardPeriodMoney {
+  revenue: string;
+  /** Gross profit from sales (sell − buy, after discounts). */
+  profit: string;
+  operatingExpenses: string;
+  /** Gross profit minus operating expenses. */
+  netProfit: string;
+}
+
 export interface DashboardSummary {
-  today: { revenue: string; profit: string; salesCount: number };
-  week: { revenue: string; profit: string };
-  month: { revenue: string; profit: string };
+  today: DashboardPeriodMoney & { salesCount: number };
+  week: DashboardPeriodMoney;
+  month: DashboardPeriodMoney;
   totals: {
     activeProducts: number;
     customers: number;
@@ -35,6 +44,8 @@ export interface RevenueTrendBucket {
   date: string; // YYYY-MM-DD
   revenue: string;
   profit: string;
+  operatingExpenses: string;
+  netProfit: string;
   salesCount: number;
 }
 

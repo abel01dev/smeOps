@@ -7,6 +7,7 @@ import {
   ScanLine,
   UserCog,
   Users,
+  Wallet,
 } from "lucide-react";
 
 import type { AppRole } from "@/lib/roles";
@@ -21,7 +22,8 @@ export interface NavItem {
     | "inventory"
     | "customers"
     | "sales"
-    | "team";
+    | "team"
+    | "expenses";
   icon: LucideIcon;
   roles: AppRole[];
 }
@@ -56,6 +58,12 @@ export const APP_NAV: NavItem[] = [
     labelKey: "team",
     icon: UserCog,
     roles: ROUTE_ACCESS["/team"],
+  },
+  {
+    href: "/expenses",
+    labelKey: "expenses",
+    icon: Wallet,
+    roles: ROUTE_ACCESS["/expenses"],
   },
   {
     href: "/customers",

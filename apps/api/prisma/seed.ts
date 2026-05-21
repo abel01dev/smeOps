@@ -100,6 +100,8 @@ async function main(): Promise<void> {
 
   await prisma.saleItem.deleteMany();
   await prisma.sale.deleteMany();
+  await prisma.operationalExpense.deleteMany();
+  await prisma.expenseCategory.deleteMany();
   await prisma.customer.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
@@ -298,6 +300,74 @@ async function main(): Promise<void> {
     (p) => p.stockQuantity <= p.minStock,
   ).length;
 
+  const expenseCategoryNames = [
+    "Rent",
+    "Salaries",
+    "Transport",
+    "Utilities",
+    "Other",
+  ] as const;
+  const expenseCats = await Promise.all(
+    expenseCategoryNames.map((name) =>
+      prisma.expenseCategory.create({
+        data: { organizationId: org.id, name },
+      }),
+    ),
+  );
+  const expCat = (name: string) =>
+    expenseCats.find((c) => c.name === name)!.id;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const expenseSamples = [
+    {
+      categoryId: expCat("Rent"),
+      amount: "8500.00",
+      description: "Shop rent",
+      daysAgo: 2,
+    },
+    {
+      categoryId: expCat("Salaries"),
+      amount: "12000.00",
+      description: "Staff salaries",
+      daysAgo: 1,
+    },
+    {
+      categoryId: expCat("Transport"),
+      amount: "450.00",
+      description: "Delivery fuel",
+      daysAgo: 0,
+    },
+    {
+      categoryId: expCat("Utilities"),
+      amount: "320.00",
+      description: "Electricity",
+      daysAgo: 3,
+    },
+    {
+      categoryId: expCat("Other"),
+      amount: "180.00",
+      description: "Cleaning supplies",
+      daysAgo: 0,
+    },
+  ];
+
+  for (const sample of expenseSamples) {
+    const expenseDate = new Date(today);
+    expenseDate.setDate(expenseDate.getDate() - sample.daysAgo);
+    await prisma.operationalExpense.create({
+      data: {
+        organizationId: org.id,
+        categoryId: sample.categoryId,
+        recordedById: owner.id,
+        amount: sample.amount,
+        description: sample.description,
+        expenseDate,
+        paymentMethod: PaymentMethod.CASH,
+      },
+    });
+  }
+
   console.log("Seed complete.\n");
   console.log("   Organization:", org.name);
   console.log("   Categories:  ", categories.length);
@@ -305,6 +375,7 @@ async function main(): Promise<void> {
   console.log("   Customers:   ", customers.length);
   console.log("   Sales:       ", saleCount);
   console.log("   Revenue:     ", `ETB ${totalRevenue.toFixed(2)}`);
+  console.log("   Expenses:    ", expenseSamples.length, "sample OPEX rows");
   console.log("\n   Demo accounts (password for all: Password123!):");
   for (const m of DEMO_TEAM) {
     console.log(`     ${m.role.padEnd(7)} ${m.email}`);

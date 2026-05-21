@@ -31,15 +31,16 @@ export class AiContextService {
 
     return [
       "## Business snapshot (read-only, summarized)",
-      `Today: revenue ${summary.today.revenue}, profit ${summary.today.profit}, ${summary.today.salesCount} sales.`,
+      `Today: revenue ${summary.today.revenue}, gross profit ${summary.today.profit}, operating expenses ${summary.today.operatingExpenses}, net profit ${summary.today.netProfit}, ${summary.today.salesCount} sales.`,
       `Last 7 days: revenue ${weekRevenue.toFixed(2)}, ${weekSales} sales.`,
-      `Month-to-date: revenue ${summary.month.revenue}, profit ${summary.month.profit}.`,
+      `Month-to-date: revenue ${summary.month.revenue}, gross profit ${summary.month.profit}, operating expenses ${summary.month.operatingExpenses}, net profit ${summary.month.netProfit}.`,
       `Inventory: ${summary.totals.activeProducts} active products, ${summary.totals.lowStockCount} low-stock alerts.`,
       `Customers on file: ${summary.totals.customers}.`,
       "Top products (30d):",
       topLines,
       "",
-      "Use this context when answering business questions. If data is missing, say so and suggest recording sales in POS.",
+      "Gross profit = sales margin; net profit = gross profit minus operating expenses (rent, salaries, transport, etc.).",
+      "Use this context when answering business questions. If data is missing, say so and suggest recording sales in POS or expenses under Expenses.",
     ].join("\n");
   }
 }

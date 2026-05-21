@@ -7,6 +7,7 @@ import {
   Package,
   ReceiptText,
   TrendingUp,
+  Wallet,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import * as React from "react";
@@ -83,7 +84,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <KpiCard
           label={t("revenueToday")}
           value={
@@ -103,15 +104,49 @@ export default function DashboardPage() {
           value={
             summary.data ? formatMoney(summary.data.today.profit) : tc("noData")
           }
+          hint={summary.data ? t("grossProfitHint") : undefined}
+          icon={TrendingUp}
+          tone="success"
+          isLoading={summary.isLoading}
+        />
+        <KpiCard
+          label={t("expensesToday")}
+          value={
+            summary.data
+              ? formatMoney(summary.data.today.operatingExpenses)
+              : tc("noData")
+          }
           hint={
             summary.data
-              ? t("last7dProfit", {
-                  amount: formatMoney(summary.data.week.profit),
+              ? t("monthExpensesHint", {
+                  amount: formatMoney(summary.data.month.operatingExpenses),
+                })
+              : undefined
+          }
+          icon={Wallet}
+          tone="default"
+          isLoading={summary.isLoading}
+        />
+        <KpiCard
+          label={t("netProfitToday")}
+          value={
+            summary.data
+              ? formatMoney(summary.data.today.netProfit)
+              : tc("noData")
+          }
+          hint={
+            summary.data
+              ? t("last7dNet", {
+                  amount: formatMoney(summary.data.week.netProfit),
                 })
               : undefined
           }
           icon={TrendingUp}
-          tone="success"
+          tone={
+            summary.data && Number(summary.data.today.netProfit) < 0
+              ? "warning"
+              : "success"
+          }
           isLoading={summary.isLoading}
         />
         <KpiCard
@@ -202,7 +237,7 @@ export default function DashboardPage() {
             <CardTitle className="text-base">{t("monthGlance")}</CardTitle>
             <CardDescription>{t("monthGlanceDesc")}</CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
             <Stat
               icon={Banknote}
               label={tc("revenue")}
@@ -223,6 +258,31 @@ export default function DashboardPage() {
               }
               loading={summary.isLoading}
               tone="success"
+            />
+            <Stat
+              icon={Wallet}
+              label={t("monthExpenses")}
+              value={
+                summary.data
+                  ? formatMoney(summary.data.month.operatingExpenses)
+                  : tc("noData")
+              }
+              loading={summary.isLoading}
+            />
+            <Stat
+              icon={TrendingUp}
+              label={t("monthNetProfit")}
+              value={
+                summary.data
+                  ? formatMoney(summary.data.month.netProfit)
+                  : tc("noData")
+              }
+              loading={summary.isLoading}
+              tone={
+                summary.data && Number(summary.data.month.netProfit) < 0
+                  ? "warning"
+                  : "success"
+              }
             />
             <Stat
               icon={ReceiptText}
