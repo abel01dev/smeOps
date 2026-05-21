@@ -8,3 +8,4 @@ export * from "./dashboard.schema";
 export * from "./ai.schema";
 export * from "./ai-assistant.schema";
 export * from "./employee.schema";
+export * from "./expense.schema";

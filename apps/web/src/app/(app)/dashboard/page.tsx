@@ -7,6 +7,7 @@ import {
   Package,
   ReceiptText,
   TrendingUp,
+  Wallet,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import * as React from "react";
@@ -56,16 +57,16 @@ export default function DashboardPage() {
     <div className="mx-auto max-w-7xl space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             {greeting}
           </h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-muted-foreground">
             {t("subtitle", {
               org: user?.organizationName ?? "your business",
             })}
           </p>
         </div>
-        <div className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-1">
+        <div className="inline-flex items-center gap-1 rounded-lg border border-border bg-card p-1">
           {periods.map((p) => (
             <Button
               key={p.days}
@@ -74,7 +75,7 @@ export default function DashboardPage() {
               onClick={() => setDays(p.days)}
               className={cn(
                 "h-8 px-3 text-xs font-medium",
-                days === p.days ? "" : "text-slate-600 hover:bg-slate-100",
+                days === p.days ? "" : "text-muted-foreground hover:bg-muted",
               )}
             >
               {p.label}
@@ -83,7 +84,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <KpiCard
           label={t("revenueToday")}
           value={
@@ -103,15 +104,49 @@ export default function DashboardPage() {
           value={
             summary.data ? formatMoney(summary.data.today.profit) : tc("noData")
           }
+          hint={summary.data ? t("grossProfitHint") : undefined}
+          icon={TrendingUp}
+          tone="success"
+          isLoading={summary.isLoading}
+        />
+        <KpiCard
+          label={t("expensesToday")}
+          value={
+            summary.data
+              ? formatMoney(summary.data.today.operatingExpenses)
+              : tc("noData")
+          }
           hint={
             summary.data
-              ? t("last7dProfit", {
-                  amount: formatMoney(summary.data.week.profit),
+              ? t("monthExpensesHint", {
+                  amount: formatMoney(summary.data.month.operatingExpenses),
+                })
+              : undefined
+          }
+          icon={Wallet}
+          tone="default"
+          isLoading={summary.isLoading}
+        />
+        <KpiCard
+          label={t("netProfitToday")}
+          value={
+            summary.data
+              ? formatMoney(summary.data.today.netProfit)
+              : tc("noData")
+          }
+          hint={
+            summary.data
+              ? t("last7dNet", {
+                  amount: formatMoney(summary.data.week.netProfit),
                 })
               : undefined
           }
           icon={TrendingUp}
-          tone="success"
+          tone={
+            summary.data && Number(summary.data.today.netProfit) < 0
+              ? "warning"
+              : "success"
+          }
           isLoading={summary.isLoading}
         />
         <KpiCard
@@ -158,7 +193,7 @@ export default function DashboardPage() {
               <CardDescription>{t("dailyTotals", { days })}</CardDescription>
             </div>
             {summary.data ? (
-              <div className="hidden text-right text-xs text-slate-500 md:block">
+              <div className="hidden text-right text-xs text-muted-foreground md:block">
                 <p>
                   {t("periodRevenue", {
                     amount: formatMoney(periodRevenue(trend.data)),
@@ -202,7 +237,7 @@ export default function DashboardPage() {
             <CardTitle className="text-base">{t("monthGlance")}</CardTitle>
             <CardDescription>{t("monthGlanceDesc")}</CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
             <Stat
               icon={Banknote}
               label={tc("revenue")}
@@ -223,6 +258,31 @@ export default function DashboardPage() {
               }
               loading={summary.isLoading}
               tone="success"
+            />
+            <Stat
+              icon={Wallet}
+              label={t("monthExpenses")}
+              value={
+                summary.data
+                  ? formatMoney(summary.data.month.operatingExpenses)
+                  : tc("noData")
+              }
+              loading={summary.isLoading}
+            />
+            <Stat
+              icon={TrendingUp}
+              label={t("monthNetProfit")}
+              value={
+                summary.data
+                  ? formatMoney(summary.data.month.netProfit)
+                  : tc("noData")
+              }
+              loading={summary.isLoading}
+              tone={
+                summary.data && Number(summary.data.month.netProfit) < 0
+                  ? "warning"
+                  : "success"
+              }
             />
             <Stat
               icon={ReceiptText}
@@ -255,26 +315,26 @@ function Stat({
   tone?: "default" | "success";
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/60 p-4">
+    <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/40 p-4">
       <div
         className={cn(
           "flex h-9 w-9 shrink-0 items-center justify-center rounded-md",
           tone === "success"
             ? "bg-emerald-100 text-emerald-700"
-            : "bg-slate-200/70 text-slate-700",
+            : "bg-muted text-foreground",
         )}
         aria-hidden
       >
         <Icon className="h-4 w-4" />
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {label}
         </p>
         <p
           className={cn(
-            "mt-1 truncate text-lg font-semibold tracking-tight text-slate-900",
-            loading && "h-6 w-24 animate-pulse rounded bg-slate-200/70",
+            "mt-1 truncate text-lg font-semibold tracking-tight text-foreground",
+            loading && "h-6 w-24 animate-pulse rounded bg-muted",
           )}
         >
           {loading ? "" : value}

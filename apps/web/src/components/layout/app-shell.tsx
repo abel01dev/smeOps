@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import * as React from "react";
 
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
+import { ThemeSwitcher } from "@/components/theme/theme-switcher";
 import { navForRole } from "@/config/nav";
 import {
   canAccessRoute,
@@ -23,7 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -54,7 +55,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (!isInitialized) {
     return (
-      <div className="grid min-h-screen place-items-center bg-slate-50 text-sm text-slate-500">
+      <div className="grid min-h-screen place-items-center bg-background text-sm text-muted-foreground">
         {t("common.loading")}
       </div>
     );
@@ -63,12 +64,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (!canAccessRoute(user.role, pathname)) {
     return (
-      <div className="grid min-h-screen place-items-center bg-slate-50 p-6">
+      <div className="grid min-h-screen place-items-center bg-background p-6">
         <div className="max-w-sm text-center">
-          <h1 className="text-lg font-semibold text-slate-900">
+          <h1 className="text-lg font-semibold text-foreground">
             {t("access.deniedTitle")}
           </h1>
-          <p className="mt-2 text-sm text-slate-600">{t("access.deniedMessage")}</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("access.deniedMessage")}
+          </p>
           <Button
             type="button"
             className="mt-4"
@@ -99,8 +102,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
               active
-                ? "bg-slate-900 text-white"
-                : "text-slate-700 hover:bg-slate-100",
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
             )}
           >
             <Icon className="h-5 w-5 shrink-0 opacity-90" aria-hidden />
@@ -111,21 +114,81 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     </nav>
   );
 
+  const SidebarFooter = ({ onNavigate }: { onNavigate?: () => void }) => (
+    <div className="shrink-0 space-y-3 border-t border-border bg-muted/30 p-3">
+      <div className="flex gap-2">
+        <ThemeSwitcher className="h-9 shrink-0 px-2" />
+        <LanguageSwitcher className="h-9 min-w-0 flex-1 justify-center gap-1 px-2 sm:justify-start" />
+      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-10 w-full justify-between gap-2 px-3 font-normal"
+          >
+            <span className="min-w-0 truncate text-left">{user.name}</span>
+            <ChevronDown className="h-4 w-4 shrink-0 opacity-60" aria-hidden />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent side="right" align="end" className="w-56">
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex flex-col space-y-1">
+              <p className="text-sm font-medium leading-none">{user.name}</p>
+              <p className="text-xs leading-none text-muted-foreground">
+                {user.email}
+              </p>
+              <p className="text-xs font-medium text-muted-foreground">
+                {t(roleLabelKey(user.role))}
+              </p>
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {canAccessRoute(user.role, "/dashboard") ? (
+            <>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard" onClick={onNavigate}>
+                  {t("common.accountOverview")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          ) : null}
+          <DropdownMenuItem
+            onClick={() => {
+              onNavigate?.();
+              logout();
+              router.replace("/login");
+            }}
+          >
+            {t("common.signOut")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <aside className="hidden w-60 shrink-0 border-r border-slate-200 bg-white md:flex md:flex-col">
-        <div className="flex h-14 items-center gap-2 border-b border-slate-200 px-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-900 text-xs font-semibold text-white">
+    <div className="flex min-h-screen bg-muted/40">
+      <aside className="sticky top-0 hidden h-screen max-h-screen w-60 shrink-0 flex-col border-r border-border bg-card md:flex">
+        <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-xs font-semibold text-primary-foreground">
             SO
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-900">
+            <p className="truncate text-sm font-semibold text-foreground">
               {user.organizationName}
             </p>
-            <p className="truncate text-xs text-slate-500">{t("common.appName")}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {t("common.appName")}
+            </p>
           </div>
         </div>
-        <NavLinks />
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <NavLinks />
+        </div>
+        <SidebarFooter />
       </aside>
 
       {mobileOpen ? (
@@ -136,9 +199,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             aria-label={t("common.closeMenu")}
             onClick={() => setMobileOpen(false)}
           />
-          <div className="absolute left-0 top-0 flex h-full w-[min(18rem,85vw)] flex-col bg-white shadow-xl">
-            <div className="flex h-14 items-center justify-between border-b border-slate-200 px-3">
-              <span className="text-sm font-semibold text-slate-900">
+          <div className="absolute left-0 top-0 flex h-full w-[min(18rem,85vw)] flex-col bg-card shadow-xl">
+            <div className="flex h-14 shrink-0 items-center justify-between border-b border-border px-3">
+              <span className="text-sm font-semibold text-foreground">
                 {t("common.menu")}
               </span>
               <Button
@@ -151,13 +214,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <X className="h-5 w-5" />
               </Button>
             </div>
-            <NavLinks onNavigate={() => setMobileOpen(false)} />
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <NavLinks onNavigate={() => setMobileOpen(false)} />
+            </div>
+            <SidebarFooter onNavigate={() => setMobileOpen(false)} />
           </div>
         </div>
       ) : null}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-slate-200 bg-white px-3 md:px-4">
+        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b border-border bg-card/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-card/80 md:hidden md:px-4">
           <Button
             type="button"
             variant="ghost"
@@ -169,55 +235,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Menu className="h-5 w-5" />
           </Button>
           <div className="min-w-0 flex-1 md:hidden">
-            <p className="truncate text-sm font-semibold text-slate-900">
+            <p className="truncate text-sm font-semibold text-foreground">
               {user.organizationName}
             </p>
           </div>
-          <div className="hidden flex-1 md:block" />
-
-          <LanguageSwitcher />
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="max-w-[10rem] shrink-0 truncate md:max-w-xs"
-              >
-                {user.name}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user.name}</p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {user.email}
-                  </p>
-                  <p className="text-xs font-medium text-slate-600">
-                    {t(roleLabelKey(user.role))}
-                  </p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {canAccessRoute(user.role, "/dashboard") ? (
-                <>
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard">{t("common.accountOverview")}</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                </>
-              ) : null}
-              <DropdownMenuItem
-                onClick={() => {
-                  logout();
-                  router.replace("/login");
-                }}
-              >
-                {t("common.signOut")}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </header>
 
         <main className="flex-1 p-4 md:p-6">{children}</main>

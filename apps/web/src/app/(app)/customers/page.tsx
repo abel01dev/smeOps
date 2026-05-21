@@ -81,10 +81,10 @@ export default function CustomersPage() {
     <div className="mx-auto max-w-5xl space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             {t("title")}
           </h1>
-          <p className="mt-1 text-sm text-slate-600">{t("subtitle")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
         <Button type="button" className="h-11 gap-2" onClick={openCreate}>
           <Plus className="h-4 w-4" />
@@ -92,7 +92,7 @@ export default function CustomersPage() {
         </Button>
       </header>
 
-      <Card className="border-slate-200 shadow-sm">
+      <Card className="border-border shadow-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">{t("allTitle")}</CardTitle>
           <CardDescription>
@@ -103,7 +103,7 @@ export default function CustomersPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/80" />
             <Input
               placeholder={t("searchPlaceholder")}
               value={search}
@@ -125,26 +125,26 @@ export default function CustomersPage() {
           )}
 
           {!q.isLoading && !q.isError && items.length === 0 && (
-            <p className="py-10 text-center text-sm text-slate-500">
+            <p className="py-10 text-center text-sm text-muted-foreground">
               {t("empty")}
             </p>
           )}
 
           {!q.isLoading && !q.isError && items.length > 0 && (
             <>
-              <ul className="divide-y divide-slate-100 rounded-xl border border-slate-100">
+              <ul className="divide-y divide-border rounded-xl border border-border">
                 {items.map((c) => (
                   <li
                     key={c.id}
                     className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="min-w-0">
-                      <p className="font-medium text-slate-900">{c.name}</p>
-                      <p className="text-sm text-slate-500">
+                      <p className="font-medium text-foreground">{c.name}</p>
+                      <p className="text-sm text-muted-foreground">
                         {[c.phone, c.address].filter(Boolean).join(" · ") ||
                           t("noContact")}
                       </p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-muted-foreground">
                         {t("spent", {
                           count: c.salesCount ?? 0,
                           amount: formatMoney(c.totalSpent),
@@ -176,7 +176,7 @@ export default function CustomersPage() {
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="h-10 w-10 text-slate-500 hover:text-red-600"
+                        className="h-10 w-10 text-muted-foreground hover:text-red-600"
                         aria-label={tc("delete")}
                         disabled={deleteMut.isPending}
                         onClick={() => void onDelete(c)}
@@ -189,8 +189,8 @@ export default function CustomersPage() {
               </ul>
 
               {totalPages > 1 && (
-                <div className="flex items-center justify-between border-t border-slate-100 pt-4">
-                  <p className="text-xs text-slate-500">
+                <div className="flex items-center justify-between border-t border-border pt-4">
+                  <p className="text-xs text-muted-foreground">
                     {tc("pageOf", { page, total: totalPages })}
                   </p>
                   <div className="flex gap-2">

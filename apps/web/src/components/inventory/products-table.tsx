@@ -39,12 +39,12 @@ export function ProductsTable({
 
   if (products.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-slate-200 bg-white py-14 text-center">
-        <Package className="h-10 w-10 text-slate-300" />
-        <p className="mt-1 text-sm font-medium text-slate-800">
+      <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card py-14 text-center">
+        <Package className="h-10 w-10 text-muted-foreground/60" />
+        <p className="mt-1 text-sm font-medium text-foreground">
           {t("noMatch")}
         </p>
-        <p className="max-w-sm text-xs text-slate-500">{t("noMatchHint")}</p>
+        <p className="max-w-sm text-xs text-muted-foreground">{t("noMatchHint")}</p>
         <Button type="button" className="mt-3 h-11" onClick={onCreate}>
           {t("addProduct")}
         </Button>
@@ -60,9 +60,9 @@ export function ProductsTable({
       )}
     >
       {/* Desktop / tablet table */}
-      <div className="hidden overflow-x-auto rounded-xl border border-slate-100 bg-white md:block">
+      <div className="hidden overflow-x-auto rounded-xl border border-border bg-card md:block">
         <table className="w-full min-w-[760px] text-left text-sm">
-          <thead className="bg-slate-50 text-xs font-medium uppercase tracking-wide text-slate-500">
+          <thead className="bg-muted/50 text-xs font-medium uppercase tracking-wide text-muted-foreground">
             <tr>
               <th className="px-4 py-3">{tc("product")}</th>
               <th className="px-4 py-3">{tc("category")}</th>
@@ -75,38 +75,38 @@ export function ProductsTable({
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-border">
             {products.map((p) => (
-              <tr key={p.id} className="hover:bg-slate-50/70">
+              <tr key={p.id} className="hover:bg-muted/50">
                 <td className="px-4 py-3 align-top">
-                  <div className="font-medium text-slate-900">{p.name}</div>
+                  <div className="font-medium text-foreground">{p.name}</div>
                   {p.description && (
-                    <p className="line-clamp-1 text-xs text-slate-500">
+                    <p className="line-clamp-1 text-xs text-muted-foreground">
                       {p.description}
                     </p>
                   )}
                 </td>
-                <td className="px-4 py-3 align-top text-slate-600">
+                <td className="px-4 py-3 align-top text-muted-foreground">
                   {p.category?.name ?? (
-                    <span className="text-slate-400">—</span>
+                    <span className="text-muted-foreground/80">—</span>
                   )}
                 </td>
-                <td className="px-4 py-3 text-right align-top tabular-nums text-slate-700">
+                <td className="px-4 py-3 text-right align-top tabular-nums text-foreground">
                   {formatMoney(p.buyPrice)}
                 </td>
-                <td className="px-4 py-3 text-right align-top tabular-nums text-slate-900">
+                <td className="px-4 py-3 text-right align-top tabular-nums text-foreground">
                   {formatMoney(p.sellPrice)}
                 </td>
                 <td className="px-4 py-3 text-right align-top tabular-nums">
                   <div
                     className={cn(
                       "font-medium",
-                      p.isLowStock ? "text-amber-700" : "text-slate-800",
+                      p.isLowStock ? "text-amber-700" : "text-foreground",
                     )}
                   >
                     {p.stockQuantity}
                   </div>
-                  <div className="text-xs text-slate-400">min {p.minStock}</div>
+                  <div className="text-xs text-muted-foreground/80">min {p.minStock}</div>
                 </td>
                 <td className="px-4 py-3 align-top">
                   <StatusCell product={p} />
@@ -135,16 +135,16 @@ export function ProductsTable({
           <li
             key={p.id}
             className={cn(
-              "rounded-xl border bg-white p-4 shadow-sm",
+              "rounded-xl border bg-card p-4 shadow-sm",
               p.isLowStock
                 ? "border-amber-200 bg-amber-50/30"
-                : "border-slate-100",
+                : "border-border",
             )}
           >
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="truncate font-medium text-slate-900">{p.name}</p>
-                <p className="mt-0.5 text-xs text-slate-500">
+                <p className="truncate font-medium text-foreground">{p.name}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   {p.category?.name ?? tc("noCategory")}
                 </p>
               </div>
@@ -202,15 +202,15 @@ function Stat({
   return (
     <div
       className={cn(
-        "rounded-md bg-slate-50 py-2",
+        "rounded-md bg-muted/50 py-2",
         tone === "warn" && "bg-amber-100/60",
       )}
     >
-      <dt className="text-slate-500">{label}</dt>
+      <dt className="text-muted-foreground">{label}</dt>
       <dd
         className={cn(
-          "mt-0.5 font-medium tabular-nums text-slate-800",
-          emphasis && "text-slate-900",
+          "mt-0.5 font-medium tabular-nums text-foreground",
+          emphasis && "text-foreground",
           tone === "warn" && "text-amber-800",
         )}
       >

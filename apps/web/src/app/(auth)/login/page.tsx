@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
+import { ThemeSwitcher } from "@/components/theme/theme-switcher";
 import { authApi } from "@/lib/api/auth";
 import { DEFAULT_ROUTE_BY_ROLE } from "@/lib/roles";
 import { useAuthStore } from "@/stores/auth.store";
@@ -51,7 +52,8 @@ export default function LoginPage() {
   return (
     <Card>
       <CardHeader className="space-y-3">
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2">
+          <ThemeSwitcher />
           <LanguageSwitcher />
         </div>
         <CardTitle>{t("welcomeBack")}</CardTitle>
@@ -89,9 +91,9 @@ export default function LoginPage() {
             {isSubmitting ? t("signingIn") : t("signIn")}
           </Button>
         </form>
-        <p className="mt-6 text-center text-sm text-slate-600">
+        <p className="mt-6 text-center text-sm text-muted-foreground">
           {t("newToApp")}{" "}
-          <Link href="/register" className="font-medium text-slate-900 hover:underline">
+          <Link href="/register" className="font-medium text-primary hover:underline">
             {t("createAccount")}
           </Link>
         </p>

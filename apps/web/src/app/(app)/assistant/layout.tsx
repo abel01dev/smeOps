@@ -8,7 +8,7 @@ export default function AssistantLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="-m-4 flex h-[calc(100dvh-3.5rem)] min-h-[32rem] flex-col md:-m-6">
+    <div className="-m-4 flex h-[calc(100dvh-3.5rem)] min-h-[32rem] flex-col md:-m-6 md:h-[100dvh]">
       {children}
     </div>
   );

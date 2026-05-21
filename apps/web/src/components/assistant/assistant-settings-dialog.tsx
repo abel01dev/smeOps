@@ -122,7 +122,7 @@ export function AssistantSettingsDialog({
               onChange={(e) => setApiKey(e.target.value)}
               autoComplete="off"
             />
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               {t("getKeyAt")}{" "}
               <a
                 href="https://openrouter.ai/keys"

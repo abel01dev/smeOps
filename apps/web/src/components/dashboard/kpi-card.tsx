@@ -15,7 +15,7 @@ interface KpiCardProps {
 }
 
 const TONE: Record<NonNullable<KpiCardProps["tone"]>, string> = {
-  default: "bg-slate-100 text-slate-700",
+  default: "bg-muted text-foreground",
   success: "bg-emerald-100 text-emerald-700",
   warning: "bg-amber-100 text-amber-700",
   danger: "bg-red-100 text-red-700",
@@ -33,13 +33,13 @@ export function KpiCard({
     <Card>
       <CardContent className="flex items-start justify-between gap-4 p-5">
         <div className="min-w-0 flex-1 space-y-1.5">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {label}
           </p>
           {isLoading ? (
             <Skeleton className="h-7 w-28" />
           ) : (
-            <p className="truncate text-2xl font-semibold tracking-tight text-slate-900">
+            <p className="truncate text-2xl font-semibold tracking-tight text-foreground">
               {value}
             </p>
           )}
@@ -47,7 +47,7 @@ export function KpiCard({
             isLoading ? (
               <Skeleton className="h-3.5 w-20" />
             ) : (
-              <p className="text-xs text-slate-500">{hint}</p>
+              <p className="text-xs text-muted-foreground">{hint}</p>
             )
           ) : null}
         </div>

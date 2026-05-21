@@ -32,8 +32,8 @@ export function PosProductGrid({ categories, onAddProduct }: PosProductGridProps
   const products = q.data?.items ?? [];
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-white">
-      <div className="shrink-0 border-b border-slate-200 px-3 pt-2 sm:px-4">
+    <div className="flex min-h-0 flex-1 flex-col bg-background">
+      <div className="shrink-0 border-b border-border px-3 pt-2 sm:px-4">
         <div className="flex gap-1 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <TabChip
             active={!categoryId}
@@ -53,9 +53,9 @@ export function PosProductGrid({ categories, onAddProduct }: PosProductGridProps
         </div>
       </div>
 
-      <div className="shrink-0 border-b border-slate-100 px-3 py-3 sm:px-4">
+      <div className="shrink-0 border-b border-border px-3 py-3 sm:px-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/80" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -81,7 +81,7 @@ export function PosProductGrid({ categories, onAddProduct }: PosProductGridProps
         )}
 
         {!q.isLoading && !q.isError && products.length === 0 && (
-          <p className="py-12 text-center text-sm text-slate-500">
+          <p className="py-12 text-center text-sm text-muted-foreground">
             {t("noProductsInventory")}
           </p>
         )}
@@ -114,8 +114,8 @@ function TabChip({
       className={cn(
         "shrink-0 rounded-lg px-4 py-2.5 text-sm font-medium transition",
         active
-          ? "bg-slate-900 text-white shadow-sm"
-          : "text-slate-600 hover:bg-slate-100",
+          ? "bg-primary text-primary-foreground shadow-sm"
+          : "text-muted-foreground hover:bg-muted",
       )}
     >
       {children}

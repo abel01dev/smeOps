@@ -26,8 +26,8 @@ export default function PosPage() {
   );
 
   return (
-    <div className="-m-4 flex h-[calc(100dvh-3.5rem)] min-h-[32rem] flex-col overflow-hidden md:-m-6 lg:flex-row">
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col border-b border-slate-200 lg:border-b-0 lg:border-r">
+    <div className="-m-4 flex h-[calc(100dvh-3.5rem)] min-h-[32rem] flex-col overflow-hidden md:-m-6 md:h-[100dvh] lg:flex-row">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col border-b border-border lg:border-b-0 lg:border-r">
         <PosProductGrid categories={categories} onAddProduct={onAdd} />
       </div>
       <div className="flex h-[min(42vh,22rem)] shrink-0 flex-col lg:h-auto lg:min-h-0 lg:shrink-0">
