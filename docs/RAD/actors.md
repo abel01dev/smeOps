@@ -357,6 +357,7 @@ classDiagram
 | Requirements | `requirment.md` | Complete |
 | Business rules | `businessrule.md` | Complete |
 | Actors & roles | `actors.md` | Complete |
+| Use cases (from scenarios) | `usecases.md` | Complete |
 
 ---
 
