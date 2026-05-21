@@ -101,6 +101,13 @@ function mapPrismaError(
         message: "Record not found",
         error: "NotFound",
       };
+    case "P2021":
+      return {
+        statusCode: HttpStatus.SERVICE_UNAVAILABLE,
+        message:
+          "Database schema is out of date. Run: pnpm --filter @sme/api exec prisma migrate deploy",
+        error: "ServiceUnavailable",
+      };
     default:
       return {
         statusCode: HttpStatus.BAD_REQUEST,

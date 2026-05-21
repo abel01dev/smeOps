@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import type {
+  DashboardPeriodMoney,
   DashboardSummary,
   RevenueTrendBucket,
   TopProduct,
@@ -13,69 +14,82 @@ export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * KPI cards data: revenue/profit windows + product/customer counts + low-stock count.
-   * Runs all aggregates concurrently — one slow query doesn't block the others.
+   * KPI cards: sales revenue/gross profit + operating expenses + net profit.
    */
   async summary(organizationId: string): Promise<DashboardSummary> {
     const now = new Date();
     const startOfToday = this.startOfDay(now);
-    const sevenDaysAgo = this.startOfDay(this.addDays(now, -6));   // includes today
-    const thirtyDaysAgo = this.startOfDay(this.addDays(now, -29)); // includes today
+    const sevenDaysAgo = this.startOfDay(this.addDays(now, -6));
+    const thirtyDaysAgo = this.startOfDay(this.addDays(now, -29));
 
-    const [todayAgg, weekAgg, monthAgg, todayCount, activeProducts, customers, lowStockCount] =
-      await Promise.all([
-        this.prisma.sale.aggregate({
-          where: { organizationId, createdAt: { gte: startOfToday } },
-          _sum: { total: true, profit: true },
-        }),
-        this.prisma.sale.aggregate({
-          where: { organizationId, createdAt: { gte: sevenDaysAgo } },
-          _sum: { total: true, profit: true },
-        }),
-        this.prisma.sale.aggregate({
-          where: { organizationId, createdAt: { gte: thirtyDaysAgo } },
-          _sum: { total: true, profit: true },
-        }),
-        this.prisma.sale.count({
-          where: { organizationId, createdAt: { gte: startOfToday } },
-        }),
-        this.prisma.product.count({
-          where: { organizationId, status: "ACTIVE" },
-        }),
-        this.prisma.customer.count({ where: { organizationId } }),
-        this.prisma.product.count({
-          where: {
-            organizationId,
-            status: "ACTIVE",
-            minStock: { gt: 0 },
-            stockQuantity: { lte: this.prisma.product.fields.minStock },
-          },
-        }),
-      ]);
+    const [
+      todayAgg,
+      weekAgg,
+      monthAgg,
+      todayExpenses,
+      weekExpenses,
+      monthExpenses,
+      todayCount,
+      activeProducts,
+      customers,
+      lowStockCount,
+    ] = await Promise.all([
+      this.prisma.sale.aggregate({
+        where: { organizationId, createdAt: { gte: startOfToday } },
+        _sum: { total: true, profit: true },
+      }),
+      this.prisma.sale.aggregate({
+        where: { organizationId, createdAt: { gte: sevenDaysAgo } },
+        _sum: { total: true, profit: true },
+      }),
+      this.prisma.sale.aggregate({
+        where: { organizationId, createdAt: { gte: thirtyDaysAgo } },
+        _sum: { total: true, profit: true },
+      }),
+      this.sumExpensesSince(organizationId, startOfToday),
+      this.sumExpensesSince(organizationId, sevenDaysAgo),
+      this.sumExpensesSince(organizationId, thirtyDaysAgo),
+      this.prisma.sale.count({
+        where: { organizationId, createdAt: { gte: startOfToday } },
+      }),
+      this.prisma.product.count({
+        where: { organizationId, status: "ACTIVE" },
+      }),
+      this.prisma.customer.count({ where: { organizationId } }),
+      this.prisma.product.count({
+        where: {
+          organizationId,
+          status: "ACTIVE",
+          minStock: { gt: 0 },
+          stockQuantity: { lte: this.prisma.product.fields.minStock },
+        },
+      }),
+    ]);
+
+    const todayPeriod = this.buildPeriod(
+      todayAgg._sum.total,
+      todayAgg._sum.profit,
+      todayExpenses,
+    );
+    const weekPeriod = this.buildPeriod(
+      weekAgg._sum.total,
+      weekAgg._sum.profit,
+      weekExpenses,
+    );
+    const monthPeriod = this.buildPeriod(
+      monthAgg._sum.total,
+      monthAgg._sum.profit,
+      monthExpenses,
+    );
 
     return {
-      today: {
-        revenue: this.sumOrZero(todayAgg._sum.total),
-        profit: this.sumOrZero(todayAgg._sum.profit),
-        salesCount: todayCount,
-      },
-      week: {
-        revenue: this.sumOrZero(weekAgg._sum.total),
-        profit: this.sumOrZero(weekAgg._sum.profit),
-      },
-      month: {
-        revenue: this.sumOrZero(monthAgg._sum.total),
-        profit: this.sumOrZero(monthAgg._sum.profit),
-      },
+      today: { ...todayPeriod, salesCount: todayCount },
+      week: weekPeriod,
+      month: monthPeriod,
       totals: { activeProducts, customers, lowStockCount },
     };
   }
 
-  /**
-   * Daily revenue + profit + sales count for the last N days, ending today.
-   * Returns one bucket per day even if there are zero sales — empty days show
-   * as flat 0s on the chart, which is the correct UX for a sparse business.
-   */
   async revenueTrend(
     organizationId: string,
     days: number,
@@ -83,38 +97,57 @@ export class DashboardService {
     const now = new Date();
     const since = this.startOfDay(this.addDays(now, -(days - 1)));
 
-    const sales = await this.prisma.sale.findMany({
-      where: { organizationId, createdAt: { gte: since } },
-      select: { createdAt: true, total: true, profit: true },
-    });
+    const [sales, expenses] = await Promise.all([
+      this.prisma.sale.findMany({
+        where: { organizationId, createdAt: { gte: since } },
+        select: { createdAt: true, total: true, profit: true },
+      }),
+      this.prisma.operationalExpense.findMany({
+        where: { organizationId, expenseDate: { gte: since } },
+        select: { expenseDate: true, amount: true },
+      }),
+    ]);
 
-    const buckets = new Map<string, { revenue: number; profit: number; salesCount: number }>();
+    const buckets = new Map<
+      string,
+      { revenue: number; profit: number; expenses: number; salesCount: number }
+    >();
     for (let d = 0; d < days; d++) {
       const date = this.addDays(since, d);
-      buckets.set(this.dayKey(date), { revenue: 0, profit: 0, salesCount: 0 });
+      buckets.set(this.dayKey(date), {
+        revenue: 0,
+        profit: 0,
+        expenses: 0,
+        salesCount: 0,
+      });
     }
 
     for (const s of sales) {
       const key = this.dayKey(s.createdAt);
       const bucket = buckets.get(key);
-      if (!bucket) continue; // out of range (defensive)
+      if (!bucket) continue;
       bucket.revenue += Number(s.total);
       bucket.profit += Number(s.profit);
       bucket.salesCount += 1;
+    }
+
+    for (const e of expenses) {
+      const key = this.dayKey(e.expenseDate);
+      const bucket = buckets.get(key);
+      if (!bucket) continue;
+      bucket.expenses += Number(e.amount);
     }
 
     return Array.from(buckets.entries()).map(([date, b]) => ({
       date,
       revenue: b.revenue.toFixed(2),
       profit: b.profit.toFixed(2),
+      operatingExpenses: b.expenses.toFixed(2),
+      netProfit: (b.profit - b.expenses).toFixed(2),
       salesCount: b.salesCount,
     }));
   }
 
-  /**
-   * Top N products by revenue in the last `days`. Uses Prisma groupBy on
-   * SaleItem so we don't pull rows into Node just to sum them.
-   */
   async topProducts(
     organizationId: string,
     days: number,
@@ -141,7 +174,31 @@ export class DashboardService {
     }));
   }
 
-  // -------------------- helpers --------------------
+  private async sumExpensesSince(
+    organizationId: string,
+    since: Date,
+  ): Promise<number> {
+    const agg = await this.prisma.operationalExpense.aggregate({
+      where: { organizationId, expenseDate: { gte: since } },
+      _sum: { amount: true },
+    });
+    return Number(agg._sum.amount ?? 0);
+  }
+
+  private buildPeriod(
+    revenue: Prisma.Decimal | null | undefined,
+    profit: Prisma.Decimal | null | undefined,
+    operatingExpenses: number,
+  ): DashboardPeriodMoney {
+    const gross = Number(profit ?? 0);
+    const expenses = operatingExpenses;
+    return {
+      revenue: this.sumOrZero(revenue),
+      profit: gross.toFixed(2),
+      operatingExpenses: expenses.toFixed(2),
+      netProfit: (gross - expenses).toFixed(2),
+    };
+  }
 
   private startOfDay(d: Date): Date {
     const out = new Date(d);
@@ -156,8 +213,6 @@ export class DashboardService {
   }
 
   private dayKey(d: Date): string {
-    // YYYY-MM-DD in the server's local timezone — fine for a single-shop MVP.
-    // For multi-region tenants we'd switch to UTC or store an Organization.tz.
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth() + 1).padStart(2, "0");
     const dd = String(d.getDate()).padStart(2, "0");

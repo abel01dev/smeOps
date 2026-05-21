@@ -12,6 +12,7 @@ import { envValidation } from "./config/env.validation";
 import { CustomersModule } from "./customers/customers.module";
 import { DashboardModule } from "./dashboard/dashboard.module";
 import { EmployeesModule } from "./employees/employees.module";
+import { ExpensesModule } from "./expenses/expenses.module";
 import { HealthController } from "./health/health.controller";
 import { PrismaModule } from "./prisma/prisma.module";
 import { ProductsModule } from "./products/products.module";
@@ -45,6 +46,7 @@ import { SalesModule } from "./sales/sales.module";
     SalesModule,
     DashboardModule,
     EmployeesModule,
+    ExpensesModule,
     AiModule,
   ],
   controllers: [HealthController],

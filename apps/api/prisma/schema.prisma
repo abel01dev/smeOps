@@ -50,10 +50,12 @@ model Organization {
   categories       Category[]
   products         Product[]
   customers        Customer[]
-  sales            Sale[]
-  aiConversations  AIConversation[]
-  aiMessages       AIMessage[]
-  aiSettings       AISettings[]
+  sales                 Sale[]
+  expenseCategories     ExpenseCategory[]
+  operationalExpenses   OperationalExpense[]
+  aiConversations       AIConversation[]
+  aiMessages            AIMessage[]
+  aiSettings            AISettings[]
 
   @@map("organizations")
 }
@@ -79,10 +81,11 @@ model User {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  organization      Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  sales             Sale[]           @relation("CashierSales")
-  aiConversations   AIConversation[]
-  aiSettings        AISettings[]
+  organization          Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  sales                 Sale[]                 @relation("CashierSales")
+  recordedExpenses      OperationalExpense[]   @relation("RecordedExpenses")
+  aiConversations       AIConversation[]
+  aiSettings            AISettings[]
 
   @@index([organizationId])
   @@map("users")
@@ -204,6 +207,48 @@ model SaleItem {
   @@index([saleId])
   @@index([productId])
   @@map("sale_items")
+}
+
+// ---------------------- Operating expenses (OPEX) ----------------------
+// Day-to-day costs: rent, salaries, transport, utilities — not capital assets.
+
+model ExpenseCategory {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  expenses     OperationalExpense[]
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+  @@map("expense_categories")
+}
+
+model OperationalExpense {
+  id             String        @id @default(cuid())
+  organizationId String
+  categoryId     String
+  recordedById   String        @db.Uuid
+  amount         Decimal       @db.Decimal(14, 2)
+  description    String?
+  /// Calendar day the money was spent (stored at local midnight).
+  expenseDate    DateTime
+  paymentMethod  PaymentMethod @default(CASH)
+  note           String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  category     ExpenseCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  recordedBy   User            @relation("RecordedExpenses", fields: [recordedById], references: [id])
+
+  @@index([organizationId])
+  @@index([organizationId, expenseDate])
+  @@index([categoryId])
+  @@map("operational_expenses")
 }
 
 // ---------------------- AI Business Assistant ----------------------

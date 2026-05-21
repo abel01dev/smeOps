@@ -19,4 +19,6 @@ export const API_ROLE_ACCESS = {
   customersDelete: [O, M],
   sales: [O, M, C],
   employees: [O],
+  expensesRead: [O, M],
+  expensesWrite: [O, M],
 } as const satisfies Record<string, UserRole[]>;
