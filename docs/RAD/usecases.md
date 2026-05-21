@@ -6,7 +6,7 @@
 
 This table follows the lab manual format: **Use Case ID**, **Use Case Name**, **Primary Actor**, **Source** (scenario).
 
-Detailed flows (Task 6): **[use-case-descriptions.md](./use-case-descriptions.md)** · API trace: [use-case-specifications.md](./use-case-specifications.md) · UML: [`docs/uml/use-case-overview.puml`](../uml/use-case-overview.puml).
+Detailed flows (Task 6): **[use-case-descriptions.md](./use-case-descriptions.md)** · API trace: [use-case-specifications.md](./use-case-specifications.md) · UML: [`diagrams/use-case/overview.puml`](./diagrams/use-case/overview.puml).
 
 ---
 
@@ -236,7 +236,7 @@ Detailed flows (Task 6): **[use-case-descriptions.md](./use-case-descriptions.md
 | Use cases from scenarios | `usecases.md` | Complete |
 | Use case descriptions (Task 6) | `use-case-descriptions.md` | Complete |
 | Use case specifications (API trace) | `use-case-specifications.md` | Existing |
-| UML diagram | `docs/uml/use-case-overview.puml` | Existing |
+| UML diagrams | `docs/RAD/diagrams/` | Complete |
 
 ---
 

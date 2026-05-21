@@ -1,0 +1,11 @@
+@startuml SME_Ops_State_AI_Conversation
+title AI conversation lifecycle — §2.3.5
+
+[*] --> Empty
+
+Empty --> Active : UC25 create / first message
+Active --> Active : UC24 send message
+Active --> Archived : user deletes conversation
+Archived --> [*]
+
+@enduml

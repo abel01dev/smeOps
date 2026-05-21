@@ -1,0 +1,18 @@
+@startuml SME_Ops_Use_Case_Inventory_Manager
+title SME Ops — Use Cases: Inventory Manager
+
+actor "Inventory\nManager" as inv
+
+rectangle "SME Ops" {
+  usecase "UC3 Manage categories" as UC3
+  usecase "UC4 Manage products" as UC4
+  usecase "UC5 Archive product" as UC5
+  usecase "UC2 Login" as UC2
+}
+
+inv --> UC2
+inv --> UC3
+inv --> UC4
+inv --> UC5
+
+@enduml

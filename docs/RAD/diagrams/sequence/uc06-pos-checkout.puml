@@ -1,0 +1,29 @@
+@startuml SME_Ops_Sequence_POS
+title UC6 — Record sale (POS checkout) — §2.3.7
+
+actor Cashier
+participant "POS UI" as Web
+participant "SalesController" as API
+participant "SalesService" as Svc
+database "PostgreSQL" as DB
+
+Cashier -> Web : confirm checkout
+Web -> API : POST /sales (cart, discount, payment)
+API -> Svc : createSale(dto, cashierId, orgId)
+
+loop each line item
+  Svc -> DB : lock Product, check stock
+end
+
+alt insufficient stock
+  Svc --> API : 400 error
+  API --> Web : show failure
+else success
+  Svc -> DB : $transaction\nSale, SaleItems,\ndecrement stock,\nupdate Customer.totalSpent
+  DB --> Svc : sale
+  Svc --> API : sale DTO
+  API --> Web : 201
+  Web --> Cashier : success, clear cart
+end
+
+@enduml

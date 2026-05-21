@@ -1,0 +1,27 @@
+@startuml SME_Ops_Sequence_AI_Insights
+title UC23 — View AI business insights — §2.3.7
+
+actor Owner
+participant "Dashboard UI" as Web
+participant "AiController" as API
+participant "AiService" as Svc
+participant "DashboardService" as Dash
+database "PostgreSQL" as DB
+
+Owner -> Web : load insights panel
+Web -> API : GET /ai/insights?days=30
+API -> Svc : getInsights(orgId, days)
+Svc -> Dash : fetch summary & trends
+Dash -> DB : query sales, stock, expenses
+DB --> Dash : aggregates
+Dash --> Svc : metrics
+Svc --> Svc : build rule-based cards
+Svc --> API : insight cards[]
+API --> Web : JSON
+Web --> Owner : display insights
+
+note right of Svc
+  No OpenRouter required (FR-17)
+end note
+
+@enduml

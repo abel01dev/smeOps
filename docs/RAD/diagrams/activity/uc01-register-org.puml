@@ -1,0 +1,28 @@
+@startuml SME_Ops_Activity_Register
+title UC1 — Register organization and owner — §2.3.6
+
+|Guest|
+start
+:Open /register;
+:Enter org name, owner name,\nemail, password;
+|System|
+:Validate input (Zod);
+if (Email exists?) then (yes)
+  :Show error;
+  stop
+else (no)
+  :Create Supabase auth user;
+  if (DB transaction OK?) then (yes)
+    :Create Organization + User OWNER;
+    :Return JWT tokens;
+    |Guest|
+    :Redirect to /dashboard;
+    stop
+  else (no)
+    :Rollback / cleanup auth user;
+    :Show error;
+    stop
+  endif
+endif
+
+@enduml

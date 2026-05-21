@@ -1,0 +1,21 @@
+@startuml SME_Ops_Sequence_Expense
+title UC17 — Record operating expense — §2.3.7
+
+actor Manager
+participant "Expenses UI" as Web
+participant "ExpensesController" as API
+participant "ExpensesService" as Svc
+database "PostgreSQL" as DB
+
+Manager -> Web : submit expense
+Web -> API : POST /expenses
+API -> Svc : create(dto, userId, orgId)
+Svc -> DB : insert OperationalExpense
+DB --> Svc : expense
+Svc --> API : expense DTO
+API --> Web : 201
+note over Manager, DB
+  Dashboard net profit uses\nSUM(expenses) in period (BR-35)
+end note
+
+@enduml

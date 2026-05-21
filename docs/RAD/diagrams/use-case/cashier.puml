@@ -1,0 +1,23 @@
+@startuml SME_Ops_Use_Case_Cashier
+title SME Ops — Use Cases: Cashier
+
+actor Cashier as cashier
+
+rectangle "SME Ops" {
+  usecase "UC6 Record sale" as UC6
+  usecase "UC7 Validate stock" as UC7
+  usecase "UC8 Discount & payment" as UC8
+  usecase "UC10 Sales history" as UC10
+  usecase "UC12 Customer CRUD" as UC12
+  usecase "UC13 Link customer" as UC13
+}
+
+cashier --> UC6
+cashier --> UC10
+cashier --> UC12
+cashier --> UC13
+UC6 ..> UC7 : <<include>>
+UC6 ..> UC8 : <<include>>
+UC13 ..> UC6 : <<extend>>
+
+@enduml

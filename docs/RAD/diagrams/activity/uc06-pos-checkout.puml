@@ -1,0 +1,35 @@
+@startuml SME_Ops_Activity_POS
+title UC6 — Record sale (POS checkout) — §2.3.6
+
+|Cashier|
+start
+:Open /pos;
+repeat
+  :Add product + qty to cart;
+repeat while (More items?) is (yes)
+->no;
+if (Link customer?) then (yes)
+  :Select customer (UC13);
+endif
+:Set discount & payment (UC8);
+:Confirm checkout;
+|System|
+:Validate stock per line (UC7);
+if (All lines OK?) then (yes)
+  :Begin transaction;
+  :Create Sale + SaleItems\n(snapshot prices);
+  :Decrement stock (UC9);
+  if (Customer linked?) then (yes)
+    :Update customer totalSpent;
+  endif
+  :Commit transaction;
+  |Cashier|
+  :Show success; clear cart;
+  stop
+else (no)
+  |Cashier|
+  :Show insufficient stock;
+  stop
+endif
+
+@enduml

@@ -1,0 +1,19 @@
+@startuml SME_Ops_Sequence_Customer
+title UC12 — Create or update customer — §2.3.7
+
+actor Cashier
+participant "Customers UI" as Web
+participant "CustomersController" as API
+participant "CustomersService" as Svc
+database "PostgreSQL" as DB
+
+Cashier -> Web : save customer form
+Web -> API : POST or PATCH /customers
+API -> Svc : create/update(dto, orgId)
+Svc -> DB : insert or update Customer
+DB --> Svc : customer
+Svc --> API : customer DTO
+API --> Web : 200/201
+Web --> Cashier : refresh list
+
+@enduml

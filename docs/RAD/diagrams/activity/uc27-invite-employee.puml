@@ -1,0 +1,21 @@
+@startuml SME_Ops_Activity_Invite
+title UC27 — Invite employee — §2.3.6
+
+|Owner|
+start
+:Open /team;
+:Open invite form;
+:Enter name, email, password, role;
+if (Role = OWNER?) then (yes)
+  :System rejects (BR-12);
+  stop
+else (no)
+  |System|
+  :Create Supabase user;
+  :Create User profile in tenant;
+  |Owner|
+  :See new employee in list;
+  stop
+endif
+
+@enduml

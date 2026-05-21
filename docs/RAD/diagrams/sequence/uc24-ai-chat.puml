@@ -1,0 +1,27 @@
+@startuml SME_Ops_Sequence_AI_Chat
+title UC24 — Chat with AI assistant — §2.3.7
+
+actor Owner
+participant "Assistant UI" as Web
+participant "AiAssistantController" as API
+participant "AiAssistantService" as Svc
+participant "AiContextService" as Ctx
+participant "OpenRouter" as LLM
+database "PostgreSQL" as DB
+
+Owner -> Web : send message
+Web -> API : POST /ai/chat/stream (SSE)
+API -> Svc : streamChat(...)
+Svc -> DB : load AISettings (encrypted key)
+Svc -> Ctx : buildContext(orgId)
+Ctx -> DB : sales, products, dashboard
+Svc -> LLM : chat completion (stream)
+loop SSE chunks
+  LLM --> Svc : token
+  Svc --> API : event
+  API --> Web : chunk
+end
+Svc -> DB : save AIMessage rows
+Web --> Owner : complete reply
+
+@enduml

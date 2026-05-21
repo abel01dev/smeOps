@@ -1,0 +1,26 @@
+@startuml SME_Ops_Activity_Login
+title UC2 — Login — §2.3.6
+
+|Actor|
+start
+:Open /login;
+:Enter email & password;
+|System|
+:POST /auth/login;
+if (Credentials valid?) then (yes)
+  if (Profile exists?) then (yes)
+    :Issue access + refresh tokens;
+    |Actor|
+    :Store tokens;
+    :Redirect to role home route;
+    stop
+  else (no)
+    :Show incomplete account;
+    stop
+  endif
+else (no)
+  :Show invalid credentials;
+  stop
+endif
+
+@enduml

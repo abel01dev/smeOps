@@ -383,6 +383,7 @@ Full actor and role documentation (Lab Task 4): **[actors.md](./actors.md)**.
 | Actors & roles | Complete — `actors.md` |
 | Use cases (from scenarios) | Complete — `usecases.md` |
 | Use case descriptions (Task 6) | Complete — `use-case-descriptions.md` |
+| UML diagrams (Tasks 7+) | Complete — `diagrams/` |
 
 ---
 

@@ -1,0 +1,108 @@
+@startuml SME_Ops_Class_Diagram
+title SME Ops — Domain class model — §2.3.8
+
+skinparam classAttributeIconSize 0
+
+class Organization {
+  +id: String
+  +name: String
+  +slug: String
+  +currency: String
+}
+
+class User {
+  +id: UUID
+  +email: String
+  +name: String
+  +role: UserRole
+}
+
+enum UserRole {
+  OWNER
+  MANAGER
+  INVENTORY_MANAGER
+  CASHIER
+}
+
+class Category {
+  +id: String
+  +name: String
+}
+
+class Product {
+  +name: String
+  +buyPrice: Decimal
+  +sellPrice: Decimal
+  +stockQuantity: Int
+  +minStock: Int
+  +status: ProductStatus
+}
+
+enum ProductStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+class Customer {
+  +name: String
+  +phone: String
+  +totalSpent: Decimal
+}
+
+class Sale {
+  +subtotal: Decimal
+  +discount: Decimal
+  +total: Decimal
+  +profit: Decimal
+  +paymentMethod: PaymentMethod
+}
+
+class SaleItem {
+  +productName: String
+  +quantity: Int
+  +buyPriceAtSale: Decimal
+  +sellPriceAtSale: Decimal
+  +lineProfit: Decimal
+}
+
+class ExpenseCategory {
+  +name: String
+}
+
+class OperationalExpense {
+  +amount: Decimal
+  +expenseDate: DateTime
+}
+
+class AIConversation {
+  +title: String
+}
+
+class AIMessage {
+  +role: AIMessageRole
+  +content: String
+}
+
+Organization "1" *-- "many" User
+Organization "1" *-- "many" Category
+Organization "1" *-- "many" Product
+Organization "1" *-- "many" Customer
+Organization "1" *-- "many" Sale
+Organization "1" *-- "many" ExpenseCategory
+Organization "1" *-- "many" OperationalExpense
+
+Category "0..1" -- "many" Product
+User "1" -- "many" Sale : cashier
+Customer "0..1" -- "many" Sale
+Sale "1" *-- "many" SaleItem
+Product "1" -- "many" SaleItem
+ExpenseCategory "1" -- "many" OperationalExpense
+User "1" -- "many" OperationalExpense : recordedBy
+
+User "1" -- "many" AIConversation
+AIConversation "1" *-- "many" AIMessage
+
+User .. UserRole
+Product .. ProductStatus
+
+@enduml

@@ -1,0 +1,22 @@
+@startuml SME_Ops_Activity_AI_Chat
+title UC24 — Chat with AI assistant — §2.3.6
+
+|Owner|
+start
+:Open /assistant;
+if (API key configured?) then (yes)
+  :Select or create conversation;
+  :Type message;
+  |System|
+  :Build tenant context;
+  :Stream reply (SSE) via OpenRouter;
+  :Save USER + ASSISTANT messages;
+  |Owner|
+  :Display streamed response;
+  stop
+else (no)
+  :Prompt to add API key in settings;
+  stop
+endif
+
+@enduml

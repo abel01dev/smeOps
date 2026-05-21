@@ -341,11 +341,11 @@ classDiagram
 
 | Actor | PlantUML file |
 |-------|----------------|
-| Owner | [`docs/uml/diagrams/owner.puml`](../uml/diagrams/owner.puml) |
-| Manager | [`docs/uml/diagrams/manager.puml`](../uml/diagrams/manager.puml) |
-| Inventory Manager | [`docs/uml/diagrams/inventory-manager.puml`](../uml/diagrams/inventory-manager.puml) |
-| Cashier | [`docs/uml/diagrams/cashier.puml`](../uml/diagrams/cashier.puml) |
-| Overview (all actors) | [`docs/uml/use-case-overview.puml`](../uml/use-case-overview.puml) |
+| Owner | [`diagrams/use-case/owner.puml`](./diagrams/use-case/owner.puml) |
+| Manager | [`diagrams/use-case/manager.puml`](./diagrams/use-case/manager.puml) |
+| Inventory Manager | [`diagrams/use-case/inventory-manager.puml`](./diagrams/use-case/inventory-manager.puml) |
+| Cashier | [`diagrams/use-case/cashier.puml`](./diagrams/use-case/cashier.puml) |
+| Overview (all actors) | [`diagrams/use-case/overview.puml`](./diagrams/use-case/overview.puml) |
 
 ---
 
