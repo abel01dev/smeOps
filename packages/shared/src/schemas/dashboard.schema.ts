@@ -69,3 +69,21 @@ export interface InventoryStatusBreakdown {
   lowStock: number;
   outOfStock: number;
 }
+
+export interface LowStockProductSummary {
+  name: string;
+  stockQuantity: number;
+  minStock: number;
+}
+
+export interface RecentSaleSummary {
+  id: string;
+  date: string;
+  total: string;
+  profit: string;
+  paymentMethod: string;
+  customerName: string | null;
+  itemCount: number;
+  /** Short description of line items, e.g. "Milk x2, Bread x1" */
+  itemsPreview: string;
+}

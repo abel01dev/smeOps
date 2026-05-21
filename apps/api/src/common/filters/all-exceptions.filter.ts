@@ -66,6 +66,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
       );
     }
 
+    if (response.headersSent) {
+      this.logger.error(
+        `${request.method} ${request.url} -> ${statusCode} ${message} (response already started — cannot send JSON body)`,
+        exception instanceof Error ? exception.stack : undefined,
+      );
+      if (!response.writableEnded) {
+        response.end();
+      }
+      return;
+    }
+
     const body: ErrorBody = {
       statusCode,
       message,

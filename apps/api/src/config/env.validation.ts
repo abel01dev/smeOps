@@ -26,6 +26,11 @@ const envSchema = z.object({
 
   /** 32+ char secret for encrypting per-user OpenRouter API keys at rest. */
   AI_ENCRYPTION_KEY: z.string().min(32).optional(),
+  /**
+   * Include full tenant JSON in AI context. Defaults on in development/test;
+   * set to "false" in production to save tokens unless you need deep Q&A.
+   */
+  AI_CONTEXT_INCLUDE_RAW: z.enum(["true", "false"]).optional(),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

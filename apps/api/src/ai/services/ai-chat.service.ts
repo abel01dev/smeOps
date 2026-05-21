@@ -17,10 +17,11 @@ const SYSTEM_PROMPT = `You are SME Ops AI Assistant — a professional business 
 
 Guidelines:
 - Be concise, actionable, and business-focused.
-- Use the provided business snapshot when relevant; do not invent numbers.
+- Use the provided business snapshot and raw JSON tenant export when answering; do not invent numbers or records.
+- For specific questions (a sale, customer, product, expense), search the raw JSON data first.
 - Format answers with markdown when helpful (lists, bold for emphasis).
-- If asked about data you do not have, explain what is missing and suggest next steps in the app (POS, Inventory, Dashboard).
-- Never request or expose API keys, passwords, or raw database exports.`;
+- If asked about data not in the export, explain what is missing and suggest next steps in the app (POS, Inventory, Dashboard).
+- Never request or expose API keys or passwords.`;
 
 @Injectable()
 export class AiChatService {
@@ -38,109 +39,125 @@ export class AiChatService {
     dto: ChatStreamInput,
     res: Response,
   ): Promise<void> {
-    let apiKey: string;
     try {
-      apiKey = await this.settings.requireApiKey(organizationId, userId);
-    } catch {
-      this.writeSse(res, { type: "error", message: "Add your OpenRouter API key in settings." });
-      res.end();
-      return;
-    }
+      let apiKey: string;
+      try {
+        apiKey = await this.settings.requireApiKey(organizationId, userId);
+      } catch {
+        this.endWithError(res, "Add your OpenRouter API key in settings.");
+        return;
+      }
 
-    const model =
-      dto.model ?? (await this.settings.preferredModel(organizationId, userId));
+      const model =
+        dto.model ?? (await this.settings.preferredModel(organizationId, userId));
 
-    let conversationId = dto.conversationId;
-    if (conversationId) {
-      const exists = await this.prisma.aIConversation.findFirst({
-        where: { id: conversationId, organizationId, userId },
-      });
-      if (!exists) throw new NotFoundException("Conversation not found");
-    } else {
-      const created = await this.conversations.create(organizationId, userId);
-      conversationId = created.id;
-      this.writeSse(res, { type: "conversation", conversationId });
-    }
+      let conversationId = dto.conversationId;
+      if (conversationId) {
+        const exists = await this.prisma.aIConversation.findFirst({
+          where: { id: conversationId, organizationId, userId },
+        });
+        if (!exists) {
+          this.endWithError(res, "Conversation not found");
+          return;
+        }
+      } else {
+        const created = await this.conversations.create(organizationId, userId);
+        conversationId = created.id;
+        this.writeSse(res, { type: "conversation", conversationId });
+      }
 
-    const userMsg = await this.prisma.aIMessage.create({
-      data: {
-        conversationId: conversationId!,
-        organizationId,
-        role: AIMessageRole.USER,
-        content: dto.message,
-      },
-    });
-
-    const autoTitle = await this.conversations.autoTitleFromMessage(
-      conversationId!,
-      dto.message,
-    );
-    if (autoTitle) {
-      this.writeSse(res, {
-        type: "conversation",
-        conversationId: conversationId!,
-        title: autoTitle,
-      });
-    }
-
-    const history = await this.prisma.aIMessage.findMany({
-      where: {
-        conversationId: conversationId!,
-        organizationId,
-        role: { in: [AIMessageRole.USER, AIMessageRole.ASSISTANT] },
-        id: { not: userMsg.id },
-      },
-      orderBy: { createdAt: "asc" },
-      take: 20,
-    });
-
-    const contextBlock = await this.context.buildContextBlock(organizationId);
-    const messages = [
-      { role: "system" as const, content: `${SYSTEM_PROMPT}\n\n${contextBlock}` },
-      ...history.map((m) => ({
-        role: (m.role === AIMessageRole.USER ? "user" : "assistant") as
-          | "user"
-          | "assistant",
-        content: m.content,
-      })),
-      { role: "user" as const, content: dto.message },
-    ];
-
-    let assistantText = "";
-    try {
-      assistantText = await this.openRouter.streamChat({
-        apiKey,
-        model,
-        messages,
-        onDelta: (chunk) => {
-          this.writeSse(res, { type: "delta", content: chunk });
+      const userMsg = await this.prisma.aIMessage.create({
+        data: {
+          conversationId: conversationId!,
+          organizationId,
+          role: AIMessageRole.USER,
+          content: dto.message,
         },
       });
-    } catch (err) {
-      const message =
-        err instanceof BadRequestException
-          ? (err.message as string)
-          : err instanceof Error
-            ? err.message
-            : "AI request failed";
-      this.writeSse(res, { type: "error", message });
+
+      const autoTitle = await this.conversations.autoTitleFromMessage(
+        conversationId!,
+        dto.message,
+      );
+      if (autoTitle) {
+        this.writeSse(res, {
+          type: "conversation",
+          conversationId: conversationId!,
+          title: autoTitle,
+        });
+      }
+
+      const history = await this.prisma.aIMessage.findMany({
+        where: {
+          conversationId: conversationId!,
+          organizationId,
+          role: { in: [AIMessageRole.USER, AIMessageRole.ASSISTANT] },
+          id: { not: userMsg.id },
+        },
+        orderBy: { createdAt: "asc" },
+        take: 20,
+      });
+
+      const contextBlock = await this.context.buildContextBlock(organizationId);
+      const messages = [
+        { role: "system" as const, content: `${SYSTEM_PROMPT}\n\n${contextBlock}` },
+        ...history.map((m) => ({
+          role: (m.role === AIMessageRole.USER ? "user" : "assistant") as
+            | "user"
+            | "assistant",
+          content: m.content,
+        })),
+        { role: "user" as const, content: dto.message },
+      ];
+
+      let assistantText = "";
+      try {
+        assistantText = await this.openRouter.streamChat({
+          apiKey,
+          model,
+          messages,
+          onDelta: (chunk) => {
+            this.writeSse(res, { type: "delta", content: chunk });
+          },
+        });
+      } catch (err) {
+        this.endWithError(res, this.errorMessage(err));
+        return;
+      }
+
+      const assistantMsg = await this.prisma.aIMessage.create({
+        data: {
+          conversationId: conversationId!,
+          organizationId,
+          role: AIMessageRole.ASSISTANT,
+          content: assistantText || "(No response)",
+          model,
+        },
+      });
+
+      await this.conversations.touchConversation(conversationId!);
+      this.writeSse(res, { type: "done", messageId: assistantMsg.id });
       res.end();
-      return;
+    } catch (err) {
+      this.endWithError(res, this.errorMessage(err));
     }
+  }
 
-    const assistantMsg = await this.prisma.aIMessage.create({
-      data: {
-        conversationId: conversationId!,
-        organizationId,
-        role: AIMessageRole.ASSISTANT,
-        content: assistantText || "(No response)",
-        model,
-      },
-    });
+  private errorMessage(err: unknown): string {
+    if (err instanceof BadRequestException) {
+      const res = err.getResponse();
+      return typeof res === "string" ? res : err.message;
+    }
+    if (err instanceof NotFoundException) {
+      return err.message;
+    }
+    if (err instanceof Error) return err.message;
+    return "Something went wrong";
+  }
 
-    await this.conversations.touchConversation(conversationId!);
-    this.writeSse(res, { type: "done", messageId: assistantMsg.id });
-    res.end();
+  private endWithError(res: Response, message: string): void {
+    this.writeSse(res, { type: "error", message });
+    if (!res.writableEnded) res.end();
   }
 
   private writeSse(
