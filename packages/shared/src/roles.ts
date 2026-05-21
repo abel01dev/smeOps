@@ -10,6 +10,7 @@ export const ROUTE_ACCESS: Record<string, AppRole[]> = {
   "/customers": ["OWNER", "MANAGER", "CASHIER"],
   "/sales": ["OWNER", "MANAGER", "CASHIER"],
   "/team": ["OWNER"],
+  "/expenses": ["OWNER", "MANAGER"],
 };
 
 export const DEFAULT_ROUTE_BY_ROLE: Record<AppRole, string> = {
