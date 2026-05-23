@@ -5,6 +5,7 @@ import type {
   DashboardSummary,
   InventoryStatusBreakdown,
   LowStockProductSummary,
+  CreditReceivablesSummary,
   RecentSaleSummary,
   RevenueTrendBucket,
   SalesByCategorySlice,
@@ -260,7 +261,11 @@ export class DashboardService {
         total: true,
         profit: true,
         paymentMethod: true,
-        customer: { select: { name: true } },
+        paymentStatus: true,
+        amountPaid: true,
+        amountDue: true,
+        dueDate: true,
+        customer: { select: { id: true, name: true } },
         items: {
           select: { productName: true, quantity: true },
           orderBy: { lineTotal: "desc" },
@@ -286,11 +291,63 @@ export class DashboardService {
         total: s.total.toString(),
         profit: s.profit.toString(),
         paymentMethod: s.paymentMethod,
+        paymentStatus: s.paymentStatus,
+        amountPaid: s.amountPaid.toString(),
+        amountDue: s.amountDue.toString(),
+        dueDate: s.dueDate?.toISOString().slice(0, 10) ?? null,
         customerName: s.customer?.name ?? null,
         itemCount: s._count.items,
         itemsPreview,
       };
     });
+  }
+
+  /** Open credit sales (pay-later / partial balances) for AI and reporting. */
+  async creditReceivables(
+    organizationId: string,
+    limit = 25,
+  ): Promise<CreditReceivablesSummary> {
+    const openSales = await this.prisma.sale.findMany({
+      where: {
+        organizationId,
+        paymentStatus: { in: ["PARTIAL", "UNPAID"] },
+        amountDue: { gt: 0 },
+      },
+      orderBy: [{ dueDate: "asc" }, { createdAt: "desc" }],
+      take: limit,
+      select: {
+        id: true,
+        customerId: true,
+        createdAt: true,
+        total: true,
+        amountPaid: true,
+        amountDue: true,
+        paymentStatus: true,
+        dueDate: true,
+        customer: { select: { name: true } },
+      },
+    });
+
+    const totalOutstanding = openSales.reduce(
+      (sum, s) => sum + Number(s.amountDue),
+      0,
+    );
+
+    return {
+      totalOutstanding: totalOutstanding.toFixed(2),
+      openSaleCount: openSales.length,
+      items: openSales.map((s) => ({
+        saleId: s.id,
+        customerId: s.customerId,
+        customerName: s.customer?.name ?? null,
+        saleDate: this.dayKey(s.createdAt),
+        total: s.total.toString(),
+        amountPaid: s.amountPaid.toString(),
+        amountDue: s.amountDue.toString(),
+        paymentStatus: s.paymentStatus,
+        dueDate: s.dueDate?.toISOString().slice(0, 10) ?? null,
+      })),
+    };
   }
 
   async topProducts(

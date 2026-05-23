@@ -5,6 +5,7 @@ export const PAYMENT_LABELS: Record<PaymentMethod, string> = {
   CASH: "Cash",
   MOBILE_MONEY: "Mobile money",
   CARD: "Card",
+  CREDIT: "On account",
 };
 
 /** @deprecated Use `useFormatSaleDate()` in client components. */

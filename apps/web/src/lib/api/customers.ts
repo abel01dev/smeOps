@@ -3,21 +3,14 @@
 import type {
   CreateCustomerInput,
   Customer,
+  CustomerDetail,
   PaginatedResult,
   UpdateCustomerInput,
 } from "@sme/shared";
 
 import { apiClient } from "../api-client";
 
-export interface CustomerDetail extends Customer {
-  recentSales: Array<{
-    id: string;
-    total: string;
-    paymentMethod: string;
-    createdAt: string;
-    items: Array<{ productName: string; quantity: number; lineTotal: string }>;
-  }>;
-}
+export type { CustomerDetail };
 
 export interface ListCustomersParams {
   page?: number;

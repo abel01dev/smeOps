@@ -24,7 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ArrowLeft, ChevronDown, Menu, X } from "lucide-react";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -33,10 +33,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { user, isInitialized, logout } = useAuthStore();
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
+  const isPosFullscreen =
+    pathname === "/pos" || pathname.startsWith("/pos/");
+
   const navItems = React.useMemo(
     () => (user ? navForRole(user.role) : []),
     [user],
   );
+
+  const exitPosHref = React.useMemo(() => {
+    if (!user) return "/dashboard";
+    const alt = navForRole(user.role).find((item) => item.href !== "/pos");
+    return alt?.href ?? DEFAULT_ROUTE_BY_ROLE[user.role];
+  }, [user]);
 
   React.useEffect(() => {
     if (isInitialized && !user) router.replace("/login");
@@ -168,6 +177,40 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </DropdownMenu>
     </div>
   );
+
+  if (isPosFullscreen) {
+    return (
+      <div className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-background">
+        <header className="z-30 flex h-12 shrink-0 items-center gap-2 border-b border-border bg-card px-3 sm:px-4">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="gap-1.5"
+            onClick={() => router.push(exitPosHref)}
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            {t("pos.exit")}
+          </Button>
+          <div className="min-w-0 flex-1 text-center sm:text-left">
+            <p className="truncate text-sm font-semibold text-foreground">
+              {t("nav.pos")}
+            </p>
+            <p className="truncate text-xs text-muted-foreground">
+              {user.organizationName}
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-1">
+            <ThemeSwitcher className="h-9 px-2" />
+            <LanguageSwitcher className="h-9 px-2" />
+          </div>
+        </header>
+        <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          {children}
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-muted/40">

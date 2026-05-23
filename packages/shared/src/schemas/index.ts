@@ -4,6 +4,7 @@ export * from "./product.schema";
 export * from "./category.schema";
 export * from "./customer.schema";
 export * from "./sale.schema";
+export * from "./customer-payment.schema";
 export * from "./dashboard.schema";
 export * from "./ai.schema";
 export * from "./ai-assistant.schema";

@@ -12,7 +12,10 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFormatSaleDate } from "@/hooks/use-format-sale-date";
-import { usePaymentLabels } from "@/hooks/use-payment-labels";
+import {
+  usePaymentLabels,
+  useSalePaymentStatusLabels,
+} from "@/hooks/use-payment-labels";
 import { useSaleDetail } from "@/hooks/use-sales";
 
 export interface SaleDetailDialogProps {
@@ -31,6 +34,7 @@ export function SaleDetailDialog({
   const tc = useTranslations("common");
   const formatSaleDate = useFormatSaleDate();
   const paymentLabels = usePaymentLabels();
+  const statusLabels = useSalePaymentStatusLabels();
   const q = useSaleDetail(salePreview ? null : saleId);
   const open = !!saleId || !!salePreview;
   const sale = salePreview ?? q.data;
@@ -57,9 +61,16 @@ export function SaleDetailDialog({
           <div className="space-y-4 text-sm">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-muted-foreground">{formatSaleDate(sale.createdAt)}</span>
-              <Badge variant="secondary" className="font-normal">
-                {paymentLabels[sale.paymentMethod]}
-              </Badge>
+              <div className="flex flex-wrap gap-1">
+                <Badge variant="secondary" className="font-normal">
+                  {paymentLabels[sale.paymentMethod]}
+                </Badge>
+                {sale.paymentStatus !== "PAID" && (
+                  <Badge variant="outline" className="font-normal">
+                    {statusLabels[sale.paymentStatus]}
+                  </Badge>
+                )}
+              </div>
             </div>
 
             {sale.customer && (
@@ -111,6 +122,26 @@ export function SaleDetailDialog({
                 <dt>{tc("total")}</dt>
                 <dd className="tabular-nums">{formatMoney(sale.total)}</dd>
               </div>
+              {Number(sale.amountPaid) > 0 && (
+                <div className="flex justify-between text-muted-foreground">
+                  <dt>{t("amountPaid")}</dt>
+                  <dd className="tabular-nums">{formatMoney(sale.amountPaid)}</dd>
+                </div>
+              )}
+              {Number(sale.amountDue) > 0 && (
+                <div className="flex justify-between text-amber-800 dark:text-amber-200">
+                  <dt>{t("amountDue")}</dt>
+                  <dd className="tabular-nums font-medium">
+                    {formatMoney(sale.amountDue)}
+                  </dd>
+                </div>
+              )}
+              {sale.dueDate && (
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <dt>{t("dueDate")}</dt>
+                  <dd>{formatSaleDate(sale.dueDate)}</dd>
+                </div>
+              )}
               <div className="flex justify-between text-xs text-muted-foreground">
                 <dt>{tc("profit")}</dt>
                 <dd className="tabular-nums">{formatMoney(sale.profit)}</dd>

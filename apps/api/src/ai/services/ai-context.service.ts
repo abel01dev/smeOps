@@ -27,6 +27,7 @@ export class AiContextService {
       inventoryStatus,
       lowStockProducts,
       recentSales,
+      creditReceivables,
       rawBlock,
     ] = await Promise.all([
       this.dashboard.summary(organizationId),
@@ -36,6 +37,7 @@ export class AiContextService {
       this.dashboard.inventoryStatusBreakdown(organizationId),
       this.dashboard.lowStockProducts(organizationId, LOW_STOCK_LIMIT),
       this.dashboard.recentSaleSummaries(organizationId, RECENT_SALES_LIMIT),
+      this.dashboard.creditReceivables(organizationId),
       this.rawData.buildRawDataBlock(organizationId),
     ]);
 
@@ -78,7 +80,22 @@ export class AiContextService {
         : recentSales
             .map((s) => {
               const who = s.customerName ? ` | ${s.customerName}` : "";
-              return `  ${s.date} | ${s.total} total | ${s.profit} profit | ${s.itemCount} items | ${s.itemsPreview}${who} | ${s.paymentMethod}`;
+              const credit =
+                Number(s.amountDue) > 0
+                  ? ` | balance due ${s.amountDue} (${s.paymentStatus})${s.dueDate ? ` | due ${s.dueDate}` : ""}`
+                  : "";
+              return `  ${s.date} | ${s.total} total | ${s.profit} profit | ${s.itemCount} items | ${s.itemsPreview}${who} | ${s.paymentMethod}${credit}`;
+            })
+            .join("\n");
+
+    const creditLines =
+      creditReceivables.items.length === 0
+        ? "  (no open credit balances)"
+        : creditReceivables.items
+            .map((r) => {
+              const who = r.customerName ?? "Walk-in (no customer)";
+              const due = r.dueDate ? ` | due ${r.dueDate}` : " | no due date set";
+              return `  ${who} | sale ${r.saleDate} | total ${r.total} | paid ${r.amountPaid} | balance due ${r.amountDue} (${r.paymentStatus})${due}`;
             })
             .join("\n");
 
@@ -103,7 +120,12 @@ export class AiContextService {
       `### Recent sales (last ${RECENT_SALES_LIMIT}, newest first)`,
       recentSaleLines,
       "",
+      "### Open credit / pay-later balances",
+      `Total outstanding across open sales: ${creditReceivables.totalOutstanding} (${creditReceivables.openSaleCount} open sale(s) shown)`,
+      creditLines,
+      "",
       "Gross profit = sales margin; net profit = gross profit minus operating expenses (rent, salaries, transport, etc.).",
+      "amountDue = balance still owed on a sale; dueDate = when payment is expected; customer.outstandingBalance = sum owed by that customer.",
       "Use summaries for trends; use raw JSON below for specific sale/customer/product lookups.",
     ].join("\n");
 
