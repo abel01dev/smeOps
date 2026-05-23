@@ -32,6 +32,12 @@ interface ListArgs {
 
 const SORTABLE_COLUMNS = new Set(["createdAt", "total", "profit"]);
 
+/** Supabase pooler + multi-step sales can exceed Prisma's 5s default. */
+const SALE_TRANSACTION_OPTIONS = {
+  maxWait: 10_000,
+  timeout: 30_000,
+} as const;
+
 @Injectable()
 export class SalesService {
   constructor(private readonly prisma: PrismaService) {}
@@ -158,22 +164,24 @@ export class SalesService {
         payment.amountPaidCents,
       );
 
-      for (const i of input.items) {
-        const result = await tx.product.updateMany({
-          where: {
-            id: i.productId,
-            organizationId,
-            status: "ACTIVE",
-            stockQuantity: { gte: i.quantity },
-          },
-          data: { stockQuantity: { decrement: i.quantity } },
-        });
-        if (result.count === 0) {
-          throw new ConflictException(
-            "Stock changed while processing this sale. Please refresh and try again.",
-          );
-        }
-      }
+      await Promise.all(
+        input.items.map(async (i) => {
+          const result = await tx.product.updateMany({
+            where: {
+              id: i.productId,
+              organizationId,
+              status: "ACTIVE",
+              stockQuantity: { gte: i.quantity },
+            },
+            data: { stockQuantity: { decrement: i.quantity } },
+          });
+          if (result.count === 0) {
+            throw new ConflictException(
+              "Stock changed while processing this sale. Please refresh and try again.",
+            );
+          }
+        }),
+      );
 
       const created = await tx.sale.create({
         data: {
@@ -230,7 +238,7 @@ export class SalesService {
       }
 
       return this.toDto(created);
-    });
+    }, SALE_TRANSACTION_OPTIONS);
   }
 
   async recordPayment(
@@ -310,7 +318,7 @@ export class SalesService {
       });
 
       return this.toDto(updated);
-    });
+    }, SALE_TRANSACTION_OPTIONS);
   }
 
   async list(

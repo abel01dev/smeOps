@@ -38,7 +38,7 @@ export function usePosCustomers(open: boolean, search: string) {
     queryFn: () =>
       customersApi.list({
         search: search.trim() || undefined,
-        pageSize: 200,
+        pageSize: 100,
         sortBy: "name",
         sortDir: "asc",
       }),

@@ -70,7 +70,12 @@ export function PosCustomerPicker({
                 <Skeleton className="h-11 w-full" />
               </div>
             )}
-            {!q.isLoading && customers.length === 0 && (
+            {q.isError && (
+              <p className="py-12 px-3 text-center text-sm text-red-600">
+                {(q.error as Error).message}
+              </p>
+            )}
+            {!q.isLoading && !q.isError && customers.length === 0 && (
               <p className="py-12 px-3 text-center text-sm text-muted-foreground">
                 {t("noCustomers")}
               </p>

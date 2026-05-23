@@ -26,13 +26,13 @@ export default function PosPage() {
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
-      <div className="flex min-h-0 min-w-0 flex-[1.35] flex-col border-b border-border lg:border-b-0 lg:border-r">
+      <div className="flex min-h-0 min-w-0 flex-col border-b border-border lg:flex-[0_0_50%] lg:border-b-0 lg:border-r">
         <PosProductGrid categories={categories} onAddProduct={onAdd} />
       </div>
-      <div className="flex min-h-0 h-[min(38vh,20rem)] shrink-0 flex-col border-b border-border lg:h-auto lg:w-72 lg:shrink-0 lg:border-b-0 lg:border-r xl:w-80">
+      <div className="flex h-[min(38vh,20rem)] min-h-0 shrink-0 flex-col border-b border-border lg:h-auto lg:min-w-0 lg:flex-[0_0_25%] lg:border-b-0 lg:border-r">
         <PosCartLines />
       </div>
-      <div className="flex min-h-0 flex-1 flex-col lg:w-80 lg:shrink-0 xl:w-96">
+      <div className="flex min-h-0 min-w-0 flex-col lg:flex-[0_0_25%]">
         <PosCheckoutPanel />
       </div>
     </div>

@@ -238,7 +238,7 @@
     "noProducts": "No products match your search.",
     "searchCustomer": "Search by name or phone…",
     "selectCustomer": "Select customer",
-    "noCustomers": "No customers found.",
+    "noCustomers": "No customers yet. Add one from the Customers page first.",
     "attachCustomer": "Attach customer",
     "typeToSearchCustomers": "Type to search customers",
     "noProductsInventory": "No products found. Add items in Inventory first.",
