@@ -18,6 +18,7 @@ import {
 import { Roles } from "../auth/decorators/roles.decorator";
 import { API_ROLE_ACCESS } from "../auth/permissions";
 import { CreateSaleDto, SaleListQueryDto } from "./dto/sale.dto";
+import { RecordSalePaymentDto } from "./dto/record-sale-payment.dto";
 import { SalesService } from "./sales.service";
 
 @ApiTags("sales")
@@ -51,6 +52,20 @@ export class SalesController {
     @Query() query: SaleListQueryDto,
   ) {
     return this.sales.list(organizationId, query);
+  }
+
+  @Post(":id/payments")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "Record a payment against a credit sale (reduces amount due)",
+  })
+  recordPayment(
+    @OrganizationId() organizationId: string,
+    @CurrentUser() user: RequestUser,
+    @Param("id") id: string,
+    @Body() dto: RecordSalePaymentDto,
+  ) {
+    return this.sales.recordPayment(organizationId, user.id, id, dto);
   }
 
   @Get(":id")

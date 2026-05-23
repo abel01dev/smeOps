@@ -178,7 +178,7 @@ export class ExpensesService {
     amount: Prisma.Decimal;
     description: string | null;
     expenseDate: Date;
-    paymentMethod: "CASH" | "MOBILE_MONEY" | "CARD";
+    paymentMethod: import("@prisma/client").PaymentMethod;
     note: string | null;
     recordedById: string;
     createdAt: Date;
@@ -193,7 +193,7 @@ export class ExpensesService {
       amount: e.amount.toString(),
       description: e.description,
       expenseDate: dayKey(e.expenseDate),
-      paymentMethod: e.paymentMethod,
+      paymentMethod: e.paymentMethod as OperationalExpense["paymentMethod"],
       note: e.note,
       recordedById: e.recordedById,
       recordedByName: e.recordedBy.name,

@@ -9,8 +9,10 @@ import type {
   CreateSaleInput,
   PaginatedResult,
   PaymentMethod,
+  RecordSalePaymentInput,
   Sale,
   SaleItem,
+  SalePaymentStatus,
 } from "@sme/shared";
 
 import { PrismaService } from "../prisma/prisma.service";
@@ -24,31 +26,22 @@ interface ListArgs {
   dateTo?: Date;
   customerId?: string;
   paymentMethod?: PaymentMethod;
+  paymentStatus?: SalePaymentStatus;
+  hasBalance?: boolean;
 }
 
 const SORTABLE_COLUMNS = new Set(["createdAt", "total", "profit"]);
+
+/** Supabase pooler + multi-step sales can exceed Prisma's 5s default. */
+const SALE_TRANSACTION_OPTIONS = {
+  maxWait: 10_000,
+  timeout: 30_000,
+} as const;
 
 @Injectable()
 export class SalesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * The crown jewel of the API.
-   *
-   * Records a sale in one atomic operation:
-   *   1. Verify customer (if given) belongs to this org.
-   *   2. Bulk-load all products in the cart, scoped to this org + ACTIVE.
-   *      (Cross-tenant or archived productIds are rejected as "not found".)
-   *   3. For each item: build a frozen snapshot (productName + buyPrice +
-   *      sellPrice at this moment) and compute lineTotal + lineProfit.
-   *   4. Atomically decrement stock per item using updateMany with a
-   *      `stockQuantity >= qty` predicate. If count = 0, the row didn't match
-   *      → either it was concurrently sold or stock changed → roll back.
-   *   5. Create the Sale + SaleItems row.
-   *   6. If a customer is attached, increment their totalSpent.
-   *   7. The whole thing runs inside prisma.$transaction so a failure at any
-   *      step rolls back the stock decrements, the sale, everything.
-   */
   async create(
     organizationId: string,
     cashierId: string,
@@ -61,12 +54,22 @@ export class SalesService {
     }
 
     return this.prisma.$transaction(async (tx) => {
+      let customer: {
+        id: string;
+        outstandingBalance: Prisma.Decimal;
+        creditLimit: Prisma.Decimal | null;
+      } | null = null;
+
       if (input.customerId) {
-        const c = await tx.customer.findFirst({
+        customer = await tx.customer.findFirst({
           where: { id: input.customerId, organizationId },
-          select: { id: true },
+          select: {
+            id: true,
+            outstandingBalance: true,
+            creditLimit: true,
+          },
         });
-        if (!c) throw new BadRequestException("Customer not found");
+        if (!customer) throw new BadRequestException("Customer not found");
       }
 
       const productIds = input.items.map((i) => i.productId);
@@ -91,7 +94,6 @@ export class SalesService {
 
       const byId = new Map(products.map((p) => [p.id, p]));
 
-      // Build line items + running totals before any DB write — fail fast on bad math.
       let subtotalCents = 0;
       let profitCents = 0;
       const itemRows: Prisma.SaleItemCreateWithoutSaleInput[] = [];
@@ -129,29 +131,58 @@ export class SalesService {
         );
       }
       const totalCents = subtotalCents - discountCents;
-      // Discount eats into profit (the shop ate the discount, not the supplier).
       const finalProfitCents = profitCents - discountCents;
 
-      // 4) Atomic stock decrement per item.
-      for (const i of input.items) {
-        const result = await tx.product.updateMany({
-          where: {
-            id: i.productId,
-            organizationId,
-            status: "ACTIVE",
-            stockQuantity: { gte: i.quantity },
-          },
-          data: { stockQuantity: { decrement: i.quantity } },
-        });
-        if (result.count === 0) {
-          // Stock was decremented by another concurrent sale between our read and write.
-          throw new ConflictException(
-            "Stock changed while processing this sale. Please refresh and try again.",
-          );
+      const payment = this.resolvePayment(
+        input.paymentStatus,
+        totalCents,
+        Math.round(input.amountPaid * 100),
+      );
+
+      if (payment.amountPaidCents > totalCents) {
+        throw new BadRequestException(
+          "Amount paid cannot exceed the sale total",
+        );
+      }
+
+      if (customer && payment.amountDueCents > 0) {
+        const newBalanceCents =
+          this.toCents(customer.outstandingBalance) + payment.amountDueCents;
+        if (customer.creditLimit != null) {
+          const limitCents = this.toCents(customer.creditLimit);
+          if (newBalanceCents > limitCents) {
+            throw new BadRequestException(
+              "This sale would exceed the customer's credit limit",
+            );
+          }
         }
       }
 
-      // 5) Create the Sale + nested items.
+      const salePaymentMethod = this.resolveSalePaymentMethod(
+        input.paymentMethod,
+        payment.status,
+        payment.amountPaidCents,
+      );
+
+      await Promise.all(
+        input.items.map(async (i) => {
+          const result = await tx.product.updateMany({
+            where: {
+              id: i.productId,
+              organizationId,
+              status: "ACTIVE",
+              stockQuantity: { gte: i.quantity },
+            },
+            data: { stockQuantity: { decrement: i.quantity } },
+          });
+          if (result.count === 0) {
+            throw new ConflictException(
+              "Stock changed while processing this sale. Please refresh and try again.",
+            );
+          }
+        }),
+      );
+
       const created = await tx.sale.create({
         data: {
           organizationId,
@@ -161,7 +192,11 @@ export class SalesService {
           discount: this.fromCents(discountCents),
           total: this.fromCents(totalCents),
           profit: this.fromCents(finalProfitCents),
-          paymentMethod: input.paymentMethod,
+          paymentMethod: salePaymentMethod,
+          paymentStatus: payment.status,
+          amountPaid: this.fromCents(payment.amountPaidCents),
+          amountDue: this.fromCents(payment.amountDueCents),
+          dueDate: input.dueDate ?? null,
           note: input.note ?? null,
           items: { create: itemRows },
         },
@@ -172,24 +207,135 @@ export class SalesService {
         },
       });
 
-      // 6) Update denormalized customer.totalSpent.
       if (input.customerId) {
         await tx.customer.update({
           where: { id: input.customerId },
-          data: { totalSpent: { increment: this.fromCents(totalCents) } },
+          data: {
+            totalSpent: { increment: this.fromCents(totalCents) },
+            ...(payment.amountDueCents > 0
+              ? {
+                  outstandingBalance: {
+                    increment: this.fromCents(payment.amountDueCents),
+                  },
+                }
+              : {}),
+          },
+        });
+      }
+
+      if (payment.amountPaidCents > 0 && input.customerId) {
+        await tx.customerPayment.create({
+          data: {
+            organizationId,
+            customerId: input.customerId,
+            saleId: created.id,
+            amount: this.fromCents(payment.amountPaidCents),
+            paymentMethod: salePaymentMethod,
+            recordedById: cashierId,
+            note: "Deposit at checkout",
+          },
         });
       }
 
       return this.toDto(created);
-    });
+    }, SALE_TRANSACTION_OPTIONS);
+  }
+
+  async recordPayment(
+    organizationId: string,
+    recordedById: string,
+    saleId: string,
+    input: RecordSalePaymentInput,
+  ): Promise<Sale> {
+    const amountCents = Math.round(input.amount * 100);
+    if (amountCents <= 0) {
+      throw new BadRequestException("Amount must be greater than 0");
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const sale = await tx.sale.findFirst({
+        where: { id: saleId, organizationId },
+        include: {
+          items: true,
+          customer: { select: { id: true, name: true } },
+          cashier: { select: { id: true, name: true } },
+        },
+      });
+      if (!sale) throw new NotFoundException("Sale not found");
+      if (!sale.customerId) {
+        throw new BadRequestException("This sale has no customer on file");
+      }
+      if (sale.paymentStatus === "PAID") {
+        throw new BadRequestException("This sale is already fully paid");
+      }
+
+      const dueCents = this.toCents(sale.amountDue);
+      if (amountCents > dueCents) {
+        throw new BadRequestException(
+          `Payment exceeds balance due (${(dueCents / 100).toFixed(2)})`,
+        );
+      }
+
+      const newPaidCents = this.toCents(sale.amountPaid) + amountCents;
+      const newDueCents = dueCents - amountCents;
+      const newStatus: SalePaymentStatus =
+        newDueCents === 0 ? "PAID" : "PARTIAL";
+
+      await tx.customerPayment.create({
+        data: {
+          organizationId,
+          customerId: sale.customerId,
+          saleId: sale.id,
+          amount: this.fromCents(amountCents),
+          paymentMethod: input.paymentMethod,
+          recordedById,
+          note: input.note ?? null,
+        },
+      });
+
+      const updated = await tx.sale.update({
+        where: { id: sale.id },
+        data: {
+          amountPaid: this.fromCents(newPaidCents),
+          amountDue: this.fromCents(newDueCents),
+          paymentStatus: newStatus,
+          ...(newStatus === "PAID"
+            ? { paymentMethod: input.paymentMethod }
+            : {}),
+        },
+        include: {
+          items: true,
+          customer: { select: { id: true, name: true } },
+          cashier: { select: { id: true, name: true } },
+        },
+      });
+
+      await tx.customer.update({
+        where: { id: sale.customerId },
+        data: {
+          outstandingBalance: { decrement: this.fromCents(amountCents) },
+        },
+      });
+
+      return this.toDto(updated);
+    }, SALE_TRANSACTION_OPTIONS);
   }
 
   async list(
     organizationId: string,
     args: ListArgs,
   ): Promise<PaginatedResult<Sale>> {
-    const { page, pageSize, sortDir, dateFrom, dateTo, customerId, paymentMethod } =
-      args;
+    const {
+      page,
+      pageSize,
+      sortDir,
+      dateFrom,
+      dateTo,
+      customerId,
+      paymentMethod,
+      paymentStatus,
+      hasBalance,
+    } = args;
     const sortBy =
       args.sortBy && SORTABLE_COLUMNS.has(args.sortBy) ? args.sortBy : "createdAt";
 
@@ -197,6 +343,12 @@ export class SalesService {
       organizationId,
       ...(customerId ? { customerId } : {}),
       ...(paymentMethod ? { paymentMethod } : {}),
+      ...(paymentStatus ? { paymentStatus } : {}),
+      ...(hasBalance === true
+        ? { paymentStatus: { in: ["PARTIAL", "UNPAID"] } }
+        : hasBalance === false
+          ? { paymentStatus: "PAID" }
+          : {}),
       ...(dateFrom || dateTo
         ? {
             createdAt: {
@@ -246,6 +398,53 @@ export class SalesService {
 
   // -------------------- private helpers --------------------
 
+  private resolvePayment(
+    requestedStatus: SalePaymentStatus,
+    totalCents: number,
+    amountPaidCents: number,
+  ): {
+    status: SalePaymentStatus;
+    amountPaidCents: number;
+    amountDueCents: number;
+  } {
+    if (requestedStatus === "PAID") {
+      return {
+        status: "PAID",
+        amountPaidCents: totalCents,
+        amountDueCents: 0,
+      };
+    }
+    if (requestedStatus === "UNPAID") {
+      return {
+        status: "UNPAID",
+        amountPaidCents: 0,
+        amountDueCents: totalCents,
+      };
+    }
+    // PARTIAL
+    if (amountPaidCents <= 0 || amountPaidCents >= totalCents) {
+      throw new BadRequestException(
+        "Partial payment requires a deposit greater than 0 and less than the total",
+      );
+    }
+    return {
+      status: "PARTIAL",
+      amountPaidCents,
+      amountDueCents: totalCents - amountPaidCents,
+    };
+  }
+
+  private resolveSalePaymentMethod(
+    requested: PaymentMethod,
+    status: SalePaymentStatus,
+    amountPaidCents: number,
+  ): PaymentMethod {
+    if (status === "UNPAID") return "CREDIT";
+    if (amountPaidCents > 0 && requested !== "CREDIT") return requested;
+    if (amountPaidCents > 0) return "CASH";
+    return "CREDIT";
+  }
+
   private hasDuplicateProductIds(items: Array<{ productId: string }>): boolean {
     const seen = new Set<string>();
     for (const i of items) {
@@ -255,11 +454,7 @@ export class SalesService {
     return false;
   }
 
-  /**
-   * Convert Prisma.Decimal -> integer cents (or smallest unit) to avoid float
-   * drift during arithmetic. ETB has 2 decimal places; multiply by 100 and round.
-   */
-  private toCents(d: Prisma.Decimal): number {
+  private toCents(d: Prisma.Decimal | string | number): number {
     return Math.round(Number(d) * 100);
   }
 
@@ -286,6 +481,10 @@ export class SalesService {
     total: s.total.toString(),
     profit: s.profit.toString(),
     paymentMethod: s.paymentMethod,
+    paymentStatus: s.paymentStatus,
+    amountPaid: s.amountPaid.toString(),
+    amountDue: s.amountDue.toString(),
+    dueDate: s.dueDate?.toISOString() ?? null,
     note: s.note,
     items: s.items.map(
       (i): SaleItem => ({

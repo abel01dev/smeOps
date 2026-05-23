@@ -29,7 +29,15 @@ export function PosProductGrid({ categories, onAddProduct }: PosProductGridProps
   }, [search]);
 
   const q = usePosProducts(debouncedSearch, categoryId);
-  const products = q.data?.items ?? [];
+  const products = React.useMemo(() => {
+    const items = q.data?.items ?? [];
+    return [...items].sort((a, b) => {
+      const aOut = a.stockQuantity <= 0 ? 1 : 0;
+      const bOut = b.stockQuantity <= 0 ? 1 : 0;
+      if (aOut !== bOut) return aOut - bOut;
+      return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+    });
+  }, [q.data?.items]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-background">

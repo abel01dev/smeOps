@@ -4,7 +4,9 @@ import type {
   CreateSaleInput,
   PaginatedResult,
   PaymentMethod,
+  RecordSalePaymentInput,
   Sale,
+  SalePaymentStatus,
 } from "@sme/shared";
 
 import { apiClient } from "../api-client";
@@ -18,6 +20,8 @@ export interface ListSalesParams {
   dateTo?: string;
   customerId?: string;
   paymentMethod?: PaymentMethod;
+  paymentStatus?: SalePaymentStatus;
+  hasBalance?: boolean;
 }
 
 export const salesApi = {
@@ -29,4 +33,8 @@ export const salesApi = {
     apiClient.get<Sale>(`/sales/${id}`).then((r) => r.data),
   create: (input: CreateSaleInput) =>
     apiClient.post<Sale>("/sales", input).then((r) => r.data),
+  recordPayment: (saleId: string, input: RecordSalePaymentInput) =>
+    apiClient
+      .post<Sale>(`/sales/${saleId}/payments`, input)
+      .then((r) => r.data),
 };

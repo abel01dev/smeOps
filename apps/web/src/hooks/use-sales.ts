@@ -1,6 +1,7 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { RecordSalePaymentInput } from "@sme/shared";
 
 import type { ListSalesParams } from "@/lib/api/sales";
 import { salesApi } from "@/lib/api/sales";
@@ -22,5 +23,23 @@ export function useSaleDetail(id: string | null) {
     queryFn: () => salesApi.findOne(id!),
     enabled: !!id,
     staleTime: 30_000,
+  });
+}
+
+export function useRecordSalePayment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      saleId,
+      input,
+    }: {
+      saleId: string;
+      input: RecordSalePaymentInput;
+    }) => salesApi.recordPayment(saleId, input),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: KEY });
+      void qc.invalidateQueries({ queryKey: ["customers"] });
+      void qc.invalidateQueries({ queryKey: ["dashboard"] });
+    },
   });
 }

@@ -14,5 +14,18 @@ export function usePaymentLabels(): Record<PaymentMethod, string> {
     CASH: t("CASH"),
     MOBILE_MONEY: t("MOBILE_MONEY"),
     CARD: t("CARD"),
+    CREDIT: t("CREDIT"),
+  };
+}
+
+export function useSalePaymentStatusLabels(): Record<
+  "PAID" | "PARTIAL" | "UNPAID",
+  string
+> {
+  const t = useTranslations("salePaymentStatus");
+  return {
+    PAID: t("PAID"),
+    PARTIAL: t("PARTIAL"),
+    UNPAID: t("UNPAID"),
   };
 }

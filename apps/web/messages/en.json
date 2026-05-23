@@ -113,7 +113,13 @@
   "payments": {
     "CASH": "Cash",
     "MOBILE_MONEY": "Mobile money",
-    "CARD": "Card"
+    "CARD": "Card",
+    "CREDIT": "On account"
+  },
+  "salePaymentStatus": {
+    "PAID": "Paid",
+    "PARTIAL": "Partially paid",
+    "UNPAID": "Unpaid"
   },
   "dashboard": {
     "greetingMorning": "Good morning, {name}.",
@@ -220,6 +226,10 @@
     "share": "{percent}% of total"
   },
   "pos": {
+    "exit": "Exit POS",
+    "cartItems": "Cart",
+    "checkout": "Checkout",
+    "customerListHint": "All customers are listed below. Search to narrow the list.",
     "currentSale": "Current sale",
     "charge": "Charge {amount}",
     "addCustomer": "Add customer (optional)",
@@ -236,13 +246,26 @@
     "noProducts": "No products match your search.",
     "searchCustomer": "Search by name or phone…",
     "selectCustomer": "Select customer",
-    "noCustomers": "No customers found.",
+    "noCustomers": "No customers yet. Add one from the Customers page first.",
     "attachCustomer": "Attach customer",
     "typeToSearchCustomers": "Type to search customers",
     "noProductsInventory": "No products found. Add items in Inventory first.",
     "customerSheetHint": "Search by name or phone, then tap a customer to attach them to this sale.",
     "discountSheetHint": "Enter a fixed discount in ETB. It is applied after line totals.",
-    "discountAmountLabel": "Amount (ETB)"
+    "discountAmountLabel": "Amount (ETB)",
+    "checkoutMode": "Checkout",
+    "payNow": "Pay now",
+    "payLater": "Pay later (full credit)",
+    "partialPay": "Partial payment",
+    "depositAmount": "Deposit now (ETB)",
+    "dueDate": "Due date (optional)",
+    "balanceDue": "Balance due",
+    "customerRequiredCredit": "Select a customer for pay-later sales",
+    "addCustomerRequired": "Add customer (required)",
+    "depositInvalid": "Deposit must be greater than 0 and less than the total",
+    "recordCreditSale": "Record credit sale · {amount}",
+    "recordPartialSale": "Record sale · paid {paid}, due {due}",
+    "creditSaleComplete": "Credit sale recorded — {amount} due {due}"
   },
   "inventory": {
     "title": "Inventory",
@@ -370,7 +393,17 @@
     "viewAllSales": "View all sales",
     "noSales": "No sales recorded yet.",
     "customerAdded": "Customer added",
-    "customerUpdated": "Customer updated"
+    "customerUpdated": "Customer updated",
+    "outstandingBalance": "Outstanding balance",
+    "openCreditSales": "Open credit sales",
+    "collectPayment": "Collect payment",
+    "balanceDue": "Balance due",
+    "dueBy": "Due by",
+    "paymentAmount": "Payment amount (ETB)",
+    "paymentNote": "Note",
+    "recordPayment": "Record payment",
+    "paymentRecorded": "Payment recorded",
+    "paymentAmountInvalid": "Enter an amount up to the balance due"
   },
   "sales": {
     "title": "Sales",
@@ -384,7 +417,10 @@
     "receiptTitle": "Sale receipt",
     "soldAt": "Sold at",
     "lineItems": "Line items",
-    "qty": "Qty"
+    "qty": "Qty",
+    "amountPaid": "Paid",
+    "amountDue": "Balance due",
+    "dueDate": "Due date"
   },
   "assistant": {
     "title": "AI Business Assistant",

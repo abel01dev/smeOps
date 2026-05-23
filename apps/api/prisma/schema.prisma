@@ -51,6 +51,7 @@ model Organization {
   products         Product[]
   customers        Customer[]
   sales                 Sale[]
+  customerPayments      CustomerPayment[]
   expenseCategories     ExpenseCategory[]
   operationalExpenses   OperationalExpense[]
   aiConversations       AIConversation[]
@@ -84,6 +85,7 @@ model User {
   organization          Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   sales                 Sale[]                 @relation("CashierSales")
   recordedExpenses      OperationalExpense[]   @relation("RecordedExpenses")
+  recordedCustomerPayments CustomerPayment[]   @relation("RecordedCustomerPayments")
   aiConversations       AIConversation[]
   aiSettings            AISettings[]
 
@@ -147,11 +149,16 @@ model Customer {
   phone          String?
   address        String?
   totalSpent     Decimal  @default(0) @db.Decimal(14, 2)
+  /// Sum of unpaid balances across credit sales (denormalized; updated in sale/payment txs).
+  outstandingBalance Decimal @default(0) @db.Decimal(14, 2)
+  /// Optional cap on total outstanding credit; null = no limit.
+  creditLimit    Decimal? @db.Decimal(14, 2)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   sales        Sale[]
+  payments     CustomerPayment[]
 
   @@index([organizationId])
   @@index([organizationId, phone])
@@ -164,30 +171,66 @@ enum PaymentMethod {
   CASH
   MOBILE_MONEY // reserved for future use
   CARD         // reserved for future use
+  CREDIT       // sale on account (buy now, pay later)
+}
+
+enum SalePaymentStatus {
+  PAID
+  PARTIAL
+  UNPAID
 }
 
 model Sale {
-  id             String        @id @default(cuid())
+  id             String            @id @default(cuid())
   organizationId String
   customerId     String?
-  cashierId      String        @db.Uuid
-  subtotal       Decimal       @db.Decimal(14, 2)
-  discount       Decimal       @default(0) @db.Decimal(14, 2)
-  total          Decimal       @db.Decimal(14, 2)
-  profit         Decimal       @db.Decimal(14, 2)
-  paymentMethod  PaymentMethod @default(CASH)
+  cashierId      String            @db.Uuid
+  subtotal       Decimal           @db.Decimal(14, 2)
+  discount       Decimal           @default(0) @db.Decimal(14, 2)
+  total          Decimal           @db.Decimal(14, 2)
+  profit         Decimal           @db.Decimal(14, 2)
+  paymentMethod  PaymentMethod     @default(CASH)
+  paymentStatus  SalePaymentStatus @default(PAID)
+  amountPaid     Decimal           @default(0) @db.Decimal(14, 2)
+  amountDue      Decimal           @default(0) @db.Decimal(14, 2)
+  dueDate        DateTime?
+  note           String?
+  createdAt      DateTime          @default(now())
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customer     Customer?         @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  cashier      User              @relation("CashierSales", fields: [cashierId], references: [id])
+  items        SaleItem[]
+  payments     CustomerPayment[]
+
+  @@index([organizationId])
+  @@index([organizationId, createdAt])
+  @@index([organizationId, paymentStatus])
+  @@index([customerId])
+  @@map("sales")
+}
+
+/// Money collected against a credit sale (or customer balance).
+model CustomerPayment {
+  id             String        @id @default(cuid())
+  organizationId String
+  customerId     String
+  saleId         String?
+  amount         Decimal       @db.Decimal(14, 2)
+  paymentMethod  PaymentMethod
+  recordedById   String        @db.Uuid
   note           String?
   createdAt      DateTime      @default(now())
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  customer     Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  cashier      User         @relation("CashierSales", fields: [cashierId], references: [id])
-  items        SaleItem[]
+  customer     Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  sale         Sale?        @relation(fields: [saleId], references: [id], onDelete: SetNull)
+  recordedBy   User         @relation("RecordedCustomerPayments", fields: [recordedById], references: [id])
 
   @@index([organizationId])
-  @@index([organizationId, createdAt])
   @@index([customerId])
-  @@map("sales")
+  @@index([saleId])
+  @@map("customer_payments")
 }
 
 model SaleItem {
