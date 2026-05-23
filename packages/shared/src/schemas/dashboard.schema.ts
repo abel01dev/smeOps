@@ -82,8 +82,30 @@ export interface RecentSaleSummary {
   total: string;
   profit: string;
   paymentMethod: string;
+  paymentStatus: string;
+  amountPaid: string;
+  amountDue: string;
+  dueDate: string | null;
   customerName: string | null;
   itemCount: number;
   /** Short description of line items, e.g. "Milk x2, Bread x1" */
   itemsPreview: string;
+}
+
+export interface OpenCreditReceivable {
+  saleId: string;
+  customerId: string | null;
+  customerName: string | null;
+  saleDate: string;
+  total: string;
+  amountPaid: string;
+  amountDue: string;
+  paymentStatus: string;
+  dueDate: string | null;
+}
+
+export interface CreditReceivablesSummary {
+  totalOutstanding: string;
+  openSaleCount: number;
+  items: OpenCreditReceivable[];
 }
