@@ -1,7 +1,7 @@
 "use client";
 
 import { formatMoney, type PaymentMethod } from "@sme/shared";
-import { ChevronRight, Minus, Plus, Trash2, User, UserX } from "lucide-react";
+import { ChevronRight, User, UserX } from "lucide-react";
 import { useTranslations } from "next-intl";
 import * as React from "react";
 import { toast } from "sonner";
@@ -30,7 +30,7 @@ import { cn } from "@/lib/utils";
 
 const POS_PAYMENT_METHODS: PaymentMethod[] = ["CASH", "MOBILE_MONEY", "CARD"];
 
-export function PosCartPanel() {
+export function PosCheckoutPanel() {
   const t = useTranslations("pos");
   const tc = useTranslations("common");
   const paymentLabels = usePaymentLabels();
@@ -43,8 +43,6 @@ export function PosCartPanel() {
   const paymentMethod = usePosCartStore((s) => s.paymentMethod);
   const depositAmount = usePosCartStore((s) => s.depositAmount);
   const dueDate = usePosCartStore((s) => s.dueDate);
-  const setQuantity = usePosCartStore((s) => s.setQuantity);
-  const removeLine = usePosCartStore((s) => s.removeLine);
   const setDiscount = usePosCartStore((s) => s.setDiscount);
   const setCheckoutMode = usePosCartStore((s) => s.setCheckoutMode);
   const setPaymentMethod = usePosCartStore((s) => s.setPaymentMethod);
@@ -57,8 +55,7 @@ export function PosCartPanel() {
   const [discountOpen, setDiscountOpen] = React.useState(false);
   const createSale = useCreateSale();
 
-  const { subtotal, discount: appliedDiscount, total, itemCount } =
-    cartTotals(lines, discount);
+  const { subtotal, discount: appliedDiscount, total } = cartTotals(lines, discount);
 
   const needsCustomer =
     checkoutMode === "pay_later" || checkoutMode === "partial";
@@ -134,135 +131,65 @@ export function PosCartPanel() {
 
   return (
     <>
-      <aside className="flex h-full min-h-0 w-full flex-col border-l border-border bg-muted/50 lg:w-[min(100%,22rem)] xl:w-96">
-        <div className="shrink-0 border-b border-border bg-card px-4 py-3">
+      <section className="flex h-full min-h-0 flex-col bg-card">
+        <div className="shrink-0 border-b border-border px-4 py-3">
           <h2 className="text-base font-semibold text-foreground">
-            {t("currentSale")}
-            {itemCount > 0 && (
-              <span className="ml-1.5 font-normal text-muted-foreground">
-                ({itemCount})
-              </span>
-            )}
+            {t("checkout")}
           </h2>
         </div>
 
-        <div className="shrink-0 border-b border-border bg-card px-4 py-3">
-          {customerName ? (
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                className="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2 text-left transition hover:bg-muted/80"
-                onClick={() => setCustomerOpen(true)}
-              >
-                <div className="flex min-w-0 items-center gap-2">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-                    {customerName.charAt(0).toUpperCase()}
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <div className="border-b border-border p-4">
+            {customerName ? (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2 text-left transition hover:bg-muted/80"
+                  onClick={() => setCustomerOpen(true)}
+                >
+                  <div className="flex min-w-0 items-center gap-2">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                      {customerName.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="truncate text-sm font-medium text-foreground">
+                      {customerName}
+                    </span>
                   </div>
-                  <span className="truncate text-sm font-medium text-foreground">
-                    {customerName}
-                  </span>
-                </div>
-                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-              </button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 shrink-0"
-                aria-label={t("removeCustomer")}
-                onClick={() => setCustomer(null, null)}
-              >
-                <UserX className="h-4 w-4" />
-              </Button>
-            </div>
-          ) : (
-            <Button
-              type="button"
-              variant="outline"
-              className={cn(
-                "h-11 w-full justify-start gap-2",
-                needsCustomer
-                  ? "border-amber-500/60 text-amber-800 dark:text-amber-200"
-                  : "text-muted-foreground",
-              )}
-              onClick={() => setCustomerOpen(true)}
-            >
-              <User className="h-4 w-4" />
-              {needsCustomer ? t("addCustomerRequired") : t("addCustomer")}
-            </Button>
-          )}
-        </div>
-
-        <ul className="min-h-0 flex-1 space-y-1 overflow-y-auto p-3">
-          {lines.length === 0 && (
-            <li className="py-8 text-center text-sm text-muted-foreground">
-              {t("tapToAdd")}
-            </li>
-          )}
-          {lines.map((line) => (
-            <li
-              key={line.productId}
-              className="rounded-lg border border-border bg-card p-3 shadow-sm"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="font-medium text-foreground">{line.name}</p>
-                  <p className="text-sm tabular-nums text-muted-foreground">
-                    {formatMoney(line.sellPrice)} {tc("each")}
-                  </p>
-                </div>
-                <p className="shrink-0 text-sm font-semibold tabular-nums text-foreground">
-                  {formatMoney(Number(line.sellPrice) * line.quantity)}
-                </p>
-              </div>
-              <div className="mt-2 flex items-center justify-between gap-2">
-                <div className="inline-flex items-center rounded-lg border border-border bg-muted/50">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10 rounded-none"
-                    aria-label={t("decreaseQty")}
-                    onClick={() =>
-                      setQuantity(line.productId, line.quantity - 1)
-                    }
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                  <span className="min-w-[2rem] text-center text-sm font-semibold tabular-nums">
-                    {line.quantity}
-                  </span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10 rounded-none"
-                    aria-label={t("increaseQty")}
-                    disabled={line.quantity >= line.stockQuantity}
-                    onClick={() =>
-                      setQuantity(line.productId, line.quantity + 1)
-                    }
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
+                  <ChevronRight
+                    className="h-4 w-4 shrink-0 text-muted-foreground"
+                    aria-hidden
+                  />
+                </button>
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-10 w-10 text-muted-foreground hover:text-red-600"
-                  aria-label={t("removeItem")}
-                  onClick={() => removeLine(line.productId)}
+                  className="h-9 w-9 shrink-0"
+                  aria-label={t("removeCustomer")}
+                  onClick={() => setCustomer(null, null)}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <UserX className="h-4 w-4" />
                 </Button>
               </div>
-            </li>
-          ))}
-        </ul>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                className={cn(
+                  "h-11 w-full justify-start gap-2",
+                  needsCustomer
+                    ? "border-amber-500/60 text-amber-800 dark:text-amber-200"
+                    : "text-muted-foreground",
+                )}
+                onClick={() => setCustomerOpen(true)}
+              >
+                <User className="h-4 w-4" />
+                {needsCustomer ? t("addCustomerRequired") : t("addCustomer")}
+              </Button>
+            )}
+          </div>
 
-        <div className="shrink-0 space-y-3 border-t border-border bg-card p-4">
-          <div className="grid gap-2">
+          <div className="space-y-3 p-4">
             <button
               type="button"
               onClick={() => setDiscountOpen(true)}
@@ -271,7 +198,10 @@ export function PosCartPanel() {
               <span className="text-muted-foreground">{t("discountEtb")}</span>
               <span className="flex items-center gap-1 tabular-nums font-medium text-foreground">
                 {discount > 0 ? formatMoney(discount) : "—"}
-                <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />
+                <ChevronRight
+                  className="h-4 w-4 text-muted-foreground"
+                  aria-hidden
+                />
               </span>
             </button>
 
@@ -321,7 +251,10 @@ export function PosCartPanel() {
 
             {checkoutMode === "partial" && (
               <div className="grid gap-1.5">
-                <Label htmlFor="deposit-amount" className="text-xs text-muted-foreground">
+                <Label
+                  htmlFor="deposit-amount"
+                  className="text-xs text-muted-foreground"
+                >
                   {t("depositAmount")}
                 </Label>
                 <Input
@@ -346,15 +279,15 @@ export function PosCartPanel() {
                   id="due-date"
                   type="date"
                   value={dueDate ?? ""}
-                  onChange={(e) =>
-                    setDueDate(e.target.value || null)
-                  }
+                  onChange={(e) => setDueDate(e.target.value || null)}
                   className="h-10"
                 />
               </div>
             )}
           </div>
+        </div>
 
+        <div className="shrink-0 space-y-3 border-t border-border p-4">
           <dl className="space-y-1 text-sm">
             <div className="flex justify-between text-muted-foreground">
               <dt>{tc("subtotal")}</dt>
@@ -406,7 +339,7 @@ export function PosCartPanel() {
             </Button>
           )}
         </div>
-      </aside>
+      </section>
 
       <PosCustomerPicker
         open={customerOpen}

@@ -32,18 +32,18 @@ export function usePosCategories() {
   });
 }
 
-export function usePosCustomers(search: string) {
+export function usePosCustomers(open: boolean, search: string) {
   return useQuery({
     queryKey: ["pos", "customers", search],
     queryFn: () =>
       customersApi.list({
         search: search.trim() || undefined,
-        pageSize: 20,
+        pageSize: 200,
         sortBy: "name",
         sortDir: "asc",
       }),
     staleTime: 30_000,
-    enabled: search.trim().length >= 1,
+    enabled: open,
   });
 }
 

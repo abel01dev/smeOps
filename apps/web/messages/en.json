@@ -218,6 +218,10 @@
     "salesCount": "{count, plural, one {# sale} other {# sales}}"
   },
   "pos": {
+    "exit": "Exit POS",
+    "cartItems": "Cart",
+    "checkout": "Checkout",
+    "customerListHint": "All customers are listed below. Search to narrow the list.",
     "currentSale": "Current sale",
     "charge": "Charge {amount}",
     "addCustomer": "Add customer (optional)",

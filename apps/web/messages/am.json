@@ -218,6 +218,10 @@
     "salesCount": "{count, plural, one {# ሽያጭ} other {# ሽያጮች}}"
   },
   "pos": {
+    "exit": "POS ይውጡ",
+    "cartItems": "ጋሪ",
+    "checkout": "መክፈያ",
+    "customerListHint": "ሁሉም ደንበኞች ከታች ተዘርዝረዋል። ለማጣራት ይፈልጉ።",
     "currentSale": "የአሁን ሽያጭ",
     "charge": "ክፍያ {amount}",
     "addCustomer": "ደንበኛ ጨምር (አማራጭ)",
