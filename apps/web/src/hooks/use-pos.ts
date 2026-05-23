@@ -56,6 +56,7 @@ export function useCreateSale() {
       void qc.invalidateQueries({ queryKey: ["pos"] });
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
       void qc.invalidateQueries({ queryKey: ["sales"] });
+      void qc.invalidateQueries({ queryKey: ["customers"] });
     },
   });
 }

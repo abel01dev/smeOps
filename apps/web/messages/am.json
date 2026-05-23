@@ -113,7 +113,13 @@
   "payments": {
     "CASH": "ጥሬ ገንዘብ",
     "MOBILE_MONEY": "ሞባይል ገንዘብ",
-    "CARD": "ካርድ"
+    "CARD": "ካርድ",
+    "CREDIT": "ብድር / በኋላ ክፍያ"
+  },
+  "salePaymentStatus": {
+    "PAID": "ተከፍሏል",
+    "PARTIAL": "በከፊል ተከፍሏል",
+    "UNPAID": "አልተከፈለም"
   },
   "dashboard": {
     "greetingMorning": "እንደምን አደሩ፣ {name}።",
@@ -234,7 +240,20 @@
     "noProductsInventory": "ምንም ምርት አልተገኘም። በመጀመሪያ በክምችት ውስጥ ይጨምሩ።",
     "customerSheetHint": "በስም ወይም በስልክ ይፈልጉ፣ ከዚያ እዚህ ሽያጭ ላይ ለማያያዝ ደንበኛውን ይንኩ።",
     "discountSheetHint": "በ ETB ቋሚ ቅናሽ ያስገቡ። ከመስመር ድምሮች በኋላ ይተገበራል።",
-    "discountAmountLabel": "መጠን (ETB)"
+    "discountAmountLabel": "መጠን (ETB)",
+    "checkoutMode": "መክፈያ",
+    "payNow": "አሁን ይክፈሉ",
+    "payLater": "በኋላ ይክፈሉ (ሙሉ ብድር)",
+    "partialPay": "በከፊል ክፍያ",
+    "depositAmount": "አሁን ያስቀምጡ (ETB)",
+    "dueDate": "የመክፈያ ቀን (አማራጭ)",
+    "balanceDue": "የቀረ ቀሪ",
+    "customerRequiredCredit": "ለበኋላ ክፍያ ደንበኛ ይምረጡ",
+    "addCustomerRequired": "ደንበኛ ጨምር (ያስፈልጋል)",
+    "depositInvalid": "የቅድመ ክፍያ ከድምሩ ያነሰ እና ከድምሩ ያነሰ መሆን አለበት",
+    "recordCreditSale": "ብድር ሽያጭ ይመዝግቡ · {amount}",
+    "recordPartialSale": "ሽያጭ · ተከፍሏል {paid}፣ ቀሪ {due}",
+    "creditSaleComplete": "ብድር ሽያጭ ተመዘገበ — {amount} ቀሪ {due}"
   },
   "inventory": {
     "title": "ክምችት",
@@ -362,7 +381,17 @@
     "viewAllSales": "ሁሉንም ሽያጮች ይመልከቱ",
     "noSales": "እስካሁን ምንም ሽያጭ አልተመዘገበም።",
     "customerAdded": "ደንበኛ ተጨመረ",
-    "customerUpdated": "ደንበኛ ተዘምኗል"
+    "customerUpdated": "ደንበኛ ተዘምኗል",
+    "outstandingBalance": "የቀረ ቀሪ",
+    "openCreditSales": "ያልተከፈሉ ብድር ሽያጮች",
+    "collectPayment": "ክፍያ ይቀበሉ",
+    "balanceDue": "የቀረ ቀሪ",
+    "dueBy": "መክፈያ እስከ",
+    "paymentAmount": "የክፍያ መጠን (ETB)",
+    "paymentNote": "ማስታወሻ",
+    "recordPayment": "ክፍያ ይመዝግቡ",
+    "paymentRecorded": "ክፍያ ተመዝግቧል",
+    "paymentAmountInvalid": "እስከ ቀሪው ድረስ መጠን ያስገቡ"
   },
   "sales": {
     "title": "ሽያጮች",
@@ -376,7 +405,10 @@
     "receiptTitle": "የሽያጭ ደረሰኝ",
     "soldAt": "ተሸጠ በ",
     "lineItems": "የንጥል ዝርዝር",
-    "qty": "ብዛት"
+    "qty": "ብዛት",
+    "amountPaid": "ተከፍሏል",
+    "amountDue": "የቀረ ቀሪ",
+    "dueDate": "የመክፈያ ቀን"
   },
   "assistant": {
     "title": "AI የንግድ ረዳት",

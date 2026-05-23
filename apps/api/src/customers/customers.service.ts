@@ -20,9 +20,24 @@ interface ListArgs {
 const SORTABLE_COLUMNS = new Set([
   "name",
   "totalSpent",
+  "outstandingBalance",
   "createdAt",
   "updatedAt",
 ]);
+
+const saleSummarySelect = {
+  id: true,
+  total: true,
+  amountPaid: true,
+  amountDue: true,
+  paymentStatus: true,
+  paymentMethod: true,
+  dueDate: true,
+  createdAt: true,
+  items: {
+    select: { productName: true, quantity: true, lineTotal: true },
+  },
+} as const;
 
 @Injectable()
 export class CustomersService {
@@ -60,16 +75,7 @@ export class CustomersService {
     ]);
 
     return {
-      items: items.map((c) => ({
-        id: c.id,
-        name: c.name,
-        phone: c.phone,
-        address: c.address,
-        totalSpent: c.totalSpent.toString(),
-        salesCount: c._count.sales,
-        createdAt: c.createdAt.toISOString(),
-        updatedAt: c.updatedAt.toISOString(),
-      })),
+      items: items.map((c) => this.toDto(c, c._count.sales)),
       page,
       pageSize,
       total,
@@ -77,10 +83,6 @@ export class CustomersService {
     };
   }
 
-  /**
-   * Single customer with recent sales (last 10) — powers the customer detail
-   * page in the web app.
-   */
   async findOne(organizationId: string, id: string) {
     const c = await this.prisma.customer.findFirst({
       where: { id, organizationId },
@@ -89,40 +91,26 @@ export class CustomersService {
         sales: {
           orderBy: { createdAt: "desc" },
           take: 10,
-          select: {
-            id: true,
-            total: true,
-            paymentMethod: true,
-            createdAt: true,
-            items: {
-              select: { productName: true, quantity: true, lineTotal: true },
-            },
-          },
+          select: saleSummarySelect,
         },
       },
     });
     if (!c) throw new NotFoundException("Customer not found");
 
+    const openSales = await this.prisma.sale.findMany({
+      where: {
+        organizationId,
+        customerId: id,
+        paymentStatus: { in: ["PARTIAL", "UNPAID"] },
+      },
+      orderBy: [{ dueDate: "asc" }, { createdAt: "desc" }],
+      select: saleSummarySelect,
+    });
+
     return {
-      id: c.id,
-      name: c.name,
-      phone: c.phone,
-      address: c.address,
-      totalSpent: c.totalSpent.toString(),
-      salesCount: c._count.sales,
-      createdAt: c.createdAt.toISOString(),
-      updatedAt: c.updatedAt.toISOString(),
-      recentSales: c.sales.map((s) => ({
-        id: s.id,
-        total: s.total.toString(),
-        paymentMethod: s.paymentMethod,
-        createdAt: s.createdAt.toISOString(),
-        items: s.items.map((i) => ({
-          productName: i.productName,
-          quantity: i.quantity,
-          lineTotal: i.lineTotal.toString(),
-        })),
-      })),
+      ...this.toDto(c, c._count.sales),
+      recentSales: c.sales.map(this.mapSaleSummary),
+      openSales: openSales.map(this.mapSaleSummary),
     };
   }
 
@@ -159,17 +147,11 @@ export class CustomersService {
     return this.toDto(updated, updated._count.sales);
   }
 
-  /**
-   * Delete a customer. Past sales reference customerId with onDelete: SetNull,
-   * so sales records are preserved (customer becomes anonymized).
-   */
   async remove(organizationId: string, id: string) {
     await this.ensureOwned(organizationId, id);
     await this.prisma.customer.delete({ where: { id } });
     return { id, deleted: true };
   }
-
-  // -------------------- helpers --------------------
 
   private async ensureOwned(organizationId: string, id: string): Promise<void> {
     const c = await this.prisma.customer.findFirst({
@@ -179,6 +161,24 @@ export class CustomersService {
     if (!c) throw new NotFoundException("Customer not found");
   }
 
+  private mapSaleSummary = (
+    s: Prisma.SaleGetPayload<{ select: typeof saleSummarySelect }>,
+  ) => ({
+    id: s.id,
+    total: s.total.toString(),
+    amountPaid: s.amountPaid.toString(),
+    amountDue: s.amountDue.toString(),
+    paymentStatus: s.paymentStatus,
+    paymentMethod: s.paymentMethod,
+    dueDate: s.dueDate?.toISOString() ?? null,
+    createdAt: s.createdAt.toISOString(),
+    items: s.items.map((i) => ({
+      productName: i.productName,
+      quantity: i.quantity,
+      lineTotal: i.lineTotal.toString(),
+    })),
+  });
+
   private toDto = (
     c: {
       id: string;
@@ -186,6 +186,8 @@ export class CustomersService {
       phone: string | null;
       address: string | null;
       totalSpent: Prisma.Decimal;
+      outstandingBalance: Prisma.Decimal;
+      creditLimit: Prisma.Decimal | null;
       createdAt: Date;
       updatedAt: Date;
     },
@@ -196,6 +198,8 @@ export class CustomersService {
     phone: c.phone,
     address: c.address,
     totalSpent: c.totalSpent.toString(),
+    outstandingBalance: c.outstandingBalance.toString(),
+    creditLimit: c.creditLimit?.toString() ?? null,
     salesCount,
     createdAt: c.createdAt.toISOString(),
     updatedAt: c.updatedAt.toISOString(),
