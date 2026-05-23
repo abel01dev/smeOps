@@ -56,3 +56,34 @@ export interface TopProduct {
   revenue: string;
   profit: string;
 }
+
+export interface SalesByCategorySlice {
+  categoryId: string | null;
+  categoryName: string;
+  revenue: string;
+  quantitySold: number;
+}
+
+export interface InventoryStatusBreakdown {
+  inStock: number;
+  lowStock: number;
+  outOfStock: number;
+}
+
+export interface LowStockProductSummary {
+  name: string;
+  stockQuantity: number;
+  minStock: number;
+}
+
+export interface RecentSaleSummary {
+  id: string;
+  date: string;
+  total: string;
+  profit: string;
+  paymentMethod: string;
+  customerName: string | null;
+  itemCount: number;
+  /** Short description of line items, e.g. "Milk x2, Bread x1" */
+  itemsPreview: string;
+}

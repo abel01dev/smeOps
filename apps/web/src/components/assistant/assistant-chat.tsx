@@ -292,7 +292,7 @@ export function AssistantChat() {
               }}
             />
           ) : (
-            <div className="mx-auto max-w-3xl">
+            <div className="mx-auto w-full max-w-4xl space-y-1 py-2">
               {messages.map((m) => (
                 <ChatMessage key={m.id} message={m} />
               ))}

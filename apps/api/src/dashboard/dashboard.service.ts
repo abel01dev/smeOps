@@ -3,7 +3,11 @@ import { Prisma } from "@prisma/client";
 import type {
   DashboardPeriodMoney,
   DashboardSummary,
+  InventoryStatusBreakdown,
+  LowStockProductSummary,
+  RecentSaleSummary,
   RevenueTrendBucket,
+  SalesByCategorySlice,
   TopProduct,
 } from "@sme/shared";
 
@@ -146,6 +150,147 @@ export class DashboardService {
       netProfit: (b.profit - b.expenses).toFixed(2),
       salesCount: b.salesCount,
     }));
+  }
+
+  async salesByCategory(
+    organizationId: string,
+    days: number,
+  ): Promise<SalesByCategorySlice[]> {
+    const since = this.startOfDay(this.addDays(new Date(), -(days - 1)));
+
+    const items = await this.prisma.saleItem.findMany({
+      where: { sale: { organizationId, createdAt: { gte: since } } },
+      select: {
+        quantity: true,
+        lineTotal: true,
+        product: {
+          select: { category: { select: { id: true, name: true } } },
+        },
+      },
+    });
+
+    const byCategory = new Map<
+      string,
+      { categoryId: string | null; categoryName: string; revenue: number; quantitySold: number }
+    >();
+
+    for (const item of items) {
+      const categoryId = item.product.category?.id ?? null;
+      const categoryName = item.product.category?.name ?? "Uncategorized";
+      const key = categoryId ?? "__uncategorized__";
+      const bucket = byCategory.get(key) ?? {
+        categoryId,
+        categoryName,
+        revenue: 0,
+        quantitySold: 0,
+      };
+      bucket.revenue += Number(item.lineTotal);
+      bucket.quantitySold += item.quantity;
+      byCategory.set(key, bucket);
+    }
+
+    return Array.from(byCategory.values())
+      .sort((a, b) => b.revenue - a.revenue)
+      .map((c) => ({
+        categoryId: c.categoryId,
+        categoryName: c.categoryName,
+        revenue: c.revenue.toFixed(2),
+        quantitySold: c.quantitySold,
+      }));
+  }
+
+  async inventoryStatusBreakdown(
+    organizationId: string,
+  ): Promise<InventoryStatusBreakdown> {
+    const products = await this.prisma.product.findMany({
+      where: { organizationId, status: "ACTIVE" },
+      select: { stockQuantity: true, minStock: true },
+    });
+
+    let inStock = 0;
+    let lowStock = 0;
+    let outOfStock = 0;
+
+    for (const p of products) {
+      if (p.stockQuantity <= 0) {
+        outOfStock += 1;
+      } else if (p.minStock > 0 && p.stockQuantity <= p.minStock) {
+        lowStock += 1;
+      } else {
+        inStock += 1;
+      }
+    }
+
+    return { inStock, lowStock, outOfStock };
+  }
+
+  async lowStockProducts(
+    organizationId: string,
+    limit = 10,
+  ): Promise<LowStockProductSummary[]> {
+    const rows = await this.prisma.product.findMany({
+      where: {
+        organizationId,
+        status: "ACTIVE",
+        minStock: { gt: 0 },
+        stockQuantity: { lte: this.prisma.product.fields.minStock },
+      },
+      orderBy: { stockQuantity: "asc" },
+      take: limit,
+      select: { name: true, stockQuantity: true, minStock: true },
+    });
+    return rows.map((p) => ({
+      name: p.name,
+      stockQuantity: p.stockQuantity,
+      minStock: p.minStock,
+    }));
+  }
+
+  async recentSaleSummaries(
+    organizationId: string,
+    limit = 15,
+  ): Promise<RecentSaleSummary[]> {
+    const sales = await this.prisma.sale.findMany({
+      where: { organizationId },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+      select: {
+        id: true,
+        createdAt: true,
+        total: true,
+        profit: true,
+        paymentMethod: true,
+        customer: { select: { name: true } },
+        items: {
+          select: { productName: true, quantity: true },
+          orderBy: { lineTotal: "desc" },
+          take: 4,
+        },
+        _count: { select: { items: true } },
+      },
+    });
+
+    return sales.map((s) => {
+      const previewParts = s.items.map(
+        (i) => `${i.productName} x${i.quantity}`,
+      );
+      const extra = s._count.items - s.items.length;
+      const itemsPreview =
+        extra > 0
+          ? `${previewParts.join(", ")} (+${extra} more)`
+          : previewParts.join(", ") || "(no items)";
+
+      return {
+        id: s.id,
+        date: this.dayKey(s.createdAt),
+        total: s.total.toString(),
+        profit: s.profit.toString(),
+        paymentMethod: s.paymentMethod,
+        customerName: s.customer?.name ?? null,
+        itemCount: s._count.items,
+        itemsPreview,
+      };
+    });
   }
 
   async topProducts(

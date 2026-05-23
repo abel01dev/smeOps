@@ -40,6 +40,11 @@
     --chart-grid: 214 32% 91%;
     --chart-axis: 215 16% 47%;
     --chart-cursor: 214 32% 80%;
+    --chart-stock-low: 38 92% 50%;
+    --chart-stock-out: 0 84% 60%;
+    --chart-slice-3: 200 70% 48%;
+    --chart-slice-4: 262 55% 58%;
+    --chart-slice-5: 28 85% 52%;
   }
 
   .dark {
@@ -77,6 +82,11 @@
     --chart-grid: 217 33% 20%;
     --chart-axis: 215 16% 55%;
     --chart-cursor: 217 33% 28%;
+    --chart-stock-low: 38 90% 55%;
+    --chart-stock-out: 0 62% 55%;
+    --chart-slice-3: 200 65% 52%;
+    --chart-slice-4: 262 50% 62%;
+    --chart-slice-5: 28 80% 55%;
   }
 }
 

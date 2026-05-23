@@ -66,6 +66,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
       );
     }
 
+    if (response.headersSent) {
+      this.logger.error(
+        `${request.method} ${request.url} -> ${statusCode} ${message} (response already started — cannot send JSON body)`,
+        exception instanceof Error ? exception.stack : undefined,
+      );
+      if (!response.writableEnded) {
+        response.end();
+      }
+      return;
+    }
+
     const body: ErrorBody = {
       statusCode,
       message,
@@ -106,6 +117,13 @@ function mapPrismaError(
         statusCode: HttpStatus.SERVICE_UNAVAILABLE,
         message:
           "Database schema is out of date. Run: pnpm --filter @sme/api exec prisma migrate deploy",
+        error: "ServiceUnavailable",
+      };
+    case "P1001":
+      return {
+        statusCode: HttpStatus.SERVICE_UNAVAILABLE,
+        message:
+          "Cannot reach the database server. Check Supabase is running (unpause project), your internet/VPN, and apps/api/.env DATABASE_URL — use Session pooler port 5432 or the direct db.*.supabase.co host (see apps/api/.env.example).",
         error: "ServiceUnavailable",
       };
     default:

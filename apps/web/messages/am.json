@@ -149,8 +149,15 @@
     "topProductsDesc": "በባለፉት {days} ቀናት በገቢ።",
     "lowStockTitle": "ዝቅተኛ ክምችት",
     "lowStockDesc": "በቅርቡ እንደገና ይሙሉ።",
-    "monthGlance": "የዚህ ወር አጠቃላይ እይታ",
-    "monthGlanceDesc": "የባለፉ 30 ቀን ድምር።",
+    "salesByCategory": "ሽያጭ በምድብ",
+    "salesByCategoryDesc": "ባለፉ {days} ቀናት የገቢ ድርሻ።",
+    "inventoryStatusChart": "የክምችት ማስጠንቀቂያ",
+    "inventoryStatusDesc": "ንቁ ምርቶች በክምችት ሁኔታ።",
+    "stockInStock": "በክምችት",
+    "stockLow": "ዝቅተኛ ክምችት",
+    "stockOut": "ክምችት አልቋል",
+    "noCategorySales": "በዚህ ጊዜ ምድቦችን ለማሳየት ሽያጭ የለም።",
+    "noActiveProducts": "ንቁ ምርቶች የሉም።",
     "salesToday": "የዛሬ ሽያጮች",
     "noSalesPeriod": "በዚህ ጊዜ ምንም ሽያጭ የለም።",
     "noTopProducts": "በዚህ ጊዜ ምንም ምርት ሽያጭ የለም።",
@@ -209,7 +216,8 @@
   "charts": {
     "revenue": "ገቢ",
     "profit": "ትርፍ",
-    "salesCount": "{count, plural, one {# ሽያጭ} other {# ሽያጮች}}"
+    "salesCount": "{count, plural, one {# ሽያጭ} other {# ሽያጮች}}",
+    "share": "{percent}% ከጠቅላላ"
   },
   "pos": {
     "currentSale": "የአሁን ሽያጭ",

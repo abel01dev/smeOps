@@ -2,7 +2,9 @@
 
 import type {
   DashboardSummary,
+  InventoryStatusBreakdown,
   RevenueTrendBucket,
+  SalesByCategorySlice,
   TopProduct,
 } from "@sme/shared";
 
@@ -22,5 +24,15 @@ export const dashboardApi = {
       .get<TopProduct[]>("/dashboard/top-products", {
         params: { days, limit },
       })
+      .then((r) => r.data),
+  salesByCategory: (days = 30) =>
+    apiClient
+      .get<SalesByCategorySlice[]>("/dashboard/sales-by-category", {
+        params: { days },
+      })
+      .then((r) => r.data),
+  inventoryStatus: () =>
+    apiClient
+      .get<InventoryStatusBreakdown>("/dashboard/inventory-status")
       .then((r) => r.data),
 };

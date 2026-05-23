@@ -6,6 +6,7 @@ import { AiController } from "./ai.controller";
 import { AiService } from "./ai.service";
 import { AiChatService } from "./services/ai-chat.service";
 import { AiContextService } from "./services/ai-context.service";
+import { AiRawDataService } from "./services/ai-raw-data.service";
 import { AiConversationsService } from "./services/ai-conversations.service";
 import { AiSettingsService } from "./services/ai-settings.service";
 import { OpenRouterService } from "./services/openrouter.service";
@@ -19,6 +20,7 @@ import { OpenRouterService } from "./services/openrouter.service";
     AiConversationsService,
     AiChatService,
     AiContextService,
+    AiRawDataService,
     OpenRouterService,
   ],
   exports: [AiService],
